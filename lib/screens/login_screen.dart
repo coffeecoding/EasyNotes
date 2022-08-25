@@ -94,9 +94,8 @@ class LoginForm extends StatelessWidget {
                   onPressed: () => pageController
                       .jumpTo(pageController.position.maxScrollExtent),
                   style: ElevatedButton.styleFrom(
-                      primary: Colors.white,
-                      textStyle:
-                          TextStyle(color: Theme.of(context).primaryColor)),
+                      primary: Theme.of(context).cardColor,
+                      textStyle: const TextStyle(color: Colors.white)),
                   child: Container(
                       width: double.infinity,
                       height: 40,
@@ -107,7 +106,7 @@ class LoginForm extends StatelessWidget {
                                       .primaryTextTheme
                                       .bodyText1!
                                       .fontWeight,
-                                  color: Theme.of(context).primaryColor))))),
+                                  color: Colors.white))))),
             ],
           ),
         ),
@@ -167,7 +166,7 @@ class SignupForm extends StatelessWidget {
                   onPressed: () => pageController
                       .jumpTo(pageController.position.minScrollExtent),
                   style: ElevatedButton.styleFrom(
-                      primary: Colors.white,
+                      primary: Theme.of(context).cardColor,
                       textStyle:
                           TextStyle(color: Theme.of(context).primaryColor)),
                   child: Container(
@@ -180,7 +179,7 @@ class SignupForm extends StatelessWidget {
                                       .primaryTextTheme
                                       .bodyText1!
                                       .fontWeight,
-                                  color: Theme.of(context).primaryColor))))),
+                                  color: Colors.white))))),
             ],
           ),
         ),
