@@ -1,8 +1,14 @@
+import 'package:easynotes/main.dart';
+import 'package:easynotes/repositories/auth_repository.dart';
+import 'package:easynotes/screens/screens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-class SplashScreen extends StatelessWidget {
+import '../blocs/blocs.dart';
+
+class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
 
   static const String routeName = '/splash';
@@ -15,7 +21,25 @@ class SplashScreen extends StatelessWidget {
   }
 
   @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  @override
   Widget build(BuildContext context) {
-    return const Center(child: Text('Splash Screen'));
+    return BlocListener<AuthBloc, AuthState>(
+        listener: (context, state) {
+          switch (state.status) {
+            case AuthStatus.authenticated:
+              EasyNotesApp.navigatorKey.currentState!
+                  .pushAndRemoveUntil(HomeScreen.route(), (route) => false);
+              break;
+            case AuthStatus.unauthenticated:
+              EasyNotesApp.navigatorKey.currentState!
+                  .pushAndRemoveUntil(LoginScreen.route(), (route) => false);
+              break;
+          }
+        },
+        child: const Center(child: Text('Splashing')));
   }
 }

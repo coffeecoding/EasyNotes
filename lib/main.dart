@@ -34,9 +34,12 @@ class EasyNotesApp extends StatelessWidget {
         ],
         child: MaterialApp(
           title: 'EasyNotes',
+          debugShowCheckedModeBanner: false,
           theme: ThemeData(
+            brightness: Brightness.light,
             primarySwatch: Colors.purple,
           ),
+          themeMode: ThemeMode.light,
           navigatorKey: navigatorKey,
           onGenerateRoute: CustomRouter.onGenerateRoute,
           initialRoute: SplashScreen.routeName,
