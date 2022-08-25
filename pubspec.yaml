@@ -29,11 +29,14 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  bloc: ^8.1.0
   cryptography: ^2.0.5
   device_info: 
   encrypt: ^5.0.1
   equatable: ^2.0.5
+  flutter_bloc: ^8.1.1
   flutter_secure_storage: 
+  formz: ^0.4.1
   pointycastle: ^3.6.1
   shared_preferences: 
   uuid: 

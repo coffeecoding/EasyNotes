@@ -131,6 +131,20 @@ class User extends Equatable {
   @override
   bool get stringify => true;
 
+  static const empty = User(
+      id: '',
+      email: '',
+      email_verified: false,
+      display_name: '',
+      created: 0,
+      pwsalt: '',
+      pwhash: '',
+      pubkey: '',
+      privkey_crypt: '',
+      verifying_key: '',
+      signing_key_crypt: '',
+      algorithm_identifier: '');
+
   static Future<User> create(String id, String email, String password) async {
     Random rnd = Random.secure();
     List<int> salt = List<int>.generate(
