@@ -36,11 +36,16 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: const Image(image: AssetImage(logoPath3x))),
               ),
               Expanded(
+                flex: 4,
                 child: PageView(
                     controller: _pageController,
                     scrollBehavior: AppScrollBehavior(),
-                    children: const <Widget>[LoginForm(), SignupForm()]),
-              )
+                    children: <Widget>[
+                      LoginForm(pageController: _pageController),
+                      SignupForm(pageController: _pageController)
+                    ]),
+              ),
+              Expanded(flex: 1, child: Container())
             ],
           ),
         ),
@@ -50,7 +55,9 @@ class _LoginScreenState extends State<LoginScreen> {
 }
 
 class LoginForm extends StatelessWidget {
-  const LoginForm({Key? key}) : super(key: key);
+  const LoginForm({Key? key, required this.pageController}) : super(key: key);
+
+  final PageController pageController;
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +91,8 @@ class LoginForm extends StatelessWidget {
                       child: const Center(child: Text('Login')))),
               const SizedBox(height: 12),
               ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () => pageController
+                      .jumpTo(pageController.position.maxScrollExtent),
                   style: ElevatedButton.styleFrom(
                       primary: Colors.white,
                       textStyle:
@@ -109,7 +117,9 @@ class LoginForm extends StatelessWidget {
 }
 
 class SignupForm extends StatelessWidget {
-  const SignupForm({Key? key}) : super(key: key);
+  const SignupForm({Key? key, required this.pageController}) : super(key: key);
+
+  final PageController pageController;
 
   @override
   Widget build(BuildContext context) {
@@ -154,7 +164,8 @@ class SignupForm extends StatelessWidget {
                       child: const Center(child: Text('Sign Up')))),
               const SizedBox(height: 12),
               ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () => pageController
+                      .jumpTo(pageController.position.minScrollExtent),
                   style: ElevatedButton.styleFrom(
                       primary: Colors.white,
                       textStyle:
