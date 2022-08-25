@@ -1,6 +1,8 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
+import 'dart:math';
 
+import 'package:easynotes/utils/crypto/crypto.dart';
 import 'package:equatable/equatable.dart';
 
 class User extends Equatable {
@@ -128,4 +130,47 @@ class User extends Equatable {
 
   @override
   bool get stringify => true;
+
+  static Future<User> create(String id, String email, String password) async {
+    Random rnd = Random.secure();
+    List<int> salt = List<int>.generate(
+        AlgorithmIdentifier.defSaltLen, (i) => rnd.nextInt(256));
+
+    String saltBase64 = base64.encode(salt);
+
+    String passwordHash = await RFC2898Helper.computePasswordHash(
+        password,
+        saltBase64,
+        AlgorithmIdentifier.defIterations,
+        AlgorithmIdentifier.defHashLen);
+
+    final rsaKeyPair = RSAHelper.createRSAKeyPair();
+    List<int> privKeyBytes =
+        utf8.encode(RSAHelper.xmlEncodeRSAPrivateKey(rsaKeyPair.privateKey));
+    final String privKeyCrypt = await RFC2898Helper.encryptWithDerivedKey(
+        password, saltBase64, privKeyBytes);
+    final String pubKey = RSAHelper.xmlEncodeRSAPublicKey(rsaKeyPair.publicKey);
+
+    final signingKeyPair = RSAHelper.createRSAKeyPair();
+    List<int> signingKeyBytes = utf8
+        .encode(RSAHelper.xmlEncodeRSAPrivateKey(signingKeyPair.privateKey));
+    final String signingKeyCrypt = await RFC2898Helper.encryptWithDerivedKey(
+        password, saltBase64, signingKeyBytes);
+    final String verifyingKey =
+        RSAHelper.xmlEncodeRSAPublicKey(signingKeyPair.publicKey);
+
+    return User(
+        id: id,
+        email: email,
+        email_verified: false,
+        display_name: id,
+        created: DateTime.now().toUtc().millisecondsSinceEpoch ~/ 1000,
+        pwsalt: saltBase64,
+        pwhash: passwordHash,
+        pubkey: pubKey,
+        privkey_crypt: privKeyCrypt,
+        verifying_key: verifyingKey,
+        signing_key_crypt: signingKeyCrypt,
+        algorithm_identifier: AlgorithmIdentifier.getDefault().toJson());
+  }
 }

@@ -92,4 +92,15 @@ class AlgorithmIdentifier extends Equatable {
       aesivLen,
     ];
   }
+
+  static AlgorithmIdentifier getDefault() {
+    return const AlgorithmIdentifier(
+        name: 'PBES2',
+        iterations: defIterations,
+        saltLen: defSaltLen,
+        hashLen: defHashLen,
+        rsaKeyLen: defRSAKeyLen,
+        dkLen: defDKLen,
+        aesivLen: defAesIVLen);
+  }
 }
