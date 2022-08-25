@@ -36,6 +36,7 @@ class EasyNotesApp extends StatelessWidget {
           title: 'EasyNotes',
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
+            visualDensity: VisualDensity.adaptivePlatformDensity,
             brightness: Brightness.light,
             primarySwatch: Colors.purple,
           ),
