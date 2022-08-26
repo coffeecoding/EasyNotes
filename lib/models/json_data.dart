@@ -1,0 +1,3 @@
+mixin JsonData {
+  String toJson();
+}

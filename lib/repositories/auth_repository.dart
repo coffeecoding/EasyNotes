@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'dio_repository.dart';
+
 enum AuthStatus { authenticated, unauthenticated }
 
 class AuthRepository {
@@ -12,11 +14,8 @@ class AuthRepository {
   }
 
   Future<void> login(
-      {required String username, required String passwordHash}) async {
-    await Future.delayed(
-      const Duration(milliseconds: 500),
-      () => _controller.add(AuthStatus.authenticated),
-    );
+      {required String username, required String password}) async {
+    try {} on Exception {}
   }
 
   logout() {

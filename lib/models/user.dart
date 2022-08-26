@@ -2,10 +2,11 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:easynotes/models/json_data.dart';
 import 'package:easynotes/utils/crypto/crypto.dart';
 import 'package:equatable/equatable.dart';
 
-class User extends Equatable {
+class User extends Equatable with JsonData {
   final String id;
   final String email;
   final bool email_verified;
@@ -123,6 +124,7 @@ class User extends Equatable {
     );
   }
 
+  @override
   String toJson() => json.encode(toMap());
 
   factory User.fromJson(String source) =>

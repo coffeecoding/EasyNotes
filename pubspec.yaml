@@ -32,11 +32,14 @@ dependencies:
   bloc: ^8.1.0
   cryptography: ^2.0.5
   device_info: 
+  dio: ^4.0.6
   encrypt: ^5.0.1
   equatable: ^2.0.5
+  ffi: ^2.0.1
   flutter_bloc: ^8.1.1
   flutter_secure_storage: 
   get_it: 7.2.0
+  http: ^0.13.5
   formz: ^0.4.1
   pointycastle: ^3.6.1
   shared_preferences: 

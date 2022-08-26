@@ -1,4 +1,5 @@
 import 'package:easynotes/repositories/auth_repository.dart';
+import 'package:easynotes/repositories/dio_repository.dart';
 import 'package:easynotes/repositories/user_repository.dart';
 import 'package:get_it/get_it.dart';
 
@@ -9,5 +10,6 @@ final GetIt locator = GetIt.instance;
 Future<void> setUpLocator() async {
   locator
     ..registerSingleton<UserRepository>(UserRepository())
-    ..registerSingleton<AuthRepository>(AuthRepository());
+    ..registerSingleton<AuthRepository>(AuthRepository())
+    ..registerSingleton<DioRepository>(DioRepository());
 }

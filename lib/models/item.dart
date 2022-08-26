@@ -3,7 +3,9 @@ import 'dart:convert';
 
 import 'package:equatable/equatable.dart';
 
-class Item extends Equatable {
+import 'json_data.dart';
+
+class Item extends Equatable with JsonData {
   final String id;
   final String parent_id;
   final String receiver_id;
@@ -125,6 +127,7 @@ class Item extends Equatable {
     );
   }
 
+  @override
   String toJson() => json.encode(toMap());
 
   factory Item.fromJson(String source) =>

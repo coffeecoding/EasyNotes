@@ -6,6 +6,8 @@ class AuthState extends Equatable {
 
   const AuthState.unauthenticated() : this._();
 
+  factory AuthState.unauth() => AuthState.unauthenticated();
+
   const AuthState.authenticated(User user)
       : this._(status: AuthStatus.authenticated, user: user);
 
