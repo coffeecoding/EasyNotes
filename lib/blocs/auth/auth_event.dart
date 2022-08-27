@@ -7,9 +7,11 @@ abstract class AuthEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class AuthStatusChanged extends AuthEvent {
-  const AuthStatusChanged(this.status);
+class AuthStateChanged extends AuthEvent {
+  const AuthStateChanged(this.status);
 
+  // the status is the ultimate login result state in the auth repository
+  // the login state is just the state of the *login form*
   final AuthStatus status;
 
   @override

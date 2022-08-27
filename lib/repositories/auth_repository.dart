@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'dio_repository.dart';
+import 'network_provider.dart';
 
 enum AuthStatus { authenticated, unauthenticated }
 

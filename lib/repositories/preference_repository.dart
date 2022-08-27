@@ -1,4 +1,76 @@
+import 'package:easynotes/models/user.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class PreferenceRespository {}
+class PreferenceRepository {
+  PreferenceRepository()
+      : _secureStorage = const FlutterSecureStorage(),
+        _prefs = SharedPreferences.getInstance();
+
+  static const String _userKey = 'user';
+  static const String _usernameKey = 'username';
+  static const String _passwordKey = 'password';
+  static const String _privkeyKey = 'privkey';
+  static const String _signkeyKey = 'signkey';
+
+  final FlutterSecureStorage _secureStorage;
+  final Future<SharedPreferences> _prefs;
+
+  Future<bool> get loggedIn async => await username != null;
+  Future<String?> get username async => _secureStorage.read(key: _usernameKey);
+  Future<String?> get password async => _secureStorage.read(key: _passwordKey);
+  Future<String?> get privkey async => _secureStorage.read(key: _privkeyKey);
+  Future<String?> get signkey async => _secureStorage.read(key: _signkeyKey);
+  Future<User?> get loggedInUser => _prefs.then((SharedPreferences prefs) {
+        String? userJson = prefs.getString(_userKey);
+        if (userJson == null) return null;
+        return User.fromJson(userJson);
+      });
+
+  Future<void> setAuth({
+    required User user,
+    required String username,
+    required String password,
+    required String privkey,
+    required String signkey,
+  }) async {
+    _prefs.then((prefs) => prefs.setString(_userKey, user.toJson()));
+    const AndroidOptions androidOptions = AndroidOptions(resetOnError: true);
+    const WindowsOptions windowsOptions = WindowsOptions();
+    try {
+      await _secureStorage.write(
+        key: _usernameKey,
+        value: username,
+        aOptions: androidOptions,
+        wOptions: windowsOptions,
+      );
+      await _secureStorage.write(
+        key: _passwordKey,
+        value: password,
+        aOptions: androidOptions,
+        wOptions: windowsOptions,
+      );
+      await _secureStorage.write(
+        key: _privkeyKey,
+        value: privkey,
+        aOptions: androidOptions,
+        wOptions: windowsOptions,
+      );
+      await _secureStorage.write(
+        key: _signkeyKey,
+        value: signkey,
+        aOptions: androidOptions,
+        wOptions: windowsOptions,
+      );
+    } catch (_) {
+      try {
+        await _secureStorage.deleteAll(
+          aOptions: androidOptions,
+        );
+      } catch (_) {
+        // Invoke logger here
+      }
+      rethrow;
+    }
+  }
+}

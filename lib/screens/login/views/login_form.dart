@@ -1,4 +1,6 @@
+import 'package:easynotes/cubits/login/login_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class LoginForm extends StatelessWidget {
   LoginForm({Key? key, required this.pageController}) : super(key: key);
@@ -30,19 +32,23 @@ class LoginForm extends StatelessWidget {
                 decoration: const InputDecoration(labelText: 'Password'),
               ),
               const SizedBox(height: 24),
-              StatefulBuilder(
-                builder: (context, setState) {
-                  return ElevatedButton(
-                      onPressed: () {
-                        showDialog(
-                            context: context,
-                            builder: (_) =>
-                                const AlertDialog(content: Text('hi')));
-                      },
-                      child: Container(
-                          width: double.infinity,
-                          height: 40,
-                          child: const Center(child: Text('Login'))));
+              BlocBuilder<LoginCubit, LoginState>(
+                builder: (context, state) {
+                  switch (state.status) {
+                    case LoginStatus.submitting:
+                      return const SizedBox(
+                          height: 40, child: CircularProgressIndicator());
+                    default:
+                      return ElevatedButton(
+                          onPressed: () => context
+                              .read<LoginCubit>()
+                              .loginWithCredentials(usernameController.text,
+                                  passwordController.text),
+                          child: Container(
+                              width: double.infinity,
+                              height: 40,
+                              child: const Center(child: Text('Login'))));
+                  }
                 },
               ),
               const SizedBox(height: 12),

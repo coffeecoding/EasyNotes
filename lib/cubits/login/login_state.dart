@@ -5,7 +5,7 @@ enum LoginStatus { initial, submitting, success, failure }
 class LoginState extends Equatable {
   const LoginState({this.status = LoginStatus.initial, this.user});
 
-  final LoginStatus? status;
+  final LoginStatus status;
   final User? user;
 
   LoginState copyWith(

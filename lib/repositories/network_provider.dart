@@ -9,8 +9,8 @@ class ProxyAwareHttpClient extends IOClient {
       : super(HttpClient()..findProxy = HttpClient.findProxyFromEnvironment);
 }
 
-class DioRepository {
-  DioRepository()
+class NetworkProvider {
+  NetworkProvider()
       : _client = ProxyAwareHttpClient(),
         _defaultHeaders = {
           'Content-Type': 'application/json',

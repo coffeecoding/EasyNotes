@@ -16,7 +16,9 @@ class LoginCubit extends Cubit<LoginState> {
     if (state.status == LoginStatus.submitting) return;
     emit(state.copyWith(status: LoginStatus.submitting));
     try {
-      _authRepository.login(username: username, password: password);
+      await Future.delayed(const Duration(seconds: 2));
+      //_authRepository.login(username: username, password: password);
+      emit(state.copyWith(status: LoginStatus.success));
     } on Exception {}
   }
 }
