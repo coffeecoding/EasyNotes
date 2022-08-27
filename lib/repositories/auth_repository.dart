@@ -15,7 +15,9 @@ class AuthRepository {
 
   Future<void> login(
       {required String username, required String password}) async {
-    try {} on Exception {}
+    try {
+      _controller.add(AuthStatus.authenticated);
+    } on Exception {}
   }
 
   logout() {

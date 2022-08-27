@@ -1,4 +1,6 @@
+import 'package:easynotes/blocs/auth/auth_bloc.dart';
 import 'package:easynotes/cubits/login/login_cubit.dart';
+import 'package:easynotes/repositories/auth_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -43,7 +45,10 @@ class LoginForm extends StatelessWidget {
                           onPressed: () => context
                               .read<LoginCubit>()
                               .loginWithCredentials(usernameController.text,
-                                  passwordController.text),
+                                  passwordController.text)
+                              .then((value) => context.read<AuthBloc>().add(
+                                  const AuthStateChanged(
+                                      AuthStatus.authenticated))),
                           child: Container(
                               width: double.infinity,
                               height: 40,

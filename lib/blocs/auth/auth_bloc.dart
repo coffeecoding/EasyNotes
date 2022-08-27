@@ -41,10 +41,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         return emit(const AuthState.unauthenticated());
       case AuthStatus.authenticated:
         // user should be saved in preferences => get it from prefsrepository
-        final user = await _preferenceRepository.loggedInUser;
-        return emit(user != null
-            ? AuthState.authenticated(user)
-            : const AuthState.unauthenticated());
+        emit(const AuthState.authenticated(User.empty));
     }
   }
 
