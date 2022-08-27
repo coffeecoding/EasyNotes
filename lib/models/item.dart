@@ -7,7 +7,7 @@ import 'json_data.dart';
 
 class Item extends Equatable with JsonData {
   final String id;
-  final String parent_id;
+  final String? parent_id;
   final String receiver_id;
   final String? sender_id;
   final String title;
@@ -118,7 +118,7 @@ class Item extends Equatable with JsonData {
   factory Item.fromMap(Map<String, dynamic> map) {
     return Item(
       id: map['id'] as String,
-      parent_id: map['parent_id'] as String,
+      parent_id: map['parent_id'] as String?,
       receiver_id: map['receiver_id'] as String,
       sender_id: map['sender_id'] != null ? map['sender_id'] as String : null,
       title: map['title'] as String,
@@ -147,6 +147,8 @@ class Item extends Equatable with JsonData {
 
   @override
   bool get stringify => true;
+
+  bool get isTopic => parent_id == null || parent_id!.isEmpty;
 
   @override
   List<Object?> get props {
