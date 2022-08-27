@@ -27,6 +27,15 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
+    return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
+      switch (state.status) {
+        case AuthStatus.authenticated:
+          return const HomeScreen();
+        case AuthStatus.unauthenticated:
+          return const LoginScreen();
+      }
+    });
+    /*
     return BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           switch (state.status) {
@@ -40,6 +49,6 @@ class _SplashScreenState extends State<SplashScreen> {
               break;
           }
         },
-        child: const Center(child: Text('Splashing')));
+        child: const Center(child: Text('Splashing')));*/
   }
 }

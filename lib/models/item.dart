@@ -10,6 +10,8 @@ class Item extends Equatable with JsonData {
   final String parent_id;
   final String receiver_id;
   final String? sender_id;
+  final String title;
+  final String content;
   final bool pinned;
   final bool pinned_globally;
   final String symbol;
@@ -22,12 +24,14 @@ class Item extends Equatable with JsonData {
   final int created;
   final int modified_header;
   final int modified;
-  final int trashed;
+  final int? trashed;
   const Item({
     required this.id,
     required this.parent_id,
     required this.receiver_id,
     this.sender_id,
+    required this.title,
+    required this.content,
     required this.pinned,
     required this.pinned_globally,
     required this.symbol,
@@ -40,7 +44,7 @@ class Item extends Equatable with JsonData {
     required this.created,
     required this.modified_header,
     required this.modified,
-    required this.trashed,
+    this.trashed,
   });
 
   Item copyWith({
@@ -48,6 +52,8 @@ class Item extends Equatable with JsonData {
     String? parent_id,
     String? receiver_id,
     String? sender_id,
+    String? title,
+    String? content,
     bool? pinned,
     bool? pinned_globally,
     String? symbol,
@@ -67,6 +73,8 @@ class Item extends Equatable with JsonData {
       parent_id: parent_id ?? this.parent_id,
       receiver_id: receiver_id ?? this.receiver_id,
       sender_id: sender_id ?? this.sender_id,
+      title: title ?? this.title,
+      content: content ?? this.content,
       pinned: pinned ?? this.pinned,
       pinned_globally: pinned_globally ?? this.pinned_globally,
       symbol: symbol ?? this.symbol,
@@ -89,6 +97,8 @@ class Item extends Equatable with JsonData {
       'parent_id': parent_id,
       'receiver_id': receiver_id,
       'sender_id': sender_id,
+      'title': title,
+      'content': content,
       'pinned': pinned,
       'pinned_globally': pinned_globally,
       'symbol': symbol,
@@ -111,6 +121,8 @@ class Item extends Equatable with JsonData {
       parent_id: map['parent_id'] as String,
       receiver_id: map['receiver_id'] as String,
       sender_id: map['sender_id'] != null ? map['sender_id'] as String : null,
+      title: map['title'] as String,
+      content: map['content'] as String,
       pinned: map['pinned'] as bool,
       pinned_globally: map['pinned_globally'] as bool,
       symbol: map['symbol'] as String,
@@ -123,7 +135,7 @@ class Item extends Equatable with JsonData {
       created: map['created'] as int,
       modified_header: map['modified_header'] as int,
       modified: map['modified'] as int,
-      trashed: map['trashed'] as int,
+      trashed: map['trashed'] != null ? map['trashed'] as int : null,
     );
   }
 
@@ -143,6 +155,8 @@ class Item extends Equatable with JsonData {
       parent_id,
       receiver_id,
       sender_id,
+      title,
+      content,
       pinned,
       pinned_globally,
       symbol,
