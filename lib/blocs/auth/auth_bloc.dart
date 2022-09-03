@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:easynotes/cubits/cubit/topics_cubit.dart';
+import 'package:easynotes/models/sample_data.dart';
 import 'package:easynotes/models/user.dart';
 import 'package:easynotes/repositories/auth_repository.dart';
 import 'package:easynotes/repositories/preference_repository.dart';
@@ -55,8 +57,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           username: event.username, password: event.password);
       // user should have been already saved in preferences
       // => get it from prefsrepository
-      return emit(const AuthState.authenticated(User.empty));
+      event.topicsCubit.fetchTopics();
+      return emit(AuthState.authenticated(SampleData.sampleUser));
     } on Exception catch (e) {
+      print(e);
       emit(const AuthState.error());
     }
   }

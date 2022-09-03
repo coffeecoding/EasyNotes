@@ -60,7 +60,10 @@ class AlgorithmIdentifier extends Equatable {
     };
   }
 
-  factory AlgorithmIdentifier.fromMap(Map<String, dynamic> map) {
+  factory AlgorithmIdentifier.fromMap(String mapString) {
+    // take care of the nested json
+    mapString = mapString.replaceAll('!', '"');
+    final map = json.decode(mapString) as Map<String, dynamic>;
     return AlgorithmIdentifier(
       name: map['name'] as String,
       iterations: map['iterations'] as int,
@@ -75,7 +78,7 @@ class AlgorithmIdentifier extends Equatable {
   String toJson() => json.encode(toMap());
 
   factory AlgorithmIdentifier.fromJson(String source) =>
-      AlgorithmIdentifier.fromMap(json.decode(source) as Map<String, dynamic>);
+      AlgorithmIdentifier.fromMap(source);
 
   @override
   bool get stringify => true;
@@ -93,14 +96,12 @@ class AlgorithmIdentifier extends Equatable {
     ];
   }
 
-  static AlgorithmIdentifier getDefault() {
-    return const AlgorithmIdentifier(
-        name: 'PBES2',
-        iterations: defIterations,
-        saltLen: defSaltLen,
-        hashLen: defHashLen,
-        rsaKeyLen: defRSAKeyLen,
-        dkLen: defDKLen,
-        aesivLen: defAesIVLen);
-  }
+  static const standard = AlgorithmIdentifier(
+      name: 'PBES2',
+      iterations: defIterations,
+      saltLen: defSaltLen,
+      hashLen: defHashLen,
+      rsaKeyLen: defRSAKeyLen,
+      dkLen: defDKLen,
+      aesivLen: defAesIVLen);
 }

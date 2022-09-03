@@ -21,13 +21,14 @@ class AuthStateChanged extends AuthEvent {
 class AuthLogoutRequested extends AuthEvent {}
 
 class AuthLoginRequested extends AuthEvent {
-  const AuthLoginRequested(this.username, this.password);
+  const AuthLoginRequested(this.username, this.password, this.topicsCubit);
 
   // the status is the ultimate login result state in the auth repository
   // the login state is just the state of the *login form*
   final String username;
   final String password;
+  final TopicsCubit topicsCubit;
 
   @override
-  List<Object> get props => [username, password];
+  List<Object> get props => [username, password, topicsCubit];
 }

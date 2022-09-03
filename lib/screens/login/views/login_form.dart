@@ -1,4 +1,5 @@
 import 'package:easynotes/blocs/auth/auth_bloc.dart';
+import 'package:easynotes/cubits/cubit/topics_cubit.dart';
 import 'package:easynotes/repositories/auth_repository.dart';
 import 'package:easynotes/screens/common/uiconstants.dart';
 import 'package:flutter/material.dart';
@@ -44,8 +45,10 @@ class LoginForm extends StatelessWidget {
                     default:
                       return ElevatedButton(
                           onPressed: () => context.read<AuthBloc>().add(
-                              AuthLoginRequested(usernameController.text,
-                                  passwordController.text)),
+                              AuthLoginRequested(
+                                  usernameController.text,
+                                  passwordController.text,
+                                  context.read<TopicsCubit>())),
                           child: Container(
                               width: double.infinity,
                               height: 40,

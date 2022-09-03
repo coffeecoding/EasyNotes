@@ -19,7 +19,7 @@ class User extends Equatable with JsonData {
   final String privkey_crypt;
   final String verifying_key;
   final String signing_key_crypt;
-  final String algorithm_identifier;
+  final AlgorithmIdentifier algorithm_identifier;
   const User({
     required this.id,
     required this.email,
@@ -69,7 +69,7 @@ class User extends Equatable with JsonData {
     String? privkey_crypt,
     String? verifying_key,
     String? signing_key_crypt,
-    String? algorithm_identifier,
+    AlgorithmIdentifier? algorithm_identifier,
   }) {
     return User(
       id: id ?? this.id,
@@ -102,7 +102,7 @@ class User extends Equatable with JsonData {
       'privkey_crypt': privkey_crypt,
       'verifying_key': verifying_key,
       'signing_key_crypt': signing_key_crypt,
-      'algorithm_identifier': algorithm_identifier,
+      'algorithm_identifier': algorithm_identifier.toJson(),
     };
   }
 
@@ -120,7 +120,8 @@ class User extends Equatable with JsonData {
       privkey_crypt: map['privkey_crypt'] as String,
       verifying_key: map['verifying_key'] as String,
       signing_key_crypt: map['signing_key_crypt'] as String,
-      algorithm_identifier: map['algorithm_identifier'] as String,
+      algorithm_identifier:
+          AlgorithmIdentifier.fromJson(map['algorithm_identifier'] as String),
     );
   }
 
@@ -145,7 +146,7 @@ class User extends Equatable with JsonData {
       privkey_crypt: '',
       verifying_key: '',
       signing_key_crypt: '',
-      algorithm_identifier: '');
+      algorithm_identifier: AlgorithmIdentifier.standard);
 
   static Future<User> create(String id, String email, String password) async {
     Random rnd = Random.secure();
@@ -187,6 +188,6 @@ class User extends Equatable with JsonData {
         privkey_crypt: privKeyCrypt,
         verifying_key: verifyingKey,
         signing_key_crypt: signingKeyCrypt,
-        algorithm_identifier: AlgorithmIdentifier.getDefault().toJson());
+        algorithm_identifier: AlgorithmIdentifier.standard);
   }
 }
