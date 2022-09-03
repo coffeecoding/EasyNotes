@@ -32,9 +32,6 @@ class EasyNotesApp extends StatelessWidget {
               create: (context) => AuthBloc(
                   authRepository: locator.get<AuthRepository>(),
                   preferenceRepository: locator.get<PreferenceRepository>())),
-          BlocProvider<LoginCubit>(
-              create: (context) =>
-                  LoginCubit(authRepository: locator.get<AuthRepository>()))
         ],
         child: MaterialApp(
           title: 'EasyNotes',

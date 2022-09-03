@@ -18,9 +18,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         super(const AuthState.unauthenticated()) {
     on<AuthStateChanged>(_onAuthStatusChanged);
     on<AuthLogoutRequested>(_onAuthLogoutRequested);
-    _authStatusSubscription = _authRepository.status.listen(
-      (status) => add(AuthStateChanged(status)),
-    );
+    on<AuthLoginRequested>(_onAuthLoginRequested);
   }
 
   final AuthRepository _authRepository;
@@ -30,7 +28,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   @override
   Future<void> close() {
     _authStatusSubscription.cancel();
-    _authRepository.dispose();
     return super.close();
   }
 
@@ -40,13 +37,33 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       case AuthStatus.unauthenticated:
         return emit(const AuthState.unauthenticated());
       case AuthStatus.authenticated:
-        // user should be saved in preferences => get it from prefsrepository
-        emit(const AuthState.authenticated(User.empty));
+        // user should have been already saved in preferences
+        // => get it from prefsrepository
+        return emit(const AuthState.authenticated(User.empty));
+      case AuthStatus.error:
+        return emit(const AuthState.error());
+      case AuthStatus.waiting:
+        return emit(const AuthState.waiting());
+    }
+  }
+
+  Future<void> _onAuthLoginRequested(
+      AuthLoginRequested event, Emitter<AuthState> emit) async {
+    try {
+      emit(const AuthState.waiting());
+      await _authRepository.login(
+          username: event.username, password: event.password);
+      // user should have been already saved in preferences
+      // => get it from prefsrepository
+      return emit(const AuthState.authenticated(User.empty));
+    } on Exception catch (e) {
+      emit(const AuthState.error());
     }
   }
 
   void _onAuthLogoutRequested(
       AuthLogoutRequested event, Emitter<AuthState> emit) async {
+    // Todo: try, catch
     _authRepository.logout();
   }
 }

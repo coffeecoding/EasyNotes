@@ -1,5 +1,4 @@
 import 'package:easynotes/blocs/auth/auth_bloc.dart';
-import 'package:easynotes/cubits/login/login_cubit.dart';
 import 'package:easynotes/repositories/auth_repository.dart';
 import 'package:easynotes/screens/common/uiconstants.dart';
 import 'package:flutter/material.dart';
@@ -35,21 +34,18 @@ class LoginForm extends StatelessWidget {
                 decoration: const InputDecoration(labelText: 'Password'),
               ),
               const SizedBox(height: ConstSpacing.xl),
-              BlocBuilder<LoginCubit, LoginState>(
+              BlocBuilder<AuthBloc, AuthState>(
+                buildWhen: (prev, next) => prev.status != next.status,
                 builder: (context, state) {
                   switch (state.status) {
-                    case LoginStatus.submitting:
+                    case AuthStatus.waiting:
                       return const SizedBox(
                           height: 40, child: CircularProgressIndicator());
                     default:
                       return ElevatedButton(
-                          onPressed: () => context
-                              .read<LoginCubit>()
-                              .loginWithCredentials(usernameController.text,
-                                  passwordController.text)
-                              .then((value) => context.read<AuthBloc>().add(
-                                  const AuthStateChanged(
-                                      AuthStatus.authenticated))),
+                          onPressed: () => context.read<AuthBloc>().add(
+                              AuthLoginRequested(usernameController.text,
+                                  passwordController.text)),
                           child: Container(
                               width: double.infinity,
                               height: 40,

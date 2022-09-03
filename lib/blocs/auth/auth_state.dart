@@ -4,6 +4,8 @@ part of 'auth_bloc.dart';
 // classes: Single class is the new approach and its advantages are explained
 // here, by the man himself: https://github.com/felangel/bloc/issues/1726
 
+enum AuthStatus { authenticated, unauthenticated, error, waiting }
+
 class AuthState extends Equatable {
   const AuthState._(
       {this.status = AuthStatus.unauthenticated, this.user = User.empty});
@@ -12,6 +14,10 @@ class AuthState extends Equatable {
 
   const AuthState.authenticated(User user)
       : this._(status: AuthStatus.authenticated, user: user);
+
+  const AuthState.error() : this._(status: AuthStatus.error);
+
+  const AuthState.waiting() : this._(status: AuthStatus.waiting);
 
   final AuthStatus status;
   final User user;
