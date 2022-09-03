@@ -1,6 +1,7 @@
 import 'package:easynotes/blocs/auth/auth_bloc.dart';
 import 'package:easynotes/cubits/login/login_cubit.dart';
 import 'package:easynotes/repositories/auth_repository.dart';
+import 'package:easynotes/screens/common/uiconstants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -26,14 +27,14 @@ class LoginForm extends StatelessWidget {
                 decoration:
                     const InputDecoration(labelText: 'Username or Email'),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: ConstSpacing.m),
               TextField(
                 controller: passwordController,
                 obscureText: true,
                 onChanged: (password) {},
                 decoration: const InputDecoration(labelText: 'Password'),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: ConstSpacing.xl),
               BlocBuilder<LoginCubit, LoginState>(
                 builder: (context, state) {
                   switch (state.status) {
@@ -56,10 +57,11 @@ class LoginForm extends StatelessWidget {
                   }
                 },
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: ConstSpacing.m),
               ElevatedButton(
-                  onPressed: () => pageController
-                      .jumpTo(pageController.position.maxScrollExtent),
+                  onPressed: () => pageController.animateTo(0,
+                      duration: const Duration(milliseconds: 500),
+                      curve: Curves.ease),
                   style: ElevatedButton.styleFrom(
                       primary: Theme.of(context).cardColor,
                       textStyle: const TextStyle(color: Colors.white)),

@@ -48,8 +48,9 @@ class SignupForm extends StatelessWidget {
                       child: const Center(child: Text('Sign Up')))),
               const SizedBox(height: 12),
               ElevatedButton(
-                  onPressed: () => pageController
-                      .jumpTo(pageController.position.minScrollExtent),
+                  onPressed: () => pageController.animateToPage(0,
+                      duration: const Duration(milliseconds: 500),
+                      curve: Curves.ease),
                   style: ElevatedButton.styleFrom(
                       primary: Theme.of(context).cardColor,
                       textStyle:
