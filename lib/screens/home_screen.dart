@@ -20,13 +20,13 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<Item> topics = SampleData.SampleItems.where((i) => i.isTopic).toList();
+    List<Item> topics = SampleData.sampleItems.where((i) => i.isTopic).toList();
     return SafeArea(
         child: Scaffold(
       body: Row(children: [
         Expanded(flex: 1, child: ItemsScreen()),
         VerticalDivider(),
-        Expanded(flex: 3, child: Center(child: Text('detail')))
+        Expanded(flex: 2, child: Center(child: Text('detail')))
       ]),
     ));
   }

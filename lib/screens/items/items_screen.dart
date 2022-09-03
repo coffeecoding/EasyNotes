@@ -1,3 +1,5 @@
+import 'package:easynotes/screens/items/components/notes_list.dart';
+import 'package:easynotes/screens/items/components/topics_list.dart';
 import 'package:flutter/material.dart';
 
 import '../home_screen.dart';
@@ -16,6 +18,10 @@ class ItemsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(child: Text('data'));
+    return Row(children: [
+      Container(width: 100, child: TopicsList()),
+      VerticalDivider(),
+      Expanded(child: NotesList()),
+    ]);
   }
 }
