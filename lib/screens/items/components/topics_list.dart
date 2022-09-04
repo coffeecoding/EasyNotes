@@ -5,14 +5,9 @@ import 'package:easynotes/screens/common/uiconstants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class TopicsList extends StatefulWidget {
+class TopicsList extends StatelessWidget {
   const TopicsList({Key? key}) : super(key: key);
 
-  @override
-  State<TopicsList> createState() => _TopicsListState();
-}
-
-class _TopicsListState extends State<TopicsList> {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ItemsCubit, ItemsState>(
