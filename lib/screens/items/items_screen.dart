@@ -20,7 +20,11 @@ class ItemsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(children: [
       Container(width: 100, child: TopicsList()),
-      VerticalDivider(),
+      VerticalDivider(
+        indent: 0,
+        endIndent: 0,
+        width: 1,
+      ),
       Expanded(child: NotesList()),
     ]);
   }

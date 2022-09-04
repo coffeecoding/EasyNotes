@@ -17,5 +17,5 @@ class TopicsState extends Equatable {
   final List<Item> topics;
 
   @override
-  List<Object> get props => [topics];
+  List<Object> get props => [status, topics];
 }

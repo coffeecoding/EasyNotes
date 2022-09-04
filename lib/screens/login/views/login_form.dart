@@ -1,9 +1,10 @@
 import 'package:easynotes/blocs/auth/auth_bloc.dart';
-import 'package:easynotes/cubits/cubit/topics_cubit.dart';
-import 'package:easynotes/repositories/auth_repository.dart';
+import 'package:easynotes/cubits/cubits.dart';
 import 'package:easynotes/screens/common/uiconstants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../../cubits/cubits.dart';
 
 class LoginForm extends StatelessWidget {
   LoginForm({Key? key, required this.pageController}) : super(key: key);
@@ -48,7 +49,7 @@ class LoginForm extends StatelessWidget {
                               AuthLoginRequested(
                                   usernameController.text,
                                   passwordController.text,
-                                  context.read<TopicsCubit>())),
+                                  context.read<ItemsCubit>())),
                           child: Container(
                               width: double.infinity,
                               height: 40,

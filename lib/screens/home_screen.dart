@@ -25,7 +25,7 @@ class HomeScreen extends StatelessWidget {
         child: Scaffold(
       body: Row(children: [
         Expanded(flex: 1, child: ItemsScreen()),
-        VerticalDivider(),
+        VerticalDivider(width: 1),
         Expanded(flex: 2, child: Center(child: Text('detail')))
       ]),
     ));
