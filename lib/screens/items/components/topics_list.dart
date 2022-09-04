@@ -1,4 +1,5 @@
 import 'package:easynotes/cubits/cubit/topics_cubit.dart';
+import 'package:easynotes/cubits/selected_topic/selected_topic_cubit.dart';
 import 'package:easynotes/extensions/color_ext.dart';
 import 'package:easynotes/models/sample_data.dart';
 import 'package:easynotes/screens/common/uiconstants.dart';
@@ -27,15 +28,28 @@ class _TopicsListState extends State<TopicsList> {
             final topics = context.read<TopicsCubit>().state.topics;
             return ListView.builder(
                 itemCount: topics.length,
-                itemBuilder: (context, idx) => Container(
-                      padding:
-                          const EdgeInsets.symmetric(vertical: ConstSpacing.sm),
-                      child: Column(children: [
-                        Icon(Icons.folder,
-                            color: HexColor.fromHex(topics[idx].color)),
-                        Text(topics[idx].title),
-                      ]),
-                    ));
+                itemBuilder: (context, idx) =>
+                    BlocBuilder<SelectedTopicCubit, SelectedTopicState>(
+                        builder: (context, state) {
+                      final clr = HexColor.fromHex(topics[idx].color);
+                      return Container(
+                        decoration: BoxDecoration(
+                            border: (state.topic != null &&
+                                    topics[idx] == state.topic)
+                                ? Border(
+                                    right: BorderSide(color: clr, width: 5))
+                                : null),
+                        child: ListTile(
+                          onTap: () => context
+                              .read<SelectedTopicCubit>()
+                              .select(topics[idx]),
+                          title: Column(children: [
+                            Icon(Icons.folder, color: clr),
+                            Text(topics[idx].title),
+                          ]),
+                        ),
+                      );
+                    }));
         }
       },
     );

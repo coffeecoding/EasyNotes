@@ -8,7 +8,7 @@ class ItemRepository {
   }
 
   Future<List<Item>> fetchTopics() async {
-    await Future.delayed(const Duration(seconds: 3));
+    await Future.delayed(const Duration(seconds: 1));
     return SampleData.sampleItems.where((i) => i.isTopic).toList();
   }
 }

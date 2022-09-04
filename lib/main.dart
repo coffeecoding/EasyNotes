@@ -1,5 +1,6 @@
 import 'package:easynotes/config/locator.dart';
 import 'package:easynotes/cubits/cubit/topics_cubit.dart';
+import 'package:easynotes/cubits/selected_topic/selected_topic_cubit.dart';
 import 'package:easynotes/repositories/auth_repository.dart';
 import 'package:easynotes/repositories/item_repository.dart';
 import 'package:easynotes/repositories/preference_repository.dart';
@@ -36,7 +37,9 @@ class EasyNotesApp extends StatelessWidget {
           BlocProvider<TopicsCubit>(
               lazy: false,
               create: (context) =>
-                  TopicsCubit(itemRepo: locator.get<ItemRepository>()))
+                  TopicsCubit(itemRepo: locator.get<ItemRepository>())),
+          BlocProvider<SelectedTopicCubit>(
+              lazy: false, create: (context) => SelectedTopicCubit())
         ],
         child: MaterialApp(
           title: 'EasyNotes',
