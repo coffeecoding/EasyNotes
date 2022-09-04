@@ -13,6 +13,9 @@ class ItemsCubit extends Cubit<ItemsState> {
   void selectTopic(int i) =>
       emit(ItemsState.selectionChanged(prev: state, topic: state.topics[i]));
 
+  void selectNote(int i) => emit(ItemsState.selectionChanged(
+      prev: state, note: state.topic!.state.notes[i]));
+
   Future<void> fetchItems() async {
     try {
       final items = await itemRepo.fetchItems();

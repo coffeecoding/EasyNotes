@@ -27,22 +27,31 @@ class _NotesListState extends State<NotesList> {
             case TopicStatus.error:
               return const Center(child: Text('Sum went wrong ...'));
             default:
-              return ListView.builder(
-                  itemCount: noteCubits.length,
-                  itemBuilder: (context, i) {
-                    final note = noteCubits[i].state.note;
-                    return Container(
-                        decoration: BoxDecoration(
-                          border: Border(
-                              bottom: BorderSide(
-                                  color: Theme.of(context).cardColor,
-                                  width: 1)),
-                        ),
-                        child: ListTile(
-                          onTap: () => print("tapped " + note!.title),
-                          title: Center(child: Text(note!.title)),
-                        ));
-                  });
+              return BlocBuilder<ItemsCubit, ItemsState>(
+                buildWhen: (prev, next) => prev.note != next.note,
+                builder: (context, state) => ListView.builder(
+                    itemCount: noteCubits.length,
+                    itemBuilder: (context, i) {
+                      final note = noteCubits[i].state.note;
+                      return Container(
+                          decoration: BoxDecoration(
+                            color: (state.note != null &&
+                                    noteCubits[i].state.note!.id ==
+                                        state.note!.state.note!.id)
+                                ? Theme.of(context).cardColor
+                                : Colors.transparent,
+                            border: Border(
+                                bottom: BorderSide(
+                                    color: Theme.of(context).cardColor,
+                                    width: 1)),
+                          ),
+                          child: ListTile(
+                            onTap: () =>
+                                context.read<ItemsCubit>().selectNote(i),
+                            title: Center(child: Text(note!.title)),
+                          ));
+                    }),
+              );
           }
         });
   }
