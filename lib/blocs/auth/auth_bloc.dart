@@ -8,8 +8,6 @@ import 'package:easynotes/repositories/auth_repository.dart';
 import 'package:easynotes/repositories/preference_repository.dart';
 import 'package:equatable/equatable.dart';
 
-import '../../cubits/cubits.dart';
-
 part 'auth_event.dart';
 part 'auth_state.dart';
 

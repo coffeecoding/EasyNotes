@@ -31,7 +31,7 @@ class _SplashScreenState extends State<SplashScreen> {
     final authstate = bloc.state.status;
     print(authstate);
     if (authstate == AuthStatus.authenticated) {
-      return const HomeScreen();
+      return HomeScreen();
     } else {
       return const LoginScreen();
     }
