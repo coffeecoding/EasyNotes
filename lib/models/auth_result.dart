@@ -3,17 +3,21 @@ import 'dart:convert';
 
 import 'package:equatable/equatable.dart';
 
+import 'package:easynotes/models/user.dart';
+
 import 'item.dart';
 
 class AuthResult extends Equatable {
   final bool success;
   final String error;
   final String token;
+  final User? user;
   final List<Item> items;
   const AuthResult({
     required this.success,
     required this.error,
     required this.token,
+    this.user,
     required this.items,
   });
 
@@ -21,12 +25,14 @@ class AuthResult extends Equatable {
     bool? success,
     String? error,
     String? token,
+    User? user,
     List<Item>? items,
   }) {
     return AuthResult(
       success: success ?? this.success,
       error: error ?? this.error,
       token: token ?? this.token,
+      user: user ?? this.user,
       items: items ?? this.items,
     );
   }
@@ -36,6 +42,7 @@ class AuthResult extends Equatable {
       'success': success,
       'error': error,
       'token': token,
+      'user': user?.toMap(),
       'items': items.map((x) => x.toMap()).toList(),
     };
   }
@@ -45,6 +52,9 @@ class AuthResult extends Equatable {
       success: map['success'] as bool,
       error: map['error'] as String,
       token: map['token'] as String,
+      user: map['user'] != null
+          ? User.fromMap(map['user'] as Map<String, dynamic>)
+          : null,
       items: List<Item>.from(
         (map['items'] as List<int>).map<Item>(
           (x) => Item.fromMap(x as Map<String, dynamic>),
@@ -62,5 +72,13 @@ class AuthResult extends Equatable {
   bool get stringify => true;
 
   @override
-  List<Object> get props => [success, error, token, items];
+  List<Object?> get props {
+    return [
+      success,
+      error,
+      token,
+      user,
+      items,
+    ];
+  }
 }

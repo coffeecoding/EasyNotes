@@ -52,7 +52,7 @@ class HomeScreen extends StatelessWidget {
             ],
           ),
           Container(
-            width: 300,
+            width: 256,
             color: Theme.of(context).backgroundColor,
             padding: const EdgeInsets.only(left: ConstSpacing.m),
             child: Row(children: [

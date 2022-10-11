@@ -7,7 +7,7 @@ import 'json_data.dart';
 
 class Item extends Equatable with JsonData {
   final String id;
-  final String? parent_id;
+  String? parent_id;
   final String receiver_id;
   final String? sender_id;
   final String title;
@@ -18,14 +18,14 @@ class Item extends Equatable with JsonData {
   final int item_type;
   final String color;
   final String options;
-  final String? ivkey;
+  String? ivkey;
   final String? signature;
   final int position;
   final int created;
   final int modified_header;
   final int modified;
   final int? trashed;
-  const Item({
+  Item({
     required this.id,
     required this.parent_id,
     required this.receiver_id,

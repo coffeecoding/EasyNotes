@@ -3,35 +3,38 @@ import 'dart:convert';
 
 import 'package:equatable/equatable.dart';
 
+import 'package:easynotes/utils/crypto/algorithm_identifier.dart';
+
 class UserCredParams extends Equatable {
-  final String pwhash;
-  final String algorithm_identifier;
+  final String pwsalt;
+  final AlgorithmIdentifier algorithm_identifier;
   const UserCredParams({
-    required this.pwhash,
+    required this.pwsalt,
     required this.algorithm_identifier,
   });
 
   UserCredParams copyWith({
-    String? pwhash,
-    String? algorithm_identifier,
+    String? pwsalt,
+    AlgorithmIdentifier? algorithm_identifier,
   }) {
     return UserCredParams(
-      pwhash: pwhash ?? this.pwhash,
+      pwsalt: pwsalt ?? this.pwsalt,
       algorithm_identifier: algorithm_identifier ?? this.algorithm_identifier,
     );
   }
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'pwhash': pwhash,
-      'algorithm_identifier': algorithm_identifier,
+      'pwsalt': pwsalt,
+      'algorithm_identifier': algorithm_identifier.toMap(),
     };
   }
 
   factory UserCredParams.fromMap(Map<String, dynamic> map) {
     return UserCredParams(
-      pwhash: map['pwhash'] as String,
-      algorithm_identifier: map['algorithm_identifier'] as String,
+      pwsalt: map['pwsalt'] as String,
+      algorithm_identifier:
+          AlgorithmIdentifier.fromJson(map['algorithm_identifier']),
     );
   }
 
@@ -44,5 +47,5 @@ class UserCredParams extends Equatable {
   bool get stringify => true;
 
   @override
-  List<Object> get props => [pwhash, algorithm_identifier];
+  List<Object> get props => [pwsalt, algorithm_identifier];
 }

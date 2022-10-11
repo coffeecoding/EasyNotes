@@ -28,22 +28,22 @@ class NetworkProvider {
   }
 
   Future<Response> get(String requestUri) async {
-    return await _client.get(Uri.parse('$baseUrl$requestUri'),
+    return await _client.get(Uri(host: baseUrl, path: requestUri),
         headers: _defaultHeaders);
   }
 
   Future<Response> post(String requestUri, String jsonBody) async {
-    return await _client.post(Uri.parse('$baseUrl$requestUri'),
+    return await _client.post(Uri(host: baseUrl, path: requestUri),
         body: jsonBody, headers: _defaultHeaders);
   }
 
   Future<Response> put(String requestUri, [String? jsonBody]) async {
-    return await _client.put(Uri.parse('$baseUrl$requestUri'),
+    return await _client.put(Uri(host: baseUrl, path: requestUri),
         body: jsonBody, headers: _defaultHeaders);
   }
 
   Future<Response> delete(String requestUri) async {
-    return await _client.delete(Uri.parse('$baseUrl$requestUri'),
+    return await _client.delete(Uri(host: baseUrl, path: requestUri),
         headers: _defaultHeaders);
   }
 

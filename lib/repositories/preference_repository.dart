@@ -11,6 +11,7 @@ class PreferenceRepository {
   static const String _usernameKey = 'username';
   static const String _passwordKey = 'password';
   static const String _privkeyKey = 'privkey';
+  static const String _pubkeyKey = 'pubkey';
   static const String _signkeyKey = 'signkey';
 
   final FlutterSecureStorage _secureStorage;
@@ -20,6 +21,8 @@ class PreferenceRepository {
   Future<String?> get username async => _secureStorage.read(key: _usernameKey);
   Future<String?> get password async => _secureStorage.read(key: _passwordKey);
   Future<String?> get privkey async => _secureStorage.read(key: _privkeyKey);
+  Future<String?> get pubkey async =>
+      _prefs.then((sp) => sp.getString(_pubkeyKey));
   Future<String?> get signkey async => _secureStorage.read(key: _signkeyKey);
   Future<User?> get loggedInUser => _prefs.then((SharedPreferences prefs) {
         String? userJson = prefs.getString(_userKey);
@@ -31,6 +34,7 @@ class PreferenceRepository {
     required User user,
     required String username,
     required String password,
+    required String pubkey,
     required String privkey,
     required String signkey,
   }) async {
@@ -56,6 +60,7 @@ class PreferenceRepository {
         aOptions: androidOptions,
         wOptions: windowsOptions,
       );
+      await _prefs.then((sp) => sp.setString(_pubkeyKey, pubkey));
       await _secureStorage.write(
         key: _signkeyKey,
         value: signkey,
