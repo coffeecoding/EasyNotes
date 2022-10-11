@@ -13,7 +13,7 @@ Future<void> setUpLocator() async {
   locator
     ..registerSingleton<PreferenceRepository>(PreferenceRepository())
     ..registerSingleton<NetworkProvider>(NetworkProvider())
-    ..registerSingleton<ItemRepository>(ItemRepository())
     ..registerSingleton<AuthRepository>(AuthRepository())
-    ..registerSingleton<CryptoService>(CryptoService());
+    ..registerSingleton<CryptoService>(CryptoService())
+    ..registerSingleton<ItemRepository>(ItemRepository());
 }

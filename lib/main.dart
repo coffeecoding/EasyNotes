@@ -32,7 +32,8 @@ class EasyNotesApp extends StatelessWidget {
               lazy: false,
               create: (context) => AuthBloc(
                   authRepository: locator.get<AuthRepository>(),
-                  preferenceRepository: locator.get<PreferenceRepository>())),
+                  preferenceRepository: locator.get<PreferenceRepository>(),
+                  itemRepository: locator.get<ItemRepository>())),
           BlocProvider<ItemsCubit>(
               lazy: false,
               create: (context) =>
