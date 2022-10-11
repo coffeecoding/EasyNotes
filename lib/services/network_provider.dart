@@ -46,23 +46,4 @@ class NetworkProvider {
     return await _client.delete(Uri(host: baseUrl, path: requestUri),
         headers: _defaultHeaders, body: body);
   }
-
-  // Leave code for if we go back to using Dio
-  /*
-  void setDefaultHeaders() {
-    _dio.options.baseUrl = baseUrl;
-    _dio.options.headers = {
-      ..._dio.options.headers,
-      'content-type': 'application/json',
-    };
-    _dio.options.contentType = 'application/json';
-    _dio.options.setRequestContentTypeWhenNoPayload = false;
-  }
-
-  void setAuthHeader(String authToken) {
-    _dio.options.headers = {
-      ..._dio.options.headers,
-      'authorization': 'Bearer $authToken',
-    };
-  }*/
 }

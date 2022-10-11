@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:easynotes/cubits/cubits.dart';
 import 'package:easynotes/models/item.dart';
-import 'package:easynotes/models/sample_data.dart';
 import 'package:easynotes/models/user.dart';
 import 'package:easynotes/repositories/auth_repository.dart';
 import 'package:easynotes/repositories/item_repository.dart';

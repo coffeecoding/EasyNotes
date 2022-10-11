@@ -30,7 +30,7 @@ class CryptoService {
     if (privKey == null) {
       throw 'CryptopServices.decryptItem: priv key not found';
     }
-    StatefulAES aes = _decodeIVKeyAndCreateAES(item.ivkey!, privKey!);
+    StatefulAES aes = _decodeIVKeyAndCreateAES(item.ivkey!, privKey);
     return item.copyWith(
         title: aes.decryptFromBase64(item.title),
         content: item.content.isEmpty
