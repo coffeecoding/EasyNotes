@@ -19,14 +19,15 @@ class AuthRepository {
   late NetworkProvider netClient;
   late PreferenceRepository prefsRepo;
 
-  /// Empty return String indicates success, non-empty String is error message.
-  Future<String> login(
+  /// Empty string indicates success, non-empty String is error message.
+  Future<MapEntry<String, List<Item>>> login(
       {required String username, required String password}) async {
     try {
       // 1) Get auth parameters and data
       final authParams = await _getUserAuthParams(username);
       if (!authParams.isSuccessStatusCode()) {
-        return 'Something went wrong. Please try again later.';
+        return const MapEntry(
+            'Something went wrong. Please try again later.', []);
       }
       final p = UserCredParams.fromJson(jsonDecode(authParams.body));
 
@@ -59,14 +60,11 @@ class AuthRepository {
           pubkey: authData.user!.pubkey,
           signkey: signKey);
 
-      // 6) pass the item data to the item repository OR directly return them
-      // to the authBloc, which can call the items Cubit ... somthing like that
-      authData.items;
-
-      return '';
+      // 6) pass the successfully retrieved item data to the caller
+      return MapEntry('', authData.items);
     } on Exception catch (e) {
       print(e);
-      return 'An unexpected error occurred';
+      return const MapEntry('An unexpected error occurred', []);
     }
   }
 

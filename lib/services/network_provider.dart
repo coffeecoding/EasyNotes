@@ -42,9 +42,9 @@ class NetworkProvider {
         body: jsonBody, headers: _defaultHeaders);
   }
 
-  Future<Response> delete(String requestUri) async {
+  Future<Response> delete(String requestUri, [String? body]) async {
     return await _client.delete(Uri(host: baseUrl, path: requestUri),
-        headers: _defaultHeaders);
+        headers: _defaultHeaders, body: body);
   }
 
   // Leave code for if we go back to using Dio

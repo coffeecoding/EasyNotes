@@ -1,18 +1,15 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
-import 'package:easynotes/models/item_header.dart';
 import 'package:equatable/equatable.dart';
 
 import 'json_data.dart';
 
-class Item extends Equatable with JsonData {
+class ItemHeader extends Equatable with JsonData {
   final String id;
   String? parent_id;
   final String receiver_id;
   final String? sender_id;
-  final String title;
-  final String content;
   final bool pinned;
   final bool pinned_globally;
   final String symbol;
@@ -21,18 +18,17 @@ class Item extends Equatable with JsonData {
   final String options;
   String? ivkey;
   final String? signature;
-  int position;
+  final int position;
   final int created;
   final int modified_header;
   final int modified;
   final int? trashed;
-  Item({
+
+  ItemHeader({
     required this.id,
-    required this.parent_id,
+    this.parent_id,
     required this.receiver_id,
     this.sender_id,
-    required this.title,
-    required this.content,
     required this.pinned,
     required this.pinned_globally,
     required this.symbol,
@@ -48,13 +44,11 @@ class Item extends Equatable with JsonData {
     this.trashed,
   });
 
-  Item copyWith({
+  ItemHeader copyWith({
     String? id,
     String? parent_id,
     String? receiver_id,
     String? sender_id,
-    String? title,
-    String? content,
     bool? pinned,
     bool? pinned_globally,
     String? symbol,
@@ -69,13 +63,11 @@ class Item extends Equatable with JsonData {
     int? modified,
     int? trashed,
   }) {
-    return Item(
+    return ItemHeader(
       id: id ?? this.id,
       parent_id: parent_id ?? this.parent_id,
       receiver_id: receiver_id ?? this.receiver_id,
       sender_id: sender_id ?? this.sender_id,
-      title: title ?? this.title,
-      content: content ?? this.content,
       pinned: pinned ?? this.pinned,
       pinned_globally: pinned_globally ?? this.pinned_globally,
       symbol: symbol ?? this.symbol,
@@ -92,37 +84,12 @@ class Item extends Equatable with JsonData {
     );
   }
 
-  Item copyWithHeader(ItemHeader header) {
-    return Item(
-        id: header.id,
-        parent_id: header.parent_id,
-        receiver_id: header.receiver_id,
-        sender_id: header.sender_id,
-        title: title,
-        content: content,
-        pinned: header.pinned,
-        pinned_globally: header.pinned_globally,
-        symbol: header.symbol,
-        item_type: header.item_type,
-        color: header.color,
-        options: header.options,
-        ivkey: header.ivkey,
-        signature: header.signature,
-        position: header.position,
-        created: header.created,
-        modified_header: header.modified_header,
-        modified: header.modified,
-        trashed: header.trashed);
-  }
-
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'id': id,
       'parent_id': parent_id,
       'receiver_id': receiver_id,
       'sender_id': sender_id,
-      'title': title,
-      'content': content,
       'pinned': pinned,
       'pinned_globally': pinned_globally,
       'symbol': symbol,
@@ -139,14 +106,12 @@ class Item extends Equatable with JsonData {
     };
   }
 
-  factory Item.fromMap(Map<String, dynamic> map) {
-    return Item(
+  factory ItemHeader.fromMap(Map<String, dynamic> map) {
+    return ItemHeader(
       id: map['id'] as String,
-      parent_id: map['parent_id'] as String?,
+      parent_id: map['parent_id'] != null ? map['parent_id'] as String : null,
       receiver_id: map['receiver_id'] as String,
       sender_id: map['sender_id'] != null ? map['sender_id'] as String : null,
-      title: map['title'] as String,
-      content: map['content'] as String,
       pinned: map['pinned'] as bool,
       pinned_globally: map['pinned_globally'] as bool,
       symbol: map['symbol'] as String,
@@ -166,32 +131,11 @@ class Item extends Equatable with JsonData {
   @override
   String toJson() => json.encode(toMap());
 
-  factory Item.fromJson(String source) =>
-      Item.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory ItemHeader.fromJson(String source) =>
+      ItemHeader.fromMap(json.decode(source) as Map<String, dynamic>);
 
   @override
   bool get stringify => true;
-
-  bool get isTopic => parent_id == null || parent_id!.isEmpty;
-
-  ItemHeader getHeader() => ItemHeader(
-      id: id,
-      parent_id: parent_id,
-      receiver_id: receiver_id,
-      sender_id: sender_id,
-      pinned: pinned,
-      pinned_globally: pinned_globally,
-      symbol: symbol,
-      item_type: item_type,
-      color: color,
-      options: options,
-      ivkey: ivkey,
-      signature: signature,
-      position: position,
-      created: created,
-      modified_header: modified_header,
-      modified: modified,
-      trashed: trashed);
 
   @override
   List<Object?> get props {
@@ -200,8 +144,6 @@ class Item extends Equatable with JsonData {
       parent_id,
       receiver_id,
       sender_id,
-      title,
-      content,
       pinned,
       pinned_globally,
       symbol,

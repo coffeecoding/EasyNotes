@@ -10,8 +10,8 @@ class CryptoService {
 
   late PreferenceRepository prefsRepo;
 
-  Future<Item> encryptItem(Item item) async {
-    final pubkey = await prefsRepo.pubkey;
+  Future<Item> encryptItem(Item item, [String? pubkey]) async {
+    pubkey ??= await prefsRepo.pubkey;
     if (pubkey == null) {
       throw 'CryptopServices.encryptItem: pub key not found';
     }
@@ -27,12 +27,23 @@ class CryptoService {
 
   Future<Item> decryptItem(Item item, [String? privKey]) async {
     privKey ??= await prefsRepo.privkey;
+    if (privKey == null) {
+      throw 'CryptopServices.decryptItem: priv key not found';
+    }
     StatefulAES aes = _decodeIVKeyAndCreateAES(item.ivkey!, privKey!);
     return item.copyWith(
         title: aes.decryptFromBase64(item.title),
         content: item.content.isEmpty
             ? item.content
             : aes.decryptFromBase64(item.content));
+  }
+
+  Future<List<Item>> encryptItems(Iterable<Item> items) async {
+    String? privkey = await prefsRepo.privkey;
+    if (privkey == null) {
+      throw 'CryptopServices.encryptItems: pub key not found';
+    }
+    return Future.wait(items.map((i) => encryptItem(i, privkey)));
   }
 
   Future<List<Item>> decryptItems(Iterable<Item> items) async {

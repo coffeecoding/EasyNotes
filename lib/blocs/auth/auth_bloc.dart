@@ -2,9 +2,11 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:easynotes/cubits/cubits.dart';
+import 'package:easynotes/models/item.dart';
 import 'package:easynotes/models/sample_data.dart';
 import 'package:easynotes/models/user.dart';
 import 'package:easynotes/repositories/auth_repository.dart';
+import 'package:easynotes/repositories/item_repository.dart';
 import 'package:easynotes/repositories/preference_repository.dart';
 import 'package:equatable/equatable.dart';
 
@@ -14,9 +16,11 @@ part 'auth_state.dart';
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc(
       {required AuthRepository authRepository,
-      required PreferenceRepository preferenceRepository})
+      required PreferenceRepository preferenceRepository,
+      required ItemRepository itemRepository})
       : _authRepository = authRepository,
-        _preferenceRepository = preferenceRepository,
+        _prefs = preferenceRepository,
+        _itemRepo = itemRepository,
         super(const AuthState.unauthenticated()) {
     on<AuthStateChanged>(_onAuthStatusChanged);
     on<AuthLogoutRequested>(_onAuthLogoutRequested);
@@ -24,7 +28,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   final AuthRepository _authRepository;
-  final PreferenceRepository _preferenceRepository;
+  final PreferenceRepository _prefs;
+  final ItemRepository _itemRepo;
   late StreamSubscription<AuthStatus> _authStatusSubscription;
 
   @override
@@ -53,12 +58,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       AuthLoginRequested event, Emitter<AuthState> emit) async {
     try {
       emit(const AuthState.waiting());
-      await _authRepository.login(
+      MapEntry<String, List<Item>> result = await _authRepository.login(
           username: event.username, password: event.password);
-      // user should have been already saved in preferences
-      // => get it from prefsrepository
-      event.topicsCubit.fetchItems();
-      return emit(AuthState.authenticated(SampleData.sampleUser));
+      if (result.key.isNotEmpty) throw 'Something went wrong ...';
+      await _itemRepo.setItems(result.value);
+      User user = (await _prefs.loggedInUser)!;
+      return emit(AuthState.authenticated(user));
     } on Exception catch (e) {
       print(e);
       emit(const AuthState.error());
