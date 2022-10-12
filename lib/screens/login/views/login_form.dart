@@ -36,6 +36,16 @@ class LoginForm extends StatelessWidget {
                 decoration: const InputDecoration(labelText: 'Password'),
               ),
               const SizedBox(height: ConstSpacing.xl),
+              BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
+                switch (state.status) {
+                  case AuthStatus.error:
+                    return const Text('Something went wrong ...',
+                        style: TextStyle(color: Colors.red));
+                  default:
+                    return const Text('');
+                }
+              }),
+              const SizedBox(height: ConstSpacing.xl),
               BlocBuilder<AuthBloc, AuthState>(
                 buildWhen: (prev, next) => prev.status != next.status,
                 builder: (context, state) {

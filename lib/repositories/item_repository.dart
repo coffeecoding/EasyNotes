@@ -42,7 +42,7 @@ class ItemRepository {
       items.where((i) => i.trashed != null).toList();
 
   Future<List<Item>> fetchItems() async {
-    Response response = await netClient.get('/items');
+    Response response = await netClient.get('/api/items');
     if (!response.isSuccessStatusCode()) throw 'Unable to fetch data';
     List<Item> encryptedItems = (jsonDecode(response.body) as List)
         .map((i) => Item.fromJson(i))
@@ -52,7 +52,7 @@ class ItemRepository {
   }
 
   Future<List<Item>> fetchTrashedItems() async {
-    Response response = await netClient.get('/items?trashed=asdf');
+    Response response = await netClient.get('/api/items?trashed=asdf');
     if (!response.isSuccessStatusCode()) throw 'Unable to fetch data';
     List<Item> encryptedItems = (jsonDecode(response.body) as List)
         .map((i) => Item.fromJson(i))
@@ -64,7 +64,7 @@ class ItemRepository {
   }
 
   Future<List<Item>> fetchRootItems() async {
-    Response response = await netClient.post('/items', "");
+    Response response = await netClient.post('/api/items', "");
     if (!response.isSuccessStatusCode()) throw 'Unable to fetch data';
     List<Item> encryptedItems = (jsonDecode(response.body) as List)
         .map((i) => Item.fromJson(i))
@@ -77,7 +77,8 @@ class ItemRepository {
 
   Future<Item> insertOrUpdateItem(Item item, ItemUpdateAction action) async {
     Item encrypted = await cryptoService.encryptItem(item);
-    Response? response = await netClient.post('/item', jsonEncode(encrypted));
+    Response? response =
+        await netClient.post('/api/item', jsonEncode(encrypted));
     if (!response.isSuccessStatusCode()) throw 'Error saving item';
     String newId = response.body;
     items.removeWhere((element) => element.id == item.id);
@@ -89,7 +90,7 @@ class ItemRepository {
   Future<List<Item>> insertOrUpdateItems(List<Item> items) async {
     List<Item> encryptedItems = await cryptoService.encryptItems(items);
     Response? response =
-        await netClient.post('/items', jsonEncode(encryptedItems));
+        await netClient.post('/api/items', jsonEncode(encryptedItems));
     if (!response.isSuccessStatusCode()) throw 'Error saving item';
     // Improve this: 1) Return the inserted items from API, 2) only update
     // those locally, not all
@@ -98,7 +99,7 @@ class ItemRepository {
 
   Future<bool> updateItemHeader(ItemHeader header) async {
     Response? response =
-        await netClient.put('/item/header', jsonEncode(header));
+        await netClient.put('/api/item/header', jsonEncode(header));
     if (!response.isSuccessStatusCode()) throw 'Error updating item header';
     int i = items.indexWhere((i) => i.id == header.id);
     items[i] = items[i].copyWithHeader(header);
@@ -107,7 +108,7 @@ class ItemRepository {
 
   Future<bool> updateItemParent(String id, String parent_id) async {
     Response? response =
-        await netClient.put('/item/$id?parent_id=$parent_id', "");
+        await netClient.put('/api/item/$id?parent_id=$parent_id', "");
     if (!response.isSuccessStatusCode()) throw 'Error updating item parent';
     int timestamp = int.parse(response.body);
     int i = items.indexWhere((i) => i.id == id);
@@ -117,7 +118,8 @@ class ItemRepository {
   }
 
   Future<bool> updateItemTrashed(String id, int trashed) async {
-    Response? response = await netClient.put('/item/$id?trashed=$trashed', "");
+    Response? response =
+        await netClient.put('/api/item/$id?trashed=$trashed', "");
     if (!response.isSuccessStatusCode()) throw 'Error updating item trashed';
     int timestamp = int.parse(response.body);
     int i = items.indexWhere((i) => i.id == id);
@@ -126,7 +128,7 @@ class ItemRepository {
   }
 
   Future<bool> updateItemPinned(String id, int pin) async {
-    Response? response = await netClient.put('/item/$id?pin=$pin', "");
+    Response? response = await netClient.put('/api/item/$id?pin=$pin', "");
     if (!response.isSuccessStatusCode()) throw 'Error updating item pinned';
     int timestamp = int.parse(response.body);
     int i = items.indexWhere((i) => i.id == id);
@@ -135,7 +137,8 @@ class ItemRepository {
   }
 
   Future<bool> updateItemGloballyPinned(String id, int pin) async {
-    Response? response = await netClient.put('/item/$id?pin_globally=$pin', "");
+    Response? response =
+        await netClient.put('/api/item/$id?pin_globally=$pin', "");
     if (!response.isSuccessStatusCode()) throw 'Error updating item gl. pinned';
     int timestamp = int.parse(response.body);
     int i = items.indexWhere((i) => i.id == id);
@@ -146,7 +149,7 @@ class ItemRepository {
 
   Future<List<Item>> updateItemPositions(ItemPositionData ipd) async {
     Response? response =
-        await netClient.put('/items/position', jsonEncode(ipd));
+        await netClient.put('/api/items/position', jsonEncode(ipd));
     if (!response.isSuccessStatusCode()) throw 'Error updating item positions';
     int timestamp = int.parse(response.body);
     for (int i = 0; i < ipd.itemIds.length; i++) {
@@ -158,14 +161,14 @@ class ItemRepository {
   }
 
   Future<bool> delete(String id) async {
-    Response? response = await netClient.delete('/item/$id');
+    Response? response = await netClient.delete('/api/item/$id');
     if (!response.isSuccessStatusCode()) throw 'Error deleteing item';
     items.removeWhere((element) => element.id == id);
     return true;
   }
 
   Future<bool> deleteItems(List<String> ids) async {
-    Response? response = await netClient.delete('/items', jsonEncode(ids));
+    Response? response = await netClient.delete('/api/items', jsonEncode(ids));
     if (!response.isSuccessStatusCode()) {
       throw 'Error deleteing items';
     }

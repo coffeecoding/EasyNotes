@@ -29,7 +29,7 @@ class ItemsCubit extends Cubit<ItemsState> {
                   .toList()))
           .toList();
       emit(ItemsState.success(topicCubits));
-    } on Exception catch (e) {
+    } catch (e) {
       print("error in items_cubit fetchTopics:");
       print(e);
       emit(const ItemsState.failure());

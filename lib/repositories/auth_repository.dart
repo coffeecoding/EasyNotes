@@ -62,7 +62,7 @@ class AuthRepository {
 
       // 6) pass the successfully retrieved item data to the caller
       return MapEntry('', authData.items);
-    } on Exception catch (e) {
+    } catch (e) {
       print(e);
       return const MapEntry('An unexpected error occurred', []);
     }
@@ -73,6 +73,7 @@ class AuthRepository {
     // consider catching exceptions outside instead of here
   }
 
-  Future<Response> _getUserAuthParams(String username) async =>
-      await netClient.get('/api/user/$username/params');
+  Future<Response> _getUserAuthParams(String username) async => username.isEmpty
+      ? throw Exception('Username required')
+      : await netClient.get('/api/user/$username/params');
 }

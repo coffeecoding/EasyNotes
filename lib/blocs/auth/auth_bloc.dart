@@ -59,11 +59,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(const AuthState.waiting());
       MapEntry<String, List<Item>> result = await _authRepository.login(
           username: event.username, password: event.password);
-      if (result.key.isNotEmpty) throw 'Something went wrong ...';
+      if (result.key.isNotEmpty) throw Exception(result.key);
       await _itemRepo.setItems(result.value);
       User user = (await _prefs.loggedInUser)!;
       return emit(AuthState.authenticated(user));
-    } on Exception catch (e) {
+    } catch (e) {
       print(e);
       emit(const AuthState.error());
     }

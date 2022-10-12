@@ -17,7 +17,8 @@ class NetworkProvider {
           'Authorization': ''
         };
 
-  static const String baseUrl = 'localhost:6000/api';
+  static const String baseUrl = 'localhost';
+  static const int port = 6000;
 
   // The Dio instance for all of the application
   final http.Client _client;
@@ -27,23 +28,26 @@ class NetworkProvider {
     _defaultHeaders['Authorization'] = authToken;
   }
 
+  Uri _createUri(String requestUri) {
+    return Uri(host: baseUrl, port: port, path: requestUri);
+  }
+
   Future<Response> get(String requestUri) async {
-    return await _client.get(Uri(host: baseUrl, path: requestUri),
-        headers: _defaultHeaders);
+    return await _client.get(_createUri(requestUri), headers: _defaultHeaders);
   }
 
   Future<Response> post(String requestUri, String jsonBody) async {
-    return await _client.post(Uri(host: baseUrl, path: requestUri),
+    return await _client.post(_createUri(requestUri),
         body: jsonBody, headers: _defaultHeaders);
   }
 
   Future<Response> put(String requestUri, [String? jsonBody]) async {
-    return await _client.put(Uri(host: baseUrl, path: requestUri),
+    return await _client.put(_createUri(requestUri),
         body: jsonBody, headers: _defaultHeaders);
   }
 
   Future<Response> delete(String requestUri, [String? body]) async {
-    return await _client.delete(Uri(host: baseUrl, path: requestUri),
+    return await _client.delete(_createUri(requestUri),
         headers: _defaultHeaders, body: body);
   }
 }
