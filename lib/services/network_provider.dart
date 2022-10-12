@@ -29,7 +29,7 @@ class NetworkProvider {
   }
 
   Uri _createUri(String requestUri) {
-    return Uri(host: baseUrl, port: port, path: requestUri);
+    return Uri(scheme: 'http', host: baseUrl, port: port, path: requestUri);
   }
 
   Future<Response> get(String requestUri) async {
