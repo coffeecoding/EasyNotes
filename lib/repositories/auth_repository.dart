@@ -9,6 +9,7 @@ import 'package:easynotes/repositories/preference_repository.dart';
 import 'package:easynotes/utils/crypto/crypto.dart';
 import 'package:http/http.dart';
 
+import '../models/sample_data.dart';
 import '../services/network_provider.dart';
 
 class AuthRepository {
@@ -29,7 +30,7 @@ class AuthRepository {
         return const MapEntry(
             'Something went wrong. Please try again later.', []);
       }
-      final p = UserCredParams.fromJson(jsonDecode(authParams.body));
+      final p = UserCredParams.fromJson(authParams.body);
 
       // 2) Compute password hash
       final pwhash = await RFC2898Helper.computePasswordHash(password, p.pwsalt,
@@ -42,7 +43,13 @@ class AuthRepository {
       };
       final authResult =
           await netClient.post('/api/token', jsonEncode(authSubmission));
-      final authData = AuthResult.fromJson(jsonDecode(authResult.body));
+
+      // weird dart thing: it can't implicitly cast List<dynamic> as List<Item>
+      // so we have to do this silly cast dance ...
+      final jsonMap = jsonDecode(authResult.body) as Map<String, dynamic>;
+      var itemList = jsonMap['items'] as List;
+      jsonMap['items'] = itemList.cast<Item>().toList();
+      final authData = AuthResult.fromMap(jsonMap);
 
       // 4) save token in http client
       netClient.setAuthHeader('Bearer ${authData.token}');
@@ -61,10 +68,10 @@ class AuthRepository {
           signkey: signKey);
 
       // 6) pass the successfully retrieved item data to the caller
-      return MapEntry('', authData.items);
+      return MapEntry('', authData.items!);
     } catch (e) {
       print(e);
-      return const MapEntry('An unexpected error occurred', []);
+      return MapEntry('An unexpected error occurred: ${e}', []);
     }
   }
 

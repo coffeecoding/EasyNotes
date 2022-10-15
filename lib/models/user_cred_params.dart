@@ -26,7 +26,7 @@ class UserCredParams extends Equatable {
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'pwsalt': pwsalt,
-      'algorithm_identifier': algorithm_identifier.toMap(),
+      'algorithm_identifier': algorithm_identifier.serialize(),
     };
   }
 
@@ -34,7 +34,7 @@ class UserCredParams extends Equatable {
     return UserCredParams(
       pwsalt: map['pwsalt'] as String,
       algorithm_identifier:
-          AlgorithmIdentifier.fromJson(map['algorithm_identifier']),
+          AlgorithmIdentifier.deserialize(map['algorithm_identifier']),
     );
   }
 

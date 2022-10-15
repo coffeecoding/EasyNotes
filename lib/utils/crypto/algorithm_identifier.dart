@@ -50,13 +50,13 @@ class AlgorithmIdentifier extends Equatable {
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'name': name,
-      'iterations': iterations,
-      'saltLen': saltLen,
-      'hashLen': hashLen,
-      'rsaKeyLen': rsaKeyLen,
-      'dkLen': dkLen,
-      'aesivLen': aesivLen,
+      'Name': name,
+      'Iterations': iterations,
+      'SaltLen': saltLen,
+      'HashLen': hashLen,
+      'RSAKeyLen': rsaKeyLen,
+      'DKLen': dkLen,
+      'AESIVLen': aesivLen,
     };
   }
 
@@ -65,13 +65,13 @@ class AlgorithmIdentifier extends Equatable {
     mapString = mapString.replaceAll('!', '"');
     final map = json.decode(mapString) as Map<String, dynamic>;
     return AlgorithmIdentifier(
-      name: map['name'] as String,
-      iterations: map['iterations'] as int,
-      saltLen: map['saltLen'] as int,
-      hashLen: map['hashLen'] as int,
-      rsaKeyLen: map['rsaKeyLen'] as int,
-      dkLen: map['dkLen'] as int,
-      aesivLen: map['aesivLen'] as int,
+      name: map['Name'] as String,
+      iterations: map['Iterations'] as int,
+      saltLen: map['SaltLen'] as int,
+      hashLen: map['HashLen'] as int,
+      rsaKeyLen: map['RSAKeyLen'] as int,
+      dkLen: map['DKLen'] as int,
+      aesivLen: map['AESIVLen'] as int,
     );
   }
 
@@ -79,6 +79,21 @@ class AlgorithmIdentifier extends Equatable {
 
   factory AlgorithmIdentifier.fromJson(String source) =>
       AlgorithmIdentifier.fromMap(source);
+
+  String serialize() =>
+      '$name,$iterations,$hashLen,$saltLen,$rsaKeyLen,$dkLen,$aesivLen';
+
+  static AlgorithmIdentifier deserialize(String serialized) {
+    final p = serialized.split(',');
+    return AlgorithmIdentifier(
+        name: p[0],
+        iterations: int.parse(p[1]),
+        saltLen: int.parse(p[3]),
+        hashLen: int.parse(p[2]),
+        rsaKeyLen: int.parse(p[4]),
+        dkLen: int.parse(p[5]),
+        aesivLen: int.parse(p[6]));
+  }
 
   @override
   bool get stringify => true;

@@ -37,7 +37,6 @@ class User extends Equatable with JsonData {
   });
 
   @override
-  // TODO: implement props
   List<Object?> get props {
     return [
       id,
@@ -102,7 +101,7 @@ class User extends Equatable with JsonData {
       'privkey_crypt': privkey_crypt,
       'verifying_key': verifying_key,
       'signing_key_crypt': signing_key_crypt,
-      'algorithm_identifier': algorithm_identifier.toJson(),
+      'algorithm_identifier': algorithm_identifier.serialize(),
     };
   }
 
@@ -120,8 +119,8 @@ class User extends Equatable with JsonData {
       privkey_crypt: map['privkey_crypt'] as String,
       verifying_key: map['verifying_key'] as String,
       signing_key_crypt: map['signing_key_crypt'] as String,
-      algorithm_identifier:
-          AlgorithmIdentifier.fromJson(map['algorithm_identifier'] as String),
+      algorithm_identifier: AlgorithmIdentifier.deserialize(
+          map['algorithm_identifier'] as String),
     );
   }
 

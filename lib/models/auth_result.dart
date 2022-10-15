@@ -55,11 +55,7 @@ class AuthResult extends Equatable {
       user: map['user'] != null
           ? User.fromMap(map['user'] as Map<String, dynamic>)
           : null,
-      items: List<Item>.from(
-        (map['items'] as List<int>).map<Item>(
-          (x) => Item.fromMap(x as Map<String, dynamic>),
-        ),
-      ),
+      items: map['items'] ?? map['items'] as List<Item>,
     );
   }
 
