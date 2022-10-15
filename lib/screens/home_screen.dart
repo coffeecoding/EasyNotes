@@ -53,8 +53,10 @@ class HomeScreen extends StatelessWidget {
           ),
           Container(
             width: 256,
-            color: Theme.of(context).backgroundColor,
             padding: const EdgeInsets.only(left: ConstSpacing.m),
+            decoration: BoxDecoration(
+                color: Theme.of(context).backgroundColor,
+                borderRadius: BorderRadius.circular(8)),
             child: Row(children: [
               Expanded(
                   child: TextField(
