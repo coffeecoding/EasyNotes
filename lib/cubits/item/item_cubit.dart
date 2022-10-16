@@ -36,6 +36,9 @@ class ItemCubit extends Cubit<ItemState> {
   Item item;
 
   String get id => item.id;
+  String get color => item.color;
+  String get symbol => item.symbol;
+  String get title => item.title;
   ItemCubit? get parent => state.parent;
   List<ItemCubit> get children => state.children;
   bool get isTopic => item.isTopic;

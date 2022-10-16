@@ -41,7 +41,7 @@ class _ItemsScreenState extends State<ItemsScreen> {
           return const Center(child: CircularProgressIndicator());
         case ItemsStatus.error:
           return const Center(child: Text('Something went wrong ... :('));
-        case ItemsStatus.success:
+        default:
           return Row(children: [
             Container(width: 100, child: const TopicsList()),
             const VerticalDivider(

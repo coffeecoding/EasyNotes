@@ -1,6 +1,6 @@
 import 'package:easynotes/extensions/color_ext.dart';
 import 'package:easynotes/models/item.dart';
-import 'package:easynotes/models/sample_data.dart';
+import 'package:easynotes/config/sample_data.dart';
 import 'package:easynotes/screens/common/uiconstants.dart';
 import 'package:easynotes/screens/items/items_screen.dart';
 import 'package:easynotes/screens/note/note_screen.dart';
