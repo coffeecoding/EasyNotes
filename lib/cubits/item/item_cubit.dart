@@ -40,6 +40,8 @@ class ItemCubit extends Cubit<ItemState> {
   String get color => item.color;
   String get symbol => item.symbol;
   String get title => item.title;
+  String get titleField => state.title;
+  String get contentField => state.content;
   int get item_type => item.item_type;
   ItemCubit? get parent => state.parent;
   List<ItemCubit> get children => state.children;
@@ -58,6 +60,12 @@ class ItemCubit extends Cubit<ItemState> {
       print("error saving item: $e");
       emit(ItemState.error(prev: state, errorMsg: 'Failed to save: $e'));
     }
+  }
+
+  void saveLocalState({String? title, String? content}) {
+    // instead of "success" we should add another state like "draft"
+    // IMPORTANT TODO !! ^
+    emit(ItemState.success(prev: state, title: title, content: content));
   }
 
   void addChild(ItemCubit child) {
