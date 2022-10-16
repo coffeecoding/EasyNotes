@@ -12,16 +12,10 @@ class ItemsCubit extends Cubit<ItemsState> {
 
   List<ItemCubit> get topicCubits => state.topicCubits;
   ItemCubit? get selectedTopic => state.selectedTopic;
-  //ItemCubit? get selectedSubTopic => state.selectedSubTopic;
   ItemCubit? get selectedNote => state.selectedNote;
 
   void selectTopic(int? i) => emit(ItemsState.success(
       prev: state, selectedTopic: i == null ? null : topicCubits[i]));
-
-  /*void selectSubTopic(int? i) => emit(ItemsState.success(
-      prev: state,
-      selectedSubTopic: i == null ? null : selectedSubTopic!.children[i]));
-*/
 
   void selectChild(ItemCubit? item) {
     if (item != null && item.isTopic) {
@@ -32,21 +26,6 @@ class ItemsCubit extends Cubit<ItemsState> {
           didChildExpansionToggle: !state.didChildExpansionToggle));
     } else {
       emit(ItemsState.success(prev: state, selectedNote: item));
-    }
-  }
-
-  void selectChildOld(int? i, bool isTopic) {
-    if (i != null && isTopic) {
-      // only if the selected item is a subtopic, don't reselect the note
-      emit(ItemsState.success(
-          prev: state,
-          didChildExpansionToggle: !state.didChildExpansionToggle));
-    } else {
-      if (i != null)
-        print("selecting note ${selectedTopic!.children[i].title}");
-      emit(ItemsState.success(
-          prev: state,
-          selectedNote: i == null ? null : selectedTopic!.children[i]));
     }
   }
 

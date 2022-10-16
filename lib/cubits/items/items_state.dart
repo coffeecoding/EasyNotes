@@ -14,7 +14,7 @@ class ItemsState extends Equatable {
 
   const ItemsState.loading() : this._();
 
-  ItemsState.initial(
+  const ItemsState.initial(
       {required List<ItemCubit> topicCubits,
       ItemCubit? selectedTopic,
       ItemCubit? selectedNote})
@@ -47,7 +47,6 @@ class ItemsState extends Equatable {
   final ItemsStatus status;
   final List<ItemCubit> topicCubits;
   final ItemCubit? selectedTopic;
-  //final ItemCubit? selectedSubTopic;
   final ItemCubit? selectedNote;
   // boolean to toggle whenever a child item gets expanded/collapsed,
   // so this flag can be used to discern wh ther to rebuild the item
