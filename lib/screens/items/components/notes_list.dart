@@ -106,20 +106,15 @@ class ItemRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       onTap: onTap,
-      title: Row(children: [
-        Icon(item.item_type == 0 ? Icons.folder : Icons.note_outlined,
-            color: color),
-        const SizedBox(width: 10),
-        Flexible(
-          child: Text(
-            item.title,
-            overflow:
-                TextOverflow.ellipsis, // remove this to line-break instead
-            softWrap: false,
-            maxLines: 1, // remove this to line-break instead
-          ),
-        ),
-      ]),
+      leading: Icon(item.item_type == 0 ? Icons.folder : Icons.note_outlined,
+          color: color),
+      horizontalTitleGap: 0,
+      title: Text(
+        item.title,
+        overflow: TextOverflow.ellipsis, // remove this to line-break instead
+        softWrap: false,
+        maxLines: 1, // remove this to line-break instead
+      ),
     );
   }
 }
