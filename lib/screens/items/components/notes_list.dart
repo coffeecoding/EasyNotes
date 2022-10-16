@@ -30,36 +30,55 @@ class NotesList extends StatelessWidget {
                 itemCount: itemCubits.length,
                 itemBuilder: (context, i) {
                   final item = itemCubits[i];
-                  final itemContainerView = ItemContainer(
-                      color: clr,
-                      item: item,
-                      index: i,
-                      selectedNote: state.selectedNote,
-                      onTap: () =>
-                          context.read<ItemsCubit>().selectChild(item));
-                  return item.isTopic && item.expanded
-                      ? Column(children: [
-                          itemContainerView,
-                          ListView.builder(
-                              shrinkWrap: true,
-                              itemCount: item.children.length,
-                              itemBuilder: (context, j) {
-                                return ItemContainer(
-                                    color: clr,
-                                    item: itemCubits[i].children[j],
-                                    selectedNote: state.selectedNote,
-                                    index: j,
-                                    onTap: () {
-                                      context
-                                          .read<ItemsCubit>()
-                                          .selectChild(item.children[j]);
-                                    });
-                              })
-                        ])
-                      : itemContainerView;
+                  return ExpandableItemContainer(
+                      color: clr, item: item, selectedNote: state.selectedNote);
                 }),
           );
         });
+  }
+}
+
+class ExpandableItemContainer extends StatelessWidget {
+  const ExpandableItemContainer({
+    super.key,
+    required this.item,
+    this.selectedNote,
+    required this.color,
+  });
+
+  final ItemCubit item;
+  final ItemCubit? selectedNote;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final itemContainerView = ItemContainer(
+        color: color,
+        item: item,
+        selectedNote: selectedNote,
+        onTap: () => context.read<ItemsCubit>().selectChild(item));
+    return item.isTopic && item.expanded
+        ? Column(children: [
+            itemContainerView,
+            ListView.builder(
+                shrinkWrap: true,
+                itemCount: item.children.length,
+                itemBuilder: (context, j) {
+                  return item.children[j].isTopic && item.children[j].expanded
+                      ? ExpandableItemContainer(
+                          item: item.children[j],
+                          color: color,
+                          selectedNote: selectedNote)
+                      : ItemContainer(
+                          color: color,
+                          item: item.children[j],
+                          selectedNote: selectedNote,
+                          onTap: () => context
+                              .read<ItemsCubit>()
+                              .selectChild(item.children[j]));
+                })
+          ])
+        : itemContainerView;
   }
 }
 
@@ -68,7 +87,6 @@ class ItemContainer extends StatelessWidget {
     super.key,
     required this.item,
     this.selectedNote,
-    required this.index,
     required this.color,
     this.onTap,
   });
@@ -76,7 +94,6 @@ class ItemContainer extends StatelessWidget {
   final ItemCubit item;
   final ItemCubit? selectedNote;
   final Color color;
-  final int index;
   final Function()? onTap;
 
   @override
