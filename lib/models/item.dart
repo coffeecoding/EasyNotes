@@ -163,6 +163,30 @@ class Item extends Equatable with JsonData {
     );
   }
 
+  factory Item.mock(String id, String? parent_id, String title, int type) {
+    int timestamp = DateTime.now().millisecondsSinceEpoch;
+    return Item(
+        id: id,
+        title: title,
+        parent_id: parent_id,
+        receiver_id: '',
+        sender_id: '',
+        content: '',
+        pinned: false,
+        pinned_globally: false,
+        symbol: type == 0 ? 'T' : 'N',
+        item_type: type,
+        color: '#ff8a8a',
+        options: '',
+        ivkey: '',
+        signature: '',
+        position: 0,
+        created: timestamp,
+        modified: timestamp,
+        modified_header: timestamp,
+        trashed: null);
+  }
+
   @override
   String toJson() => json.encode(toMap());
 

@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:easynotes/models/auth_result.dart';
 import 'package:easynotes/models/item.dart';
-import 'package:easynotes/models/sample_data.dart';
+import 'package:easynotes/config/sample_data.dart';
 
 /// How to deserialize json list in 2022 !!!
 void main() {
