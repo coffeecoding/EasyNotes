@@ -8,8 +8,8 @@ class ItemsState extends Equatable {
       {this.status = ItemsStatus.loading,
       this.topicCubits = const <ItemCubit>[],
       this.selectedTopic,
-      this.selectedSubTopic,
       this.selectedNote,
+      this.didChildExpansionToggle = false,
       this.errorMsg = ''});
 
   const ItemsState.loading() : this._();
@@ -17,13 +17,11 @@ class ItemsState extends Equatable {
   ItemsState.initial(
       {required List<ItemCubit> topicCubits,
       ItemCubit? selectedTopic,
-      ItemCubit? selectedSubTopic,
       ItemCubit? selectedNote})
       : this._(
           status: ItemsStatus.initial,
           topicCubits: topicCubits,
           selectedTopic: selectedTopic,
-          selectedSubTopic: selectedSubTopic,
           selectedNote: selectedNote,
         );
 
@@ -31,14 +29,15 @@ class ItemsState extends Equatable {
       {required ItemsState prev,
       List<ItemCubit>? topicCubits,
       ItemCubit? selectedTopic,
-      ItemCubit? selectedSubTopic,
-      ItemCubit? selectedNote})
+      ItemCubit? selectedNote,
+      bool? didChildExpansionToggle})
       : this._(
           status: ItemsStatus.success,
           topicCubits: topicCubits ?? prev.topicCubits,
           selectedTopic: selectedTopic ?? prev.selectedTopic,
-          selectedSubTopic: selectedSubTopic ?? prev.selectedSubTopic,
           selectedNote: selectedNote ?? prev.selectedNote,
+          didChildExpansionToggle:
+              didChildExpansionToggle ?? prev.didChildExpansionToggle,
         );
 
   // potentially pass previous state as well, to keep the UI state
@@ -48,11 +47,20 @@ class ItemsState extends Equatable {
   final ItemsStatus status;
   final List<ItemCubit> topicCubits;
   final ItemCubit? selectedTopic;
-  final ItemCubit? selectedSubTopic;
+  //final ItemCubit? selectedSubTopic;
   final ItemCubit? selectedNote;
+  // boolean to toggle whenever a child item gets expanded/collapsed,
+  // so this flag can be used to discern wh ther to rebuild the item
+  // listview
+  final bool didChildExpansionToggle;
   final String errorMsg;
 
   @override
-  List<Object?> get props =>
-      [status, selectedTopic, selectedSubTopic, selectedNote, topicCubits];
+  List<Object?> get props => [
+        status,
+        didChildExpansionToggle,
+        selectedTopic,
+        selectedNote,
+        topicCubits
+      ];
 }

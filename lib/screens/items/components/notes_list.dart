@@ -14,9 +14,9 @@ class NotesList extends StatelessWidget {
         buildWhen: (prev, next) =>
             prev.selectedNote != next.selectedNote ||
             prev.selectedTopic != next.selectedTopic ||
-            prev.selectedSubTopic != next.selectedSubTopic,
+            prev.didChildExpansionToggle != next.didChildExpansionToggle,
         builder: (context, state) {
-          final selectedTopic = state.selectedSubTopic;
+          final selectedTopic = state.selectedTopic;
           if (selectedTopic == null) {
             return const Center(child: Text('No Topic selected'));
           }
@@ -29,19 +29,20 @@ class NotesList extends StatelessWidget {
                 physics: const ClampingScrollPhysics(),
                 itemCount: itemCubits.length,
                 itemBuilder: (context, i) {
+                  final item = itemCubits[i];
                   final itemContainerView = ItemContainer(
                       color: clr,
-                      item: itemCubits[i],
+                      item: item,
                       index: i,
                       selectedNote: state.selectedNote,
-                      onTap: () => context.read<ItemsCubit>().selectChild(i));
-                  return itemCubits[i].isTopic &&
-                          itemCubits[i] == state.selectedSubTopic
+                      onTap: () =>
+                          context.read<ItemsCubit>().selectChild(item));
+                  return item.isTopic && item.expanded
                       ? Column(children: [
                           itemContainerView,
                           ListView.builder(
                               shrinkWrap: true,
-                              itemCount: itemCubits[i].children.length,
+                              itemCount: item.children.length,
                               itemBuilder: (context, j) {
                                 return ItemContainer(
                                     color: clr,
@@ -49,7 +50,9 @@ class NotesList extends StatelessWidget {
                                     selectedNote: state.selectedNote,
                                     index: j,
                                     onTap: () {
-                                      context.read<ItemsCubit>().selectChild(j);
+                                      context
+                                          .read<ItemsCubit>()
+                                          .selectChild(item.children[j]);
                                     });
                               })
                         ])

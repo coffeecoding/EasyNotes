@@ -12,7 +12,8 @@ class ItemCubit extends Cubit<ItemState> {
       {required this.item,
       required this.itemsCubit,
       required ItemCubit? parent,
-      required List<Item> items})
+      required List<Item> items,
+      this.expanded = false})
       : itemRepo = locator.get<ItemRepository>(),
         super(ItemState.initial(parent: parent)) {
     // Problem: We can't pass "this" to "createChildrenCubitsForParent" in
@@ -43,6 +44,9 @@ class ItemCubit extends Cubit<ItemState> {
   ItemCubit? get parent => state.parent;
   List<ItemCubit> get children => state.children;
   bool get isTopic => item.isTopic;
+
+  // state that only needs to trigger a rebuild on ItemsCubit rebuilding
+  bool expanded;
 
   Future<void> save({String? title, String? content}) async {
     try {
