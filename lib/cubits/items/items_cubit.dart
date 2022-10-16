@@ -10,29 +10,41 @@ class ItemsCubit extends Cubit<ItemsState> {
 
   final ItemRepository itemRepo;
 
-  void selectTopic(int i) =>
-      emit(ItemsState.selectionChanged(prev: state, topic: state.topics[i]));
+  List<ItemCubit> get topicCubits => state.topicCubits;
+  ItemCubit? get selectedTopic => state.selectedTopic;
+  ItemCubit? get selectedSubTopic => state.selectedSubTopic;
+  ItemCubit? get selectedNote => state.selectedNote;
 
-  void selectNote(int i) => emit(ItemsState.selectionChanged(
-      prev: state, note: state.topic!.state.notes[i]));
+  void selectTopic(int? i) => emit(ItemsState.success(
+      prev: state,
+      selectedTopic: i == null ? null : topicCubits[i],
+      selectedSubTopic: i == null ? null : topicCubits[i]));
+
+  void selectSubTopic(int? i) => emit(ItemsState.success(
+      prev: state,
+      selectedSubTopic: i == null ? null : selectedTopic!.children[i]));
+
+  void selectNote(int? i) {
+    if (i != null && selectedTopic!.children[i].isTopic) {
+      // only if the selected item is a subtopic, don't reselect the note
+      emit(ItemsState.success(
+          prev: state, selectedSubTopic: selectedTopic!.children[i]));
+    } else {
+      emit(ItemsState.success(
+          prev: state,
+          selectedNote: i == null ? null : selectedTopic!.children[i]));
+    }
+  }
 
   Future<void> fetchItems() async {
     try {
       final items = await itemRepo.fetchItems();
-      final topics = items.where((i) => i.isTopic).toList();
-      final topicCubits = topics
-          .map((t) => TopicCubit(
-              topic: t,
-              notes: items
-                  .where((i) => i.parent_id == t.id)
-                  .map((n) => NoteCubit(note: n))
-                  .toList()))
-          .toList();
-      emit(ItemsState.success(topicCubits));
+      final topicCubits =
+          ItemCubit.createChildrenCubitsForParent(this, null, items);
+      emit(ItemsState.initial(topicCubits: topicCubits));
     } catch (e) {
-      print("error in items_cubit fetchTopics:");
-      print(e);
-      emit(const ItemsState.failure());
+      print("error in items_cubit fetchTopics: $e");
+      emit(ItemsState.error(errorMsg: 'Failed to retrieve data: $e'));
     }
   }
 }

@@ -172,7 +172,7 @@ class Item extends Equatable with JsonData {
   @override
   bool get stringify => true;
 
-  bool get isTopic => parent_id == null || parent_id!.isEmpty;
+  bool get isTopic => item_type == 0;
 
   ItemHeader getHeader() => ItemHeader(
       id: id,

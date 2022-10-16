@@ -75,7 +75,7 @@ class ItemRepository {
     return rootItems;
   }
 
-  Future<Item> insertOrUpdateItem(Item item, ItemUpdateAction action) async {
+  Future<Item> insertOrUpdateItem(Item item) async {
     Item encrypted = await cryptoService.encryptItem(item);
     Response? response =
         await netClient.post('/api/item', jsonEncode(encrypted));

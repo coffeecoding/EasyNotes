@@ -53,6 +53,8 @@ class AuthRepository {
 
       // 4) save token in http client
       netClient.setAuthHeader('Bearer ${authData.token}');
+      print("Saved auth token:");
+      print(authData.token);
 
       // 5) save creds securely in secure storage
       String privKey = await RFC2898Helper.decryptWithDerivedKey(

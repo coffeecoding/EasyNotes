@@ -1,3 +1,4 @@
+import 'package:easynotes/blocs/blocs.dart';
 import 'package:easynotes/cubits/cubits.dart';
 import 'package:easynotes/screens/items/components/notes_list.dart';
 import 'package:easynotes/screens/items/components/topics_list.dart';
@@ -6,7 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../home_screen.dart';
 
-class ItemsScreen extends StatelessWidget {
+class ItemsScreen extends StatefulWidget {
   const ItemsScreen({Key? key}) : super(key: key);
 
   static const String routeName = '/items';
@@ -16,6 +17,20 @@ class ItemsScreen extends StatelessWidget {
       settings: const RouteSettings(name: routeName),
       builder: (BuildContext context) => const ItemsScreen(),
     );
+  }
+
+  @override
+  State<ItemsScreen> createState() => _ItemsScreenState();
+}
+
+class _ItemsScreenState extends State<ItemsScreen> {
+  @override
+  void initState() {
+    super.initState();
+    if (BlocProvider.of<AuthBloc>(context).state.status ==
+        AuthStatus.authenticated) {
+      BlocProvider.of<ItemsCubit>(context).fetchItems();
+    }
   }
 
   @override

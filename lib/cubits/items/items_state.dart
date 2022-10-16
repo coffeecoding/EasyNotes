@@ -1,57 +1,58 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 part of 'items_cubit.dart';
 
-enum ItemsStatus { loading, success, error }
+enum ItemsStatus { loading, initial, success, error }
 
 class ItemsState extends Equatable {
   const ItemsState._(
       {this.status = ItemsStatus.loading,
-      this.topics = const <TopicCubit>[],
-      this.notes = const <NoteCubit>[],
-      this.note,
-      this.topic});
+      this.topicCubits = const <ItemCubit>[],
+      this.selectedTopic,
+      this.selectedSubTopic,
+      this.selectedNote,
+      this.errorMsg = ''});
 
   const ItemsState.loading() : this._();
 
-  const ItemsState.success(List<TopicCubit> topics)
-      : this._(status: ItemsStatus.success, topics: topics);
-
-  ItemsState.selectionChanged({
-    required ItemsState prev,
-    TopicCubit? topic,
-    NoteCubit? note,
-  }) : this._(
-          status: prev.status,
-          topics: prev.topics,
-          notes: prev.notes,
-          topic: topic ?? prev.topic,
-          note: note ?? prev.note,
+  ItemsState.initial(
+      {required List<ItemCubit> topicCubits,
+      ItemCubit? selectedTopic,
+      ItemCubit? selectedSubTopic,
+      ItemCubit? selectedNote})
+      : this._(
+          status: ItemsStatus.initial,
+          topicCubits: topicCubits,
+          selectedTopic: selectedTopic,
+          selectedSubTopic: selectedSubTopic,
+          selectedNote: selectedNote,
         );
 
-  const ItemsState.failure() : this._(status: ItemsStatus.error);
+  ItemsState.success(
+      {required ItemsState prev,
+      List<ItemCubit>? topicCubits,
+      ItemCubit? selectedTopic,
+      ItemCubit? selectedSubTopic,
+      ItemCubit? selectedNote})
+      : this._(
+          status: ItemsStatus.success,
+          topicCubits: topicCubits ?? prev.topicCubits,
+          selectedTopic: selectedTopic ?? prev.selectedTopic,
+          selectedSubTopic: selectedSubTopic ?? prev.selectedSubTopic,
+          selectedNote: selectedNote ?? prev.selectedSubTopic,
+        );
+
+  // potentially pass previous state as well, to keep the UI state
+  const ItemsState.error({required String errorMsg})
+      : this._(status: ItemsStatus.error, errorMsg: errorMsg);
 
   final ItemsStatus status;
-  final List<TopicCubit> topics;
-  final List<NoteCubit> notes;
-  final TopicCubit? topic;
-  final NoteCubit? note;
+  final List<ItemCubit> topicCubits;
+  final ItemCubit? selectedTopic;
+  final ItemCubit? selectedSubTopic;
+  final ItemCubit? selectedNote;
+  final String errorMsg;
 
   @override
-  List<Object?> get props => [status, topics, notes, topic, note];
-
-  ItemsState copyWith({
-    ItemsStatus? status,
-    List<TopicCubit>? topics,
-    List<NoteCubit>? notes,
-    TopicCubit? topic,
-    NoteCubit? note,
-  }) {
-    return ItemsState._(
-      status: status ?? this.status,
-      topics: topics ?? this.topics,
-      notes: notes ?? this.notes,
-      topic: topic ?? this.topic,
-      note: note ?? this.note,
-    );
-  }
+  List<Object?> get props =>
+      [status, selectedTopic, selectedSubTopic, selectedNote, topicCubits];
 }
