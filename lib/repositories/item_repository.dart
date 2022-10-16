@@ -14,8 +14,28 @@ import 'preference_repository.dart';
 
 enum ItemUpdateAction { insert, updateBody, updateHeader }
 
-class ItemRepository {
-  ItemRepository()
+abstract class ItemRepository {
+  Future<List<Item>> setItems(List<Item> items);
+  List<Item> getItems();
+  List<Item> getRootItems();
+  List<Item> getTrashedItems();
+  Future<List<Item>> fetchItems();
+  Future<List<Item>> fetchTrashedItems();
+  Future<List<Item>> fetchRootItems();
+  Future<Item> insertOrUpdateItem(Item item);
+  Future<List<Item>> insertOrUpdateItems(List<Item> items);
+  Future<bool> updateItemHeader(ItemHeader header);
+  Future<bool> updateItemParent(String id, String parent_id);
+  Future<bool> updateItemTrashed(String id, int trashed);
+  Future<bool> updateItemPinned(String id, int pin);
+  Future<bool> updateItemGloballyPinned(String id, int pin);
+  Future<List<Item>> updateItemPositions(ItemPositionData ipd);
+  Future<bool> delete(String id);
+  Future<bool> deleteItems(List<String> ids);
+}
+
+class ItemRepo implements ItemRepository {
+  ItemRepo()
       : netClient = locator.get<NetworkProvider>(),
         cryptoService = locator.get<CryptoService>(),
         prefsRepo = locator.get<PreferenceRepository>();
@@ -29,18 +49,23 @@ class ItemRepository {
 
   // This function is used when initially getting the items from the auth_bloc
   // since they are already returned upon logging in
+  @override
   Future<List<Item>> setItems(List<Item> items) async {
     items = await cryptoService.decryptItems(items);
     return items;
   }
 
+  @override
   List<Item> getItems() => items.where((i) => i.trashed == null).toList();
 
+  @override
   List<Item> getRootItems() => items.where((i) => i.parent_id == null).toList();
 
+  @override
   List<Item> getTrashedItems() =>
       items.where((i) => i.trashed != null).toList();
 
+  @override
   Future<List<Item>> fetchItems() async {
     Response response = await netClient.get('/api/items');
     if (!response.isSuccessStatusCode()) throw 'Unable to fetch data';
@@ -51,6 +76,7 @@ class ItemRepository {
     return getItems();
   }
 
+  @override
   Future<List<Item>> fetchTrashedItems() async {
     Response response = await netClient.get('/api/items?trashed=asdf');
     if (!response.isSuccessStatusCode()) throw 'Unable to fetch data';
@@ -58,11 +84,12 @@ class ItemRepository {
         .map((i) => Item.fromJson(i))
         .toList();
     final trashedItems = await cryptoService.decryptItems(encryptedItems);
-    items.removeWhere((i) => i.trashed != null);
-    items.addAll(trashedItems);
+    //items.removeWhere((i) => i.trashed != null);
+    //items.addAll(trashedItems);
     return getTrashedItems();
   }
 
+  @override
   Future<List<Item>> fetchRootItems() async {
     Response response = await netClient.post('/api/items', "");
     if (!response.isSuccessStatusCode()) throw 'Unable to fetch data';
@@ -75,6 +102,7 @@ class ItemRepository {
     return rootItems;
   }
 
+  @override
   Future<Item> insertOrUpdateItem(Item item) async {
     Item encrypted = await cryptoService.encryptItem(item);
     Response? response =
@@ -87,6 +115,7 @@ class ItemRepository {
     return updated;
   }
 
+  @override
   Future<List<Item>> insertOrUpdateItems(List<Item> items) async {
     List<Item> encryptedItems = await cryptoService.encryptItems(items);
     Response? response =
@@ -97,6 +126,7 @@ class ItemRepository {
     return await fetchItems();
   }
 
+  @override
   Future<bool> updateItemHeader(ItemHeader header) async {
     Response? response =
         await netClient.put('/api/item/header', jsonEncode(header));
@@ -106,6 +136,7 @@ class ItemRepository {
     return true;
   }
 
+  @override
   Future<bool> updateItemParent(String id, String parent_id) async {
     Response? response =
         await netClient.put('/api/item/$id?parent_id=$parent_id', "");
@@ -117,6 +148,7 @@ class ItemRepository {
     return true;
   }
 
+  @override
   Future<bool> updateItemTrashed(String id, int trashed) async {
     Response? response =
         await netClient.put('/api/item/$id?trashed=$trashed', "");
@@ -127,6 +159,7 @@ class ItemRepository {
     return true;
   }
 
+  @override
   Future<bool> updateItemPinned(String id, int pin) async {
     Response? response = await netClient.put('/api/item/$id?pin=$pin', "");
     if (!response.isSuccessStatusCode()) throw 'Error updating item pinned';
@@ -136,6 +169,7 @@ class ItemRepository {
     return true;
   }
 
+  @override
   Future<bool> updateItemGloballyPinned(String id, int pin) async {
     Response? response =
         await netClient.put('/api/item/$id?pin_globally=$pin', "");
@@ -147,6 +181,7 @@ class ItemRepository {
     return true;
   }
 
+  @override
   Future<List<Item>> updateItemPositions(ItemPositionData ipd) async {
     Response? response =
         await netClient.put('/api/items/position', jsonEncode(ipd));
@@ -160,6 +195,7 @@ class ItemRepository {
     return items.where((i) => ipd.itemIds.any((id) => id == i.id)).toList();
   }
 
+  @override
   Future<bool> delete(String id) async {
     Response? response = await netClient.delete('/api/item/$id');
     if (!response.isSuccessStatusCode()) throw 'Error deleteing item';
@@ -167,6 +203,7 @@ class ItemRepository {
     return true;
   }
 
+  @override
   Future<bool> deleteItems(List<String> ids) async {
     Response? response = await netClient.delete('/api/items', jsonEncode(ids));
     if (!response.isSuccessStatusCode()) {

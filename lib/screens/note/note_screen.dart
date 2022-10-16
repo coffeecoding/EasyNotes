@@ -19,9 +19,11 @@ class NoteScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ItemsCubit, ItemsState>(builder: (context, state) {
-      final note = state.note;
-      if (note == null) return const Center(child: Text('no Note selected'));
-      return Center(child: Text(note.state.note!.title));
+      final selectedItemCubit = state.selectedNote;
+      if (selectedItemCubit == null) {
+        return const Center(child: Text('no Note selected'));
+      }
+      return Center(child: Text(selectedItemCubit!.item.title));
     });
   }
 }
