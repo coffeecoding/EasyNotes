@@ -47,5 +47,21 @@ class SampleData {
     Item.mock('38', '13', "Onboarding", 1),
     Item.mock('39', '14', "Brainstorming", 1),
     Item.mock('40', '14', "Organisatorisches", 1),
+
+    // lots of notes inside software topic, for testing scrolling and all
+    Item.mock('41', '6', "Another legendary article", 1),
+    Item.mock('42', '6', "The legend continues ...", 1),
+    Item.mock('43', '6', "Legend has it", 1),
+    Item.mock('44', '6', "There are more legends", 1),
+    Item.mock('45', '6', "more legend articles", 1),
+    Item.mock('46', '6', "Neverending legends", 1),
+    Item.mock('47', '6', "Legendary legendness", 1),
+    Item.mock('48', '6', "Perpetual legenderainess", 1),
+    Item.mock('49', '6', "Legendception", 1),
+    Item.mock('50', '6', "Legionary?", 1),
+    Item.mock('51', '6', "Legendary legions?", 1),
+    Item.mock('52', '6', "The legion of legends", 1),
+    Item.mock('53', '6', "A legion of legends", 1),
+    Item.mock('54', '6', "Legends never die?", 1),
   ];
 }

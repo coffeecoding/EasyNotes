@@ -22,18 +22,40 @@ class NotesList extends StatelessWidget {
           }
           final itemCubits = selectedTopic.children;
           final clr = HexColor.fromHex(selectedTopic.color);
-          return ListView.builder(
-              itemCount: itemCubits.length,
-              itemBuilder: (context, i) {
-                final item = itemCubits[i];
-                final itemContainerView = ItemContainer(
-                    color: clr,
-                    item: item,
-                    index: i,
-                    selectedNote: state.selectedNote,
-                    onTap: () => context.read<ItemsCubit>().selectChild(i));
-                return itemContainerView;
-              });
+          return Container(
+            alignment: Alignment.topLeft,
+            child: ListView.builder(
+                shrinkWrap: true,
+                physics: const ClampingScrollPhysics(),
+                itemCount: itemCubits.length,
+                itemBuilder: (context, i) {
+                  final itemContainerView = ItemContainer(
+                      color: clr,
+                      item: itemCubits[i],
+                      index: i,
+                      selectedNote: state.selectedNote,
+                      onTap: () => context.read<ItemsCubit>().selectChild(i));
+                  return itemCubits[i].isTopic &&
+                          itemCubits[i] == state.selectedSubTopic
+                      ? Column(children: [
+                          itemContainerView,
+                          ListView.builder(
+                              shrinkWrap: true,
+                              itemCount: itemCubits[i].children.length,
+                              itemBuilder: (context, j) {
+                                return ItemContainer(
+                                    color: clr,
+                                    item: itemCubits[i].children[j],
+                                    selectedNote: state.selectedNote,
+                                    index: j,
+                                    onTap: () {
+                                      context.read<ItemsCubit>().selectChild(j);
+                                    });
+                              })
+                        ])
+                      : itemContainerView;
+                }),
+          );
         });
   }
 }
