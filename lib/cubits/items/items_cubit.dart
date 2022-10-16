@@ -24,7 +24,7 @@ class ItemsCubit extends Cubit<ItemsState> {
       prev: state,
       selectedSubTopic: i == null ? null : selectedSubTopic!.children[i]));
 
-  void selectNote(int? i) {
+  void selectChild(int? i) {
     if (i != null && selectedSubTopic!.children[i].isTopic) {
       // only if the selected item is a subtopic, don't reselect the note
       selectSubTopic(i);

@@ -26,12 +26,13 @@ class NotesList extends StatelessWidget {
               itemCount: itemCubits.length,
               itemBuilder: (context, i) {
                 final item = itemCubits[i];
-                return ItemContainer(
+                final itemContainerView = ItemContainer(
                     color: clr,
                     item: item,
                     index: i,
                     selectedNote: state.selectedNote,
                     onTap: () => context.read<ItemsCubit>().selectChild(i));
+                return itemContainerView;
               });
         });
   }
@@ -51,7 +52,7 @@ class ItemContainer extends StatelessWidget {
   final ItemCubit? selectedNote;
   final Color color;
   final int index;
-  final Function? onTap;
+  final Function()? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -74,12 +75,12 @@ class ItemRow extends StatelessWidget {
 
   final ItemCubit item;
   final Color color;
-  final Function? onTap;
+  final Function()? onTap;
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      onTap: () => onTap,
+      onTap: onTap,
       title: Row(children: [
         Icon(item.item_type == 0 ? Icons.folder : Icons.note_outlined,
             color: color),
