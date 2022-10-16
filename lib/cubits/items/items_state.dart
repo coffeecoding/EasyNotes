@@ -38,7 +38,7 @@ class ItemsState extends Equatable {
           topicCubits: topicCubits ?? prev.topicCubits,
           selectedTopic: selectedTopic ?? prev.selectedTopic,
           selectedSubTopic: selectedSubTopic ?? prev.selectedSubTopic,
-          selectedNote: selectedNote ?? prev.selectedSubTopic,
+          selectedNote: selectedNote ?? prev.selectedNote,
         );
 
   // potentially pass previous state as well, to keep the UI state

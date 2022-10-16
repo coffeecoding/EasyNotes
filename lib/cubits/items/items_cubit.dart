@@ -22,14 +22,15 @@ class ItemsCubit extends Cubit<ItemsState> {
 
   void selectSubTopic(int? i) => emit(ItemsState.success(
       prev: state,
-      selectedSubTopic: i == null ? null : selectedTopic!.children[i]));
+      selectedSubTopic: i == null ? null : selectedSubTopic!.children[i]));
 
   void selectNote(int? i) {
-    if (i != null && selectedTopic!.children[i].isTopic) {
+    if (i != null && selectedSubTopic!.children[i].isTopic) {
       // only if the selected item is a subtopic, don't reselect the note
-      emit(ItemsState.success(
-          prev: state, selectedSubTopic: selectedTopic!.children[i]));
+      selectSubTopic(i);
     } else {
+      if (i != null)
+        print("selecting note ${selectedTopic!.children[i].title}");
       emit(ItemsState.success(
           prev: state,
           selectedNote: i == null ? null : selectedTopic!.children[i]));

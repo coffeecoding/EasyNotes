@@ -14,19 +14,20 @@ class NotesList extends StatelessWidget {
             prev.selectedTopic != next.selectedTopic ||
             prev.selectedSubTopic != next.selectedSubTopic,
         builder: (context, state) {
-          if (state.selectedTopic == null) {
+          final selectedTopic = state.selectedSubTopic;
+          if (selectedTopic == null) {
             return const Center(child: Text('No Topic selected'));
           }
-          final noteCubits = state.selectedTopic!.children;
-          final clr = HexColor.fromHex(state.selectedTopic!.color);
+          final itemCubits = selectedTopic!.children;
+          final clr = HexColor.fromHex(selectedTopic!.color);
           return ListView.builder(
-              itemCount: noteCubits.length,
+              itemCount: itemCubits.length,
               itemBuilder: (context, i) {
-                final note = noteCubits[i].item;
+                final note = itemCubits[i].item;
                 return Container(
                     decoration: BoxDecoration(
                       color: (state.selectedNote != null &&
-                              noteCubits[i].id == state.selectedNote!.id)
+                              itemCubits[i].id == state.selectedNote!.id)
                           ? Theme.of(context).cardColor
                           : Colors.transparent,
                       border: Border(
