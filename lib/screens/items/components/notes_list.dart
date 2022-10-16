@@ -9,6 +9,7 @@ class NotesList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ItemsCubit, ItemsState>(
+        // potentially add condition to rebuild when changing a node's parent
         buildWhen: (prev, next) =>
             prev.selectedNote != next.selectedNote ||
             prev.selectedTopic != next.selectedTopic ||
@@ -18,13 +19,15 @@ class NotesList extends StatelessWidget {
           if (selectedTopic == null) {
             return const Center(child: Text('No Topic selected'));
           }
-          final itemCubits = selectedTopic!.children;
-          final clr = HexColor.fromHex(selectedTopic!.color);
+          final itemCubits = selectedTopic.children;
+          final clr = HexColor.fromHex(selectedTopic.color);
           return ListView.builder(
               itemCount: itemCubits.length,
               itemBuilder: (context, i) {
-                final note = itemCubits[i].item;
+                final item = itemCubits[i];
                 return Container(
+                    padding: EdgeInsets.only(
+                        left: (item.getAncestorCount() - 1) * 20),
                     decoration: BoxDecoration(
                       color: (state.selectedNote != null &&
                               itemCubits[i].id == state.selectedNote!.id)
@@ -38,12 +41,12 @@ class NotesList extends StatelessWidget {
                       onTap: () => context.read<ItemsCubit>().selectNote(i),
                       title: Row(children: [
                         Icon(
-                            note.item_type == 0
+                            item.item_type == 0
                                 ? Icons.folder
                                 : Icons.note_outlined,
                             color: clr),
                         const SizedBox(width: 10),
-                        Text(note!.title),
+                        Text(item.title),
                       ]),
                     ));
               });

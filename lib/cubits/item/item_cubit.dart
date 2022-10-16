@@ -39,6 +39,7 @@ class ItemCubit extends Cubit<ItemState> {
   String get color => item.color;
   String get symbol => item.symbol;
   String get title => item.title;
+  int get item_type => item.item_type;
   ItemCubit? get parent => state.parent;
   List<ItemCubit> get children => state.children;
   bool get isTopic => item.isTopic;
@@ -86,12 +87,22 @@ class ItemCubit extends Cubit<ItemState> {
     }
   }
 
-  List<ItemCubit> getParents() {
+  List<ItemCubit> getAncestors() {
     final result = <ItemCubit>[];
     ItemCubit? cursor = state.parent;
     while (cursor != null) {
-      result.add(state.parent!);
-      cursor = state.parent;
+      result.add(cursor.parent!);
+      cursor = cursor.parent;
+    }
+    return result;
+  }
+
+  int getAncestorCount() {
+    int result = 0;
+    ItemCubit? cursor = state.parent;
+    while (cursor != null) {
+      result += 1;
+      cursor = cursor.parent;
     }
     return result;
   }
