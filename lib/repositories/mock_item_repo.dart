@@ -22,7 +22,7 @@ class MockItemRepo implements ItemRepository {
 
   @override
   Future<List<Item>> fetchItems() async {
-    await Future.delayed(const Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 1));
     items = SampleData.sampleItems;
     return items;
   }

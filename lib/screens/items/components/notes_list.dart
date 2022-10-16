@@ -46,7 +46,7 @@ class NotesList extends StatelessWidget {
                                 : Icons.note_outlined,
                             color: clr),
                         const SizedBox(width: 10),
-                        Text(item.title),
+                        Flexible(child: Text(item.title)),
                       ]),
                     ));
               });
