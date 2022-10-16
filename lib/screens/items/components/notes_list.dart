@@ -18,6 +18,7 @@ class NotesList extends StatelessWidget {
             return const Center(child: Text('No Topic selected'));
           }
           final noteCubits = state.selectedTopic!.children;
+          final clr = HexColor.fromHex(state.selectedTopic!.color);
           return ListView.builder(
               itemCount: noteCubits.length,
               itemBuilder: (context, i) {
@@ -34,7 +35,15 @@ class NotesList extends StatelessWidget {
                     ),
                     child: ListTile(
                       onTap: () => context.read<ItemsCubit>().selectNote(i),
-                      title: Center(child: Text(note!.title)),
+                      title: Row(children: [
+                        Icon(
+                            note.item_type == 0
+                                ? Icons.folder
+                                : Icons.note_outlined,
+                            color: clr),
+                        const SizedBox(width: 10),
+                        Text(note!.title),
+                      ]),
                     ));
               });
         });

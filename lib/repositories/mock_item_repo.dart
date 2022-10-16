@@ -1,5 +1,5 @@
 import 'package:easynotes/models/models.dart';
-import 'package:easynotes/models/sample_data.dart';
+import 'package:easynotes/config/sample_data.dart';
 
 import 'item_repository.dart';
 

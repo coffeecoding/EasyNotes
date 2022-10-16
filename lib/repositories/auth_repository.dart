@@ -9,7 +9,7 @@ import 'package:easynotes/repositories/preference_repository.dart';
 import 'package:easynotes/utils/crypto/crypto.dart';
 import 'package:http/http.dart';
 
-import '../models/sample_data.dart';
+import '../config/sample_data.dart';
 import '../services/network_provider.dart';
 
 class AuthRepository {
