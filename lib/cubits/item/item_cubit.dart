@@ -17,12 +17,12 @@ class ItemCubit extends Cubit<ItemState> {
       required List<Item> items,
       this.expanded = false})
       : itemRepo = locator.get<ItemRepository>(),
-        titleField = item.title,
-        titleExtentOffset = 0,
-        titleBaseOffset = 0,
-        contentField = item.content,
-        contentExtentOffset = 0,
-        contentBaseOffset = 0,
+        ////titleField = item.title,
+        ////titleExtentOffset = 0,
+        ////titleBaseOffset = 0,
+        ////contentField = item.content,
+        ////contentExtentOffset = 0,
+        ////contentBaseOffset = 0,
         super(item.id.isEmpty
             ? const ItemState.newDraft()
             : const ItemState.persisted()) {
@@ -50,13 +50,13 @@ class ItemCubit extends Cubit<ItemState> {
 
   // Local UI state
   bool expanded;
-  String titleField;
-  int titleExtentOffset;
-  int titleBaseOffset;
-  String contentField;
-  int contentExtentOffset;
-  int contentBaseOffset;
-  FocussedElement? focussedElement;
+  ////String titleField;
+  ////int titleExtentOffset;
+  ////int titleBaseOffset;
+  ////String contentField;
+  ////int contentExtentOffset;
+  ////int contentBaseOffset;
+  ////FocussedElement? focussedElement;
 
   Future<void> save({String? title, String? content}) async {
     try {
@@ -79,13 +79,13 @@ class ItemCubit extends Cubit<ItemState> {
       int? contentBaseOffset = 0,
       int? contentExtentOffset = 0,
       FocussedElement? focussedElement}) {
-    titleField = title ?? titleField;
-    this.titleExtentOffset = titleExtentOffset ?? this.titleExtentOffset;
-    this.titleBaseOffset = titleBaseOffset ?? this.titleBaseOffset;
-    contentField = content ?? contentField;
-    this.contentExtentOffset = contentExtentOffset ?? this.contentExtentOffset;
-    this.contentBaseOffset = contentBaseOffset ?? this.contentBaseOffset;
-    this.focussedElement = focussedElement ?? this.focussedElement;
+    ////titleField = title ?? titleField;
+    ////this.titleExtentOffset = titleExtentOffset ?? this.titleExtentOffset;
+    ////this.titleBaseOffset = titleBaseOffset ?? this.titleBaseOffset;
+    ////contentField = content ?? contentField;
+    ////this.contentExtentOffset = contentExtentOffset ?? this.contentExtentOffset;
+    ////this.contentBaseOffset = contentBaseOffset ?? this.contentBaseOffset;
+    ////this.focussedElement = focussedElement ?? this.focussedElement;
     ItemStatus status = newStatus ?? state.status;
     if (newStatus != state.status) {
       if (newStatus == ItemStatus.draft) {
@@ -103,12 +103,12 @@ class ItemCubit extends Cubit<ItemState> {
   }
 
   void resetState() {
-    titleField = item.title;
-    titleExtentOffset = 0;
-    titleBaseOffset = 0;
-    contentField = item.content;
-    contentExtentOffset = 0;
-    contentBaseOffset = 0;
+    ////titleField = item.title;
+    ////titleExtentOffset = 0;
+    ////titleBaseOffset = 0;
+    ////contentField = item.content;
+    ////contentExtentOffset = 0;
+    ////contentBaseOffset = 0;
     itemsCubit.emit(ItemsState.changed(
         prev: itemsCubit.state,
         selectedNote: itemsCubit.selectedNote,

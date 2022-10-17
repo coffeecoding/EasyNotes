@@ -6,11 +6,13 @@ import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
+import 'views/abstract_note_view.dart';
 import 'views/simplenote_view.dart';
 
 class NoteScreen extends StatelessWidget {
   const NoteScreen({Key? key}) : super(key: key);
 
+  static List<NoteView> draftNoteViews = [];
   static const String routeName = '/note';
 
   static Route<dynamic> route() {
@@ -30,14 +32,23 @@ class NoteScreen extends StatelessWidget {
           if (noteCubit == null) {
             return const Center(child: Text('no Note selected'));
           }
-          Widget? body;
-          switch (noteCubit.item_type) {
-            case 1:
-              body = SimpleNoteView(note: noteCubit);
-              break;
-            default:
-              body = Center(child: Text(noteCubit.item.title));
-              break;
+          NoteView? body;
+          // potentially remove this: maybe we don't care ...
+          // the point is to not keep overflowing memory by only ever adding
+          // view items here
+          draftNoteViews.removeWhere((v) => v.note.status != ItemStatus.draft);
+          final drafts =
+              draftNoteViews.where((v) => v.note.id == noteCubit.id).toList();
+          if (drafts.isNotEmpty) {
+            body = drafts[0];
+          } else {
+            switch (noteCubit.item_type) {
+              default:
+                body = SimpleNoteView(note: noteCubit);
+            }
+            if (noteCubit.status == ItemStatus.draft) {
+              draftNoteViews.add(body);
+            }
           }
           return Scaffold(appBar: buildActionPanel(context), body: body);
         });

@@ -3,27 +3,31 @@ import 'package:easynotes/cubits/item/item_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class SimpleNoteView extends StatefulWidget {
+import 'abstract_note_view.dart';
+
+class SimpleNoteView extends StatefulWidget implements NoteView {
   SimpleNoteView({super.key, required this.note})
-      : titleCtr = TextEditingController(text: note.titleField) {
-    contentCtr = TextEditingController(text: note.contentField);
-    contentCtr.selection = TextSelection(
-        baseOffset: note.contentBaseOffset,
-        extentOffset: note.contentExtentOffset);
-    focussedElement = note.focussedElement;
-    switch (focussedElement) {
-      case FocussedElement.title:
-        titleFN.requestFocus();
-        break;
-      case FocussedElement.content:
-        contentFN.requestFocus();
-        break;
-      default:
-        break;
-    }
+      : titleCtr = TextEditingController(text: note.title) {
+    ////
+    contentCtr = TextEditingController(text: note.content); ////
+    ////contentCtr.selection = TextSelection(
+    ////   baseOffset: note.contentBaseOffset,
+    ////    extentOffset: note.contentExtentOffset);
+    ////focussedElement = note.focussedElement;
+    ////switch (focussedElement) {
+    ////  case FocussedElement.title:
+    ////    titleFN.requestFocus();
+    ////    break;
+    ////  case FocussedElement.content:
+    ////    contentFN.requestFocus();
+    ////    break;
+    ////  default:
+    ////    break;
+    ////}
   }
 
-  final ItemCubit note;
+  @override
+  ItemCubit note;
   final TextEditingController titleCtr;
   late TextEditingController contentCtr;
   late FocusNode contentFN = FocusNode();
@@ -79,16 +83,18 @@ class _SimpleNoteViewState extends State<SimpleNoteView> {
     if (noteCubit!.status != ItemStatus.draft) {
       if (titleDraft != null) {
         noteCubit.saveLocalState(
-            newStatus: ItemStatus.draft,
-            title: titleDraft,
-            titleBaseOffset: widget.titleCtr.selection.baseOffset,
-            titleExtentOffset: widget.titleCtr.selection.extentOffset);
+          newStatus: ItemStatus.draft,
+          ////title: titleDraft,
+          ////titleBaseOffset: widget.titleCtr.selection.baseOffset,
+          ////titleExtentOffset: widget.titleCtr.selection.extentOffset
+        );
       } else if (contentDraft != null) {
         noteCubit.saveLocalState(
-            newStatus: ItemStatus.draft,
-            content: contentDraft,
-            contentBaseOffset: widget.contentCtr.selection.baseOffset,
-            contentExtentOffset: widget.contentCtr.selection.extentOffset);
+          newStatus: ItemStatus.draft,
+          ////content: contentDraft,
+          ////contentBaseOffset: widget.contentCtr.selection.baseOffset,
+          ////contentExtentOffset: widget.contentCtr.selection.extentOffset
+        );
       }
     }
   }
@@ -99,14 +105,14 @@ class _SimpleNoteViewState extends State<SimpleNoteView> {
     // without this condition, when discarding changes, the fields won't reset
     // because the local state of the text controllers is copied again and saved
     // in the rspective cubit
-    if (oldView.note.status == ItemStatus.draft) {
-      oldView.note.saveLocalState(
-          newStatus: ItemStatus.draft,
-          title: oldView.titleCtr.text,
-          content: oldView.contentCtr.text,
-          contentExtentOffset: oldView.contentCtr.selection.extentOffset,
-          contentBaseOffset: oldView.contentCtr.selection.baseOffset,
-          focussedElement: oldView.focussedElement);
-    }
+    ////if (oldView.note.status == ItemStatus.draft) {
+    ////  oldView.note.saveLocalState(
+    ////      newStatus: ItemStatus.draft,
+    ////      title: oldView.titleCtr.text,
+    ////      content: oldView.contentCtr.text,
+    ////      contentExtentOffset: oldView.contentCtr.selection.extentOffset,
+    ////      contentBaseOffset: oldView.contentCtr.selection.baseOffset,
+    ////      focussedElement: oldView.focussedElement);
+    ////}
   }
 }

@@ -80,9 +80,9 @@ class HomeScreen extends StatelessWidget {
           )
         ]),
       ),
-      body: Row(children: const [
-        Expanded(flex: 1, child: ItemsScreen()),
-        VerticalDivider(width: 1),
+      body: Row(children: [
+        const Expanded(flex: 1, child: ItemsScreen()),
+        const VerticalDivider(width: 1),
         Expanded(flex: 2, child: NoteScreen()),
       ]),
     ));
