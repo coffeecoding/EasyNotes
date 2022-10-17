@@ -48,9 +48,13 @@ class _SimpleNoteViewState extends State<SimpleNoteView> {
       child: Column(children: [
         TextField(
             onChanged: (n) => ensureStateIsDraft(titleDraft: n),
+            onEditingComplete: () => widget.contentFN.requestFocus(),
             toolbarOptions: const ToolbarOptions(
                 paste: true, copy: true, selectAll: true, cut: true),
-            onTap: () => widget.focussedElement = FocussedElement.title,
+            onTap: () {
+              widget.contentFN.unfocus();
+              widget.focussedElement = FocussedElement.title;
+            },
             focusNode: widget.titleFN,
             controller: widget.titleCtr),
         Expanded(
@@ -58,7 +62,10 @@ class _SimpleNoteViewState extends State<SimpleNoteView> {
                 onChanged: (n) => ensureStateIsDraft(contentDraft: n),
                 toolbarOptions: const ToolbarOptions(
                     paste: true, copy: true, selectAll: true, cut: true),
-                onTap: () => widget.focussedElement = FocussedElement.content,
+                onTap: () {
+                  widget.titleFN.unfocus();
+                  widget.focussedElement = FocussedElement.content;
+                },
                 focusNode: widget.contentFN,
                 controller: widget.contentCtr,
                 maxLines: null)),
@@ -70,7 +77,19 @@ class _SimpleNoteViewState extends State<SimpleNoteView> {
   void ensureStateIsDraft({String? titleDraft, String? contentDraft}) {
     ItemCubit? noteCubit = BlocProvider.of<ItemsCubit>(context).selectedNote;
     if (noteCubit!.status != ItemStatus.draft) {
-      noteCubit.setToDraft();
+      if (titleDraft != null) {
+        noteCubit.saveLocalState(
+            newStatus: ItemStatus.draft,
+            title: titleDraft,
+            titleBaseOffset: widget.titleCtr.selection.baseOffset,
+            titleExtentOffset: widget.titleCtr.selection.extentOffset);
+      } else if (contentDraft != null) {
+        noteCubit.saveLocalState(
+            newStatus: ItemStatus.draft,
+            content: contentDraft,
+            contentBaseOffset: widget.contentCtr.selection.baseOffset,
+            contentExtentOffset: widget.contentCtr.selection.extentOffset);
+      }
     }
   }
 
@@ -82,6 +101,7 @@ class _SimpleNoteViewState extends State<SimpleNoteView> {
     // in the rspective cubit
     if (oldView.note.status == ItemStatus.draft) {
       oldView.note.saveLocalState(
+          newStatus: ItemStatus.draft,
           title: oldView.titleCtr.text,
           content: oldView.contentCtr.text,
           contentExtentOffset: oldView.contentCtr.selection.extentOffset,

@@ -18,6 +18,8 @@ class ItemCubit extends Cubit<ItemState> {
       this.expanded = false})
       : itemRepo = locator.get<ItemRepository>(),
         titleField = item.title,
+        titleExtentOffset = 0,
+        titleBaseOffset = 0,
         contentField = item.content,
         contentExtentOffset = 0,
         contentBaseOffset = 0,
@@ -49,6 +51,8 @@ class ItemCubit extends Cubit<ItemState> {
   // Local UI state
   bool expanded;
   String titleField;
+  int titleExtentOffset;
+  int titleBaseOffset;
   String contentField;
   int contentExtentOffset;
   int contentBaseOffset;
@@ -67,39 +71,49 @@ class ItemCubit extends Cubit<ItemState> {
   }
 
   void saveLocalState(
-      {String? title,
+      {ItemStatus? newStatus,
+      String? title,
       String? content,
+      int? titleBaseOffset = 0,
+      int? titleExtentOffset = 0,
       int? contentBaseOffset = 0,
       int? contentExtentOffset = 0,
       FocussedElement? focussedElement}) {
     titleField = title ?? titleField;
+    this.titleExtentOffset = titleExtentOffset ?? this.titleExtentOffset;
+    this.titleBaseOffset = titleBaseOffset ?? this.titleBaseOffset;
     contentField = content ?? contentField;
     this.contentExtentOffset = contentExtentOffset ?? this.contentExtentOffset;
     this.contentBaseOffset = contentBaseOffset ?? this.contentBaseOffset;
-    this.focussedElement = focussedElement;
+    this.focussedElement = focussedElement ?? this.focussedElement;
+    ItemStatus status = newStatus ?? state.status;
+    if (newStatus != state.status) {
+      if (newStatus == ItemStatus.draft) {
+        emit(const ItemState.draft());
+      } else if (newStatus == ItemStatus.persisted) {
+        emit(const ItemState.persisted());
+      }
+      itemsCubit.emit(ItemsState.changed(
+          prev: itemsCubit.state,
+          selectedNote: itemsCubit.selectedNote,
+          differentialRebuildToggle:
+              !itemsCubit.state.differentialRebuildToggle));
+    }
   }
 
   void resetState() {
+    titleField = item.title;
+    titleExtentOffset = 0;
+    titleBaseOffset = 0;
+    contentField = item.content;
     contentExtentOffset = 0;
     contentBaseOffset = 0;
-    titleField = item.title;
-    contentField = item.content;
     itemsCubit.emit(ItemsState.changed(
         prev: itemsCubit.state,
         selectedNote: itemsCubit.selectedNote,
         differentialRebuildToggle:
             !itemsCubit.state.differentialRebuildToggle));
     emit(const ItemState.persisted());
-  }
-
-  // todo: handle other changes such as options
-  void setToDraft() {
-    emit(const ItemState.draft());
-    itemsCubit.emit(ItemsState.changed(
-        prev: itemsCubit.state,
-        selectedNote: this,
-        differentialRebuildToggle:
-            !itemsCubit.state.differentialRebuildToggle));
   }
 
   void addChild(ItemCubit child) {

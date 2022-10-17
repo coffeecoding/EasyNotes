@@ -102,27 +102,41 @@ class DiscardButton extends StatelessWidget {
         buildWhen: (p, n) =>
             p.selectedNote != null &&
             n.selectedNote != null &&
-            (p.selectedNote!.status != n.selectedNote!.status ||
-                n.selectedNote!.status == ItemStatus.draft),
+            (p.selectedNote!.status != n.selectedNote!.status),
         builder: (context, state) {
           final cubit = BlocProvider.of<ItemsCubit>(context).selectedNote;
-          return TextButton(
-            onPressed: cubit!.status == ItemStatus.draft
-                ? () => cubit.resetState()
-                : null,
-            child: Row(children: [
-              Icon(Icons.cancel,
-                  color: cubit.status == ItemStatus.draft
-                      ? Theme.of(context).textTheme.bodyText1!.color
-                      : Theme.of(context).disabledColor),
-              Text(' Discard Changes',
-                  style: TextStyle(
-                      fontWeight: FontWeight.w400,
-                      color: cubit.status == ItemStatus.draft
-                          ? Theme.of(context).textTheme.bodyText1!.color
-                          : Theme.of(context).disabledColor)),
-            ]),
-          );
+          return ActionButton(
+              onPressed: () => cubit!.resetState(),
+              enabled: cubit!.status == ItemStatus.draft,
+              title: 'Discard Button');
         });
+  }
+}
+
+class ActionButton extends StatelessWidget {
+  const ActionButton(
+      {super.key, this.onPressed, required this.title, this.enabled = true});
+
+  final Function()? onPressed;
+  final bool enabled;
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      onPressed: enabled ? onPressed : null,
+      child: Row(children: [
+        Icon(Icons.cancel,
+            color: enabled
+                ? Theme.of(context).textTheme.bodyText1!.color
+                : Theme.of(context).disabledColor),
+        Text(title,
+            style: TextStyle(
+                fontWeight: FontWeight.w400,
+                color: enabled
+                    ? Theme.of(context).textTheme.bodyText1!.color
+                    : Theme.of(context).disabledColor)),
+      ]),
+    );
   }
 }
