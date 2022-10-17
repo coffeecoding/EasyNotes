@@ -1,7 +1,5 @@
 import 'package:easynotes/cubits/cubits.dart';
 import 'package:easynotes/extensions/color_ext.dart';
-import 'package:easynotes/config/sample_data.dart';
-import 'package:easynotes/screens/common/uiconstants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

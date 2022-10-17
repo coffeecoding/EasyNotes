@@ -65,10 +65,6 @@ class ItemState extends Equatable {
   final String content;
   final String errorMsg;
 
-  List<ItemCubit> getAncestors() {
-    throw 'getAncestors is not yet implemented';
-  }
-
   @override
   List<Object?> get props =>
       [status, title, content, errorMsg, children, parent];

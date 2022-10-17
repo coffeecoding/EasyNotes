@@ -9,12 +9,12 @@ class NotesList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ItemsCubit, ItemsState>(
-        // potentially add condition to rebuild when changing a node's parent
-        // or even a single, not selected item changes (e.g. it's title)
         buildWhen: (prev, next) =>
             prev.selectedNote != next.selectedNote ||
             prev.selectedTopic != next.selectedTopic ||
-            prev.didChildExpansionToggle != next.didChildExpansionToggle,
+            prev.didChildExpansionToggle != next.didChildExpansionToggle ||
+            prev.selectedTopic?.children.length !=
+                next.selectedTopic?.children.length,
         builder: (context, state) {
           final selectedTopic = state.selectedTopic;
           if (selectedTopic == null) {

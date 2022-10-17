@@ -4,6 +4,7 @@ import 'package:easynotes/cubits/items/items_cubit.dart';
 import 'package:easynotes/models/item.dart';
 import 'package:easynotes/repositories/item_repository.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 
 part 'item_state.dart';
 
@@ -15,6 +16,10 @@ class ItemCubit extends Cubit<ItemState> {
       required List<Item> items,
       this.expanded = false})
       : itemRepo = locator.get<ItemRepository>(),
+        titleField = item.title,
+        contentField = item.content,
+        contentExtentOffset = 0,
+        contentBaseOffset = 0,
         super(ItemState.initial(parent: parent)) {
     // Problem: We can't pass "this" to "createChildrenCubitsForParent" in
     // the initializer list or super-constructor, so we have to initialize
@@ -40,15 +45,18 @@ class ItemCubit extends Cubit<ItemState> {
   String get color => item.color;
   String get symbol => item.symbol;
   String get title => item.title;
-  String get titleField => state.title;
-  String get contentField => state.content;
   int get item_type => item.item_type;
   ItemCubit? get parent => state.parent;
   List<ItemCubit> get children => state.children;
   bool get isTopic => item.isTopic;
 
-  // state that only needs to trigger a rebuild on ItemsCubit rebuilding
+  // UI state that only needs to trigger a rebuild on ItemsCubit rebuilding
   bool expanded;
+  String titleField;
+  String contentField;
+  int contentExtentOffset;
+  int contentBaseOffset;
+  FocusNode? focusNode;
 
   Future<void> save({String? title, String? content}) async {
     try {
@@ -62,10 +70,19 @@ class ItemCubit extends Cubit<ItemState> {
     }
   }
 
-  void saveLocalState({String? title, String? content}) {
+  void saveLocalState(
+      {String? title,
+      String? content,
+      int contentBaseOffset = 0,
+      int contentExtentOffset = 0,
+      FocusNode? focusNode}) {
     // instead of "success" we should add another state like "draft"
     // IMPORTANT TODO !! ^
-    emit(ItemState.success(prev: state, title: title, content: content));
+    titleField = title ?? titleField;
+    contentField = content ?? contentField;
+    this.contentExtentOffset = contentExtentOffset;
+    this.contentBaseOffset = contentBaseOffset;
+    this.focusNode = focusNode;
   }
 
   void addChild(ItemCubit child) {
