@@ -20,25 +20,18 @@ class ItemCubit extends Cubit<ItemState> {
         contentField = item.content,
         contentExtentOffset = 0,
         contentBaseOffset = 0,
-        super(ItemState.initial(parent: parent)) {
-    // Problem: We can't pass "this" to "createChildrenCubitsForParent" in
-    // the initializer list or super-constructor, so we have to initialize
-    // this cubit using the empty dummy state and then after initialization
-    // reinitialize it's state with the children
+        super(ItemState.initial(
+            parent: parent, title: item.title, content: item.content)) {
     initChildren(items);
   }
 
   void initChildren(List<Item> childrenItems) {
-    emit(ItemState.populated(
-        parent: parent,
-        title: item.title,
-        content: item.content,
-        children:
-            createChildrenCubitsForParent(itemsCubit, this, childrenItems)));
+    children = createChildrenCubitsForParent(itemsCubit, this, childrenItems);
   }
 
   final ItemRepository itemRepo;
   final ItemsCubit itemsCubit;
+  late List<ItemCubit> children;
   Item item;
 
   String get id => item.id;
@@ -47,7 +40,6 @@ class ItemCubit extends Cubit<ItemState> {
   String get title => item.title;
   int get item_type => item.item_type;
   ItemCubit? get parent => state.parent;
-  List<ItemCubit> get children => state.children;
   bool get isTopic => item.isTopic;
 
   // UI state that only needs to trigger a rebuild on ItemsCubit rebuilding
@@ -86,19 +78,12 @@ class ItemCubit extends Cubit<ItemState> {
   }
 
   void addChild(ItemCubit child) {
-    emit(ItemState.populated(
-        parent: parent,
-        title: item.title,
-        content: item.content,
-        children: [...children, child]));
+    // todo: resort according to preferences
+    children.add(child);
   }
 
   void removeChild(ItemCubit child) {
-    emit(ItemState.populated(
-        parent: parent,
-        title: item.title,
-        content: item.content,
-        children: children.where((c) => c.id != child.id).toList()));
+    children = children.where((c) => c.id != child.id).toList();
   }
 
   Future<void> changeParent(ItemCubit newParent) async {
