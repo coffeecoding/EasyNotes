@@ -56,7 +56,6 @@ class ItemsState extends Equatable {
   // so this flag can be used to discern wh ther to rebuild the item
   // listview
   final bool didChildExpansionToggle;
-  //final bool didSelectedNoteChangeToggle;
   final bool differentialRebuildNoteToggle;
 
   final String errorMsg;

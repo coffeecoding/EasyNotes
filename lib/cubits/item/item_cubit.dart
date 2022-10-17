@@ -17,12 +17,6 @@ class ItemCubit extends Cubit<ItemState> {
       required List<Item> items,
       this.expanded = false})
       : itemRepo = locator.get<ItemRepository>(),
-        ////titleField = item.title,
-        ////titleExtentOffset = 0,
-        ////titleBaseOffset = 0,
-        ////contentField = item.content,
-        ////contentExtentOffset = 0,
-        ////contentBaseOffset = 0,
         super(item.id.isEmpty
             ? const ItemState.newDraft()
             : const ItemState.persisted()) {
@@ -50,13 +44,6 @@ class ItemCubit extends Cubit<ItemState> {
 
   // Local UI state
   bool expanded;
-  ////String titleField;
-  ////int titleExtentOffset;
-  ////int titleBaseOffset;
-  ////String contentField;
-  ////int contentExtentOffset;
-  ////int contentBaseOffset;
-  ////FocussedElement? focussedElement;
 
   Future<void> save({String? title, String? content}) async {
     try {
@@ -71,22 +58,7 @@ class ItemCubit extends Cubit<ItemState> {
   }
 
   void saveLocalState(
-      {ItemStatus? newStatus,
-      String? title,
-      String? content,
-      int? titleBaseOffset = 0,
-      int? titleExtentOffset = 0,
-      int? contentBaseOffset = 0,
-      int? contentExtentOffset = 0,
-      FocussedElement? focussedElement}) {
-    ////titleField = title ?? titleField;
-    ////this.titleExtentOffset = titleExtentOffset ?? this.titleExtentOffset;
-    ////this.titleBaseOffset = titleBaseOffset ?? this.titleBaseOffset;
-    ////contentField = content ?? contentField;
-    ////this.contentExtentOffset = contentExtentOffset ?? this.contentExtentOffset;
-    ////this.contentBaseOffset = contentBaseOffset ?? this.contentBaseOffset;
-    ////this.focussedElement = focussedElement ?? this.focussedElement;
-    ItemStatus status = newStatus ?? state.status;
+      {ItemStatus? newStatus, FocussedElement? focussedElement}) {
     if (newStatus != state.status) {
       if (newStatus == ItemStatus.draft) {
         emit(const ItemState.draft());
@@ -103,12 +75,6 @@ class ItemCubit extends Cubit<ItemState> {
   }
 
   void resetState() {
-    ////titleField = item.title;
-    ////titleExtentOffset = 0;
-    ////titleBaseOffset = 0;
-    ////contentField = item.content;
-    ////contentExtentOffset = 0;
-    ////contentBaseOffset = 0;
     itemsCubit.emit(ItemsState.changed(
         prev: itemsCubit.state,
         selectedNote: itemsCubit.selectedNote,
@@ -136,7 +102,7 @@ class ItemCubit extends Cubit<ItemState> {
       parent!.removeChild(this);
       newParent.addChild(this);
       emit(const ItemState.persisted());
-      // emit ItemsState state changed
+      // Todo: emit ItemsState state changed
     } catch (e) {
       print("error changing item parent: $e");
       emit(ItemState.error(errorMsg: 'Failed to change parent: $e'));
