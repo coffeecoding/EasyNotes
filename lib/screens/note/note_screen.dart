@@ -23,7 +23,8 @@ class NoteScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ItemsCubit, ItemsState>(
-        buildWhen: (p, n) => p.selectedNote != n.selectedNote,
+        buildWhen: (p, n) =>
+            p.differentialRebuildToggle != n.differentialRebuildToggle,
         builder: (context, state) {
           final noteCubit = state.selectedNote;
           if (noteCubit == null) {
@@ -75,17 +76,7 @@ class NoteScreen extends StatelessWidget {
             onPressed: () {},
           ),
           Row(children: [
-            TextButton(
-              child: Row(children: [
-                Icon(Icons.cancel,
-                    color: Theme.of(context).textTheme.bodyText1!.color),
-                Text(' Discard Changes',
-                    style: TextStyle(
-                        fontWeight: FontWeight.w400,
-                        color: Theme.of(context).textTheme.bodyText1!.color)),
-              ]),
-              onPressed: () {},
-            ),
+            DiscardButton(key: UniqueKey()),
             TextButton(
               child: Row(children: [
                 Icon(Icons.save,
@@ -100,4 +91,38 @@ class NoteScreen extends StatelessWidget {
           ]),
         ]),
       );
+}
+
+class DiscardButton extends StatelessWidget {
+  const DiscardButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<ItemsCubit, ItemsState>(
+        buildWhen: (p, n) =>
+            p.selectedNote != null &&
+            n.selectedNote != null &&
+            (p.selectedNote!.status != n.selectedNote!.status ||
+                n.selectedNote!.status == ItemStatus.draft),
+        builder: (context, state) {
+          final cubit = BlocProvider.of<ItemsCubit>(context).selectedNote;
+          return TextButton(
+            onPressed: cubit!.status == ItemStatus.draft
+                ? () => cubit.resetState()
+                : null,
+            child: Row(children: [
+              Icon(Icons.cancel,
+                  color: cubit.status == ItemStatus.draft
+                      ? Theme.of(context).textTheme.bodyText1!.color
+                      : Theme.of(context).disabledColor),
+              Text(' Discard Changes',
+                  style: TextStyle(
+                      fontWeight: FontWeight.w400,
+                      color: cubit.status == ItemStatus.draft
+                          ? Theme.of(context).textTheme.bodyText1!.color
+                          : Theme.of(context).disabledColor)),
+            ]),
+          );
+        });
+  }
 }

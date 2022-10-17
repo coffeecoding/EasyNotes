@@ -3,13 +3,11 @@ import 'dart:convert';
 
 import 'package:easynotes/config/locator.dart';
 import 'package:easynotes/extensions/http_client_ext.dart';
-import 'package:easynotes/models/auth_result.dart';
 import 'package:easynotes/models/models.dart';
 import 'package:easynotes/repositories/preference_repository.dart';
 import 'package:easynotes/utils/crypto/crypto.dart';
 import 'package:http/http.dart';
 
-import '../config/sample_data.dart';
 import '../services/network_provider.dart';
 
 class AuthRepository {
@@ -53,8 +51,6 @@ class AuthRepository {
 
       // 4) save token in http client
       netClient.setAuthHeader('Bearer ${authData.token}');
-      print("Saved auth token:");
-      print(authData.token);
 
       // 5) save creds securely in secure storage
       String privKey = await RFC2898Helper.decryptWithDerivedKey(
@@ -70,7 +66,7 @@ class AuthRepository {
           signkey: signKey);
 
       // 6) pass the successfully retrieved item data to the caller
-      return MapEntry('', authData.items!);
+      return MapEntry('', authData.items);
     } catch (e) {
       print(e);
       return MapEntry('An unexpected error occurred: ${e}', []);

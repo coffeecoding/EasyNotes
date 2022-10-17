@@ -6,7 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class SimpleNoteView extends StatefulWidget {
   SimpleNoteView({super.key, required this.note})
       : titleCtr = TextEditingController(text: note.titleField) {
-    contentCtr = TextEditingController(text: decodeContent());
+    contentCtr = TextEditingController(text: note.contentField);
     contentCtr.selection = TextSelection(
         baseOffset: note.contentBaseOffset,
         extentOffset: note.contentExtentOffset);
@@ -30,9 +30,6 @@ class SimpleNoteView extends StatefulWidget {
   late FocusNode titleFN = FocusNode();
   FocussedElement? focussedElement;
 
-  // Todo: potentially refactor this method interface into
-  String decodeContent() => note.contentField;
-
   @override
   State<SimpleNoteView> createState() => _SimpleNoteViewState();
 }
@@ -50,6 +47,7 @@ class _SimpleNoteViewState extends State<SimpleNoteView> {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(children: [
         TextField(
+            onChanged: (n) => ensureStateIsDraft(titleDraft: n),
             toolbarOptions: const ToolbarOptions(
                 paste: true, copy: true, selectAll: true, cut: true),
             onTap: () => widget.focussedElement = FocussedElement.title,
@@ -57,6 +55,7 @@ class _SimpleNoteViewState extends State<SimpleNoteView> {
             controller: widget.titleCtr),
         Expanded(
             child: TextField(
+                onChanged: (n) => ensureStateIsDraft(contentDraft: n),
                 toolbarOptions: const ToolbarOptions(
                     paste: true, copy: true, selectAll: true, cut: true),
                 onTap: () => widget.focussedElement = FocussedElement.content,
@@ -67,14 +66,27 @@ class _SimpleNoteViewState extends State<SimpleNoteView> {
     );
   }
 
+  // Todo: Add everything else too, like options etc, once they are implemented
+  void ensureStateIsDraft({String? titleDraft, String? contentDraft}) {
+    ItemCubit? noteCubit = BlocProvider.of<ItemsCubit>(context).selectedNote;
+    if (noteCubit!.status != ItemStatus.draft) {
+      noteCubit.setToDraft();
+    }
+  }
+
   @override
   void didUpdateWidget(SimpleNoteView oldView) {
     super.didUpdateWidget(oldView);
-    oldView.note.saveLocalState(
-        title: oldView.titleCtr.text,
-        content: oldView.contentCtr.text,
-        contentExtentOffset: oldView.contentCtr.selection.extentOffset,
-        contentBaseOffset: oldView.contentCtr.selection.baseOffset,
-        focussedElement: oldView.focussedElement);
+    // without this condition, when discarding changes, the fields won't reset
+    // because the local state of the text controllers is copied again and saved
+    // in the rspective cubit
+    if (oldView.note.status == ItemStatus.draft) {
+      oldView.note.saveLocalState(
+          title: oldView.titleCtr.text,
+          content: oldView.contentCtr.text,
+          contentExtentOffset: oldView.contentCtr.selection.extentOffset,
+          contentBaseOffset: oldView.contentCtr.selection.baseOffset,
+          focussedElement: oldView.focussedElement);
+    }
   }
 }

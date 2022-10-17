@@ -4,7 +4,6 @@ import 'package:easynotes/cubits/items/items_cubit.dart';
 import 'package:easynotes/models/item.dart';
 import 'package:easynotes/repositories/item_repository.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
 
 part 'item_state.dart';
 
@@ -14,7 +13,7 @@ class ItemCubit extends Cubit<ItemState> {
   ItemCubit(
       {required this.item,
       required this.itemsCubit,
-      required ItemCubit? parent,
+      required this.parent,
       required List<Item> items,
       this.expanded = false})
       : itemRepo = locator.get<ItemRepository>(),
@@ -22,8 +21,9 @@ class ItemCubit extends Cubit<ItemState> {
         contentField = item.content,
         contentExtentOffset = 0,
         contentBaseOffset = 0,
-        super(ItemState.initial(
-            parent: parent, title: item.title, content: item.content)) {
+        super(item.id.isEmpty
+            ? const ItemState.newDraft()
+            : const ItemState.persisted()) {
     initChildren(items);
   }
 
@@ -34,17 +34,19 @@ class ItemCubit extends Cubit<ItemState> {
   final ItemRepository itemRepo;
   final ItemsCubit itemsCubit;
   late List<ItemCubit> children;
+  ItemCubit? parent;
   Item item;
 
   String get id => item.id;
   String get color => item.color;
   String get symbol => item.symbol;
   String get title => item.title;
+  String get content => item.content;
   int get item_type => item.item_type;
-  ItemCubit? get parent => state.parent;
   bool get isTopic => item.isTopic;
+  ItemStatus get status => state.status;
 
-  // UI state that only needs to trigger a rebuild on ItemsCubit rebuilding
+  // Local UI state
   bool expanded;
   String titleField;
   String contentField;
@@ -54,29 +56,50 @@ class ItemCubit extends Cubit<ItemState> {
 
   Future<void> save({String? title, String? content}) async {
     try {
-      emit(const ItemState.saving());
+      emit(const ItemState.busy());
       Item updated = item.copyWith(title: title, content: content);
       await itemRepo.insertOrUpdateItem(updated);
-      emit(ItemState.success(prev: state));
+      emit(const ItemState.persisted());
     } catch (e) {
       print("error saving item: $e");
-      emit(ItemState.error(prev: state, errorMsg: 'Failed to save: $e'));
+      emit(ItemState.error(errorMsg: 'Failed to save: $e'));
     }
   }
 
   void saveLocalState(
       {String? title,
       String? content,
-      int contentBaseOffset = 0,
-      int contentExtentOffset = 0,
+      int? contentBaseOffset = 0,
+      int? contentExtentOffset = 0,
       FocussedElement? focussedElement}) {
-    // instead of "success" we should add another state like "draft"
-    // IMPORTANT TODO !! ^
     titleField = title ?? titleField;
     contentField = content ?? contentField;
-    this.contentExtentOffset = contentExtentOffset;
-    this.contentBaseOffset = contentBaseOffset;
+    this.contentExtentOffset = contentExtentOffset ?? this.contentExtentOffset;
+    this.contentBaseOffset = contentBaseOffset ?? this.contentBaseOffset;
     this.focussedElement = focussedElement;
+  }
+
+  void resetState() {
+    contentExtentOffset = 0;
+    contentBaseOffset = 0;
+    titleField = item.title;
+    contentField = item.content;
+    itemsCubit.emit(ItemsState.changed(
+        prev: itemsCubit.state,
+        selectedNote: itemsCubit.selectedNote,
+        differentialRebuildToggle:
+            !itemsCubit.state.differentialRebuildToggle));
+    emit(const ItemState.persisted());
+  }
+
+  // todo: handle other changes such as options
+  void setToDraft() {
+    emit(const ItemState.draft());
+    itemsCubit.emit(ItemsState.changed(
+        prev: itemsCubit.state,
+        selectedNote: this,
+        differentialRebuildToggle:
+            !itemsCubit.state.differentialRebuildToggle));
   }
 
   void addChild(ItemCubit child) {
@@ -90,22 +113,22 @@ class ItemCubit extends Cubit<ItemState> {
 
   Future<void> changeParent(ItemCubit newParent) async {
     try {
-      emit(const ItemState.saving());
+      emit(const ItemState.busy());
       Item updated = item.copyWith(parent_id: newParent.id);
       await itemRepo.updateItemParent(updated.id, newParent.id);
+      parent = newParent;
       parent!.removeChild(this);
       newParent.addChild(this);
-      emit(ItemState.success(prev: state, parent: newParent));
+      emit(const ItemState.persisted());
     } catch (e) {
       print("error changing item parent: $e");
-      emit(ItemState.error(
-          prev: state, errorMsg: 'Failed to change parent: $e'));
+      emit(ItemState.error(errorMsg: 'Failed to change parent: $e'));
     }
   }
 
   List<ItemCubit> getAncestors() {
     final result = <ItemCubit>[];
-    ItemCubit? cursor = state.parent;
+    ItemCubit? cursor = parent;
     while (cursor != null) {
       result.add(cursor.parent!);
       cursor = cursor.parent;
@@ -115,7 +138,7 @@ class ItemCubit extends Cubit<ItemState> {
 
   int getAncestorCount() {
     int result = 0;
-    ItemCubit? cursor = state.parent;
+    ItemCubit? cursor = parent;
     while (cursor != null) {
       result += 1;
       cursor = cursor.parent;

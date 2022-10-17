@@ -37,10 +37,10 @@ class _ItemsScreenState extends State<ItemsScreen> {
   Widget build(BuildContext context) {
     return BlocBuilder<ItemsCubit, ItemsState>(builder: (context, state) {
       switch (state.status) {
-        case ItemsStatus.loading:
+        case ItemsStatus.busy:
           return const Center(child: CircularProgressIndicator());
         case ItemsStatus.error:
-          return const Center(child: Text('Something went wrong ... :('));
+          return const Center(child: Text('Failed to retrieve notes ... :('));
         default:
           return Row(children: [
             Container(width: 100, child: const TopicsList()),
