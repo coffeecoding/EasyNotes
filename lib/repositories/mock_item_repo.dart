@@ -89,8 +89,10 @@ class MockItemRepo implements ItemRepository {
 
   @override
   Future<bool> updateItemParent(String id, String parent_id) async {
-    // TODO: implement updateItemParent
-    throw UnimplementedError();
+    await Future.delayed(const Duration(milliseconds: 200));
+    int i = items.indexWhere((i) => i.id == id);
+    items[i].parent_id = parent_id;
+    return true;
   }
 
   @override
