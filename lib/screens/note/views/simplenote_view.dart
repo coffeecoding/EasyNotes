@@ -10,7 +10,8 @@ class SimpleNoteView extends StatefulWidget {
     contentCtr.selection = TextSelection(
         baseOffset: note.contentBaseOffset,
         extentOffset: note.contentExtentOffset);
-    switch (note.focussedElement) {
+    focussedElement = note.focussedElement;
+    switch (focussedElement) {
       case FocussedElement.title:
         titleFN.requestFocus();
         break;
@@ -27,6 +28,7 @@ class SimpleNoteView extends StatefulWidget {
   late TextEditingController contentCtr;
   late FocusNode contentFN = FocusNode();
   late FocusNode titleFN = FocusNode();
+  FocussedElement? focussedElement;
 
   // Todo: potentially refactor this method interface into
   String decodeContent() => note.contentField;
@@ -47,9 +49,17 @@ class _SimpleNoteViewState extends State<SimpleNoteView> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(children: [
-        TextField(focusNode: widget.titleFN, controller: widget.titleCtr),
+        TextField(
+            toolbarOptions: const ToolbarOptions(
+                paste: true, copy: true, selectAll: true, cut: true),
+            onTap: () => widget.focussedElement = FocussedElement.title,
+            focusNode: widget.titleFN,
+            controller: widget.titleCtr),
         Expanded(
             child: TextField(
+                toolbarOptions: const ToolbarOptions(
+                    paste: true, copy: true, selectAll: true, cut: true),
+                onTap: () => widget.focussedElement = FocussedElement.content,
                 focusNode: widget.contentFN,
                 controller: widget.contentCtr,
                 maxLines: null)),
@@ -65,10 +75,6 @@ class _SimpleNoteViewState extends State<SimpleNoteView> {
         content: oldView.contentCtr.text,
         contentExtentOffset: oldView.contentCtr.selection.extentOffset,
         contentBaseOffset: oldView.contentCtr.selection.baseOffset,
-        focussedElement: oldView.titleFN.hasFocus
-            ? FocussedElement.title
-            : oldView.contentFN.hasFocus
-                ? FocussedElement.content
-                : null);
+        focussedElement: oldView.focussedElement);
   }
 }
