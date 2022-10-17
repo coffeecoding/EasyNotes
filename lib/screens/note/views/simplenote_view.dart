@@ -34,6 +34,8 @@ class _SimpleNoteViewState extends State<SimpleNoteView> {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(children: [
         TextField(
+            cursorWidth: 1,
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w100),
             onChanged: (n) => ensureStateIsDraft(titleDraft: n),
             onEditingComplete: () => widget.contentFN.requestFocus(),
             toolbarOptions: const ToolbarOptions(
@@ -46,6 +48,9 @@ class _SimpleNoteViewState extends State<SimpleNoteView> {
             controller: widget.titleCtr),
         Expanded(
             child: TextField(
+                cursorWidth: 1,
+                style:
+                    const TextStyle(fontSize: 24, fontWeight: FontWeight.w100),
                 onChanged: (n) => ensureStateIsDraft(contentDraft: n),
                 toolbarOptions: const ToolbarOptions(
                     paste: true, copy: true, selectAll: true, cut: true),
