@@ -10,13 +10,23 @@ class SimpleNoteView extends StatefulWidget {
     contentCtr.selection = TextSelection(
         baseOffset: note.contentBaseOffset,
         extentOffset: note.contentExtentOffset);
-    contentFN.requestFocus();
+    switch (note.focussedElement) {
+      case FocussedElement.title:
+        titleFN.requestFocus();
+        break;
+      case FocussedElement.content:
+        contentFN.requestFocus();
+        break;
+      default:
+        break;
+    }
   }
 
   final ItemCubit note;
   final TextEditingController titleCtr;
   late TextEditingController contentCtr;
   late FocusNode contentFN = FocusNode();
+  late FocusNode titleFN = FocusNode();
 
   // Todo: potentially refactor this method interface into
   String decodeContent() => note.contentField;
@@ -37,7 +47,7 @@ class _SimpleNoteViewState extends State<SimpleNoteView> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(children: [
-        TextField(controller: widget.titleCtr),
+        TextField(focusNode: widget.titleFN, controller: widget.titleCtr),
         Expanded(
             child: TextField(
                 focusNode: widget.contentFN,
@@ -54,8 +64,11 @@ class _SimpleNoteViewState extends State<SimpleNoteView> {
         title: oldView.titleCtr.text,
         content: oldView.contentCtr.text,
         contentExtentOffset: oldView.contentCtr.selection.extentOffset,
-        contentBaseOffset: oldView.contentCtr.selection.baseOffset);
-    print(
-        'leaving ${oldView.note.id} with offset ${oldView.contentCtr.selection.baseOffset}');
+        contentBaseOffset: oldView.contentCtr.selection.baseOffset,
+        focussedElement: oldView.titleFN.hasFocus
+            ? FocussedElement.title
+            : oldView.contentFN.hasFocus
+                ? FocussedElement.content
+                : null);
   }
 }

@@ -22,96 +22,82 @@ class NoteScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: BlocProvider.of<ItemsCubit>(context).state.selectedNote == null
-          ? null
-          : AppBar(
-              shadowColor: Colors.transparent,
-              backgroundColor: Colors.transparent,
-              title: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        TextButton(
-                          style: ButtonStyle(
-                              padding: MaterialStateProperty.all(
-                                  const EdgeInsets.symmetric(horizontal: 0))),
-                          child: Row(children: const [
-                            Icon(FontAwesomeIcons.solidTrashCan,
-                                color: Colors.red),
-                            Text(' Move to Trash',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w400,
-                                    color: Colors.red)),
-                          ]),
-                          onPressed: () {},
-                        ),
-                      ],
-                    ),
-                    TextButton(
-                      child: Row(children: [
-                        Icon(FontAwesomeIcons.mapPin,
-                            color:
-                                Theme.of(context).textTheme.bodyText1!.color),
-                        Text(' Pin Globally',
-                            style: TextStyle(
-                                fontWeight: FontWeight.w400,
-                                color: Theme.of(context)
-                                    .textTheme
-                                    .bodyText1!
-                                    .color)),
-                      ]),
-                      onPressed: () {},
-                    ),
-                    Row(children: [
-                      TextButton(
-                        child: Row(children: [
-                          Icon(Icons.cancel,
-                              color:
-                                  Theme.of(context).textTheme.bodyText1!.color),
-                          Text(' Discard Changes',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w400,
-                                  color: Theme.of(context)
-                                      .textTheme
-                                      .bodyText1!
-                                      .color)),
-                        ]),
-                        onPressed: () {},
-                      ),
-                      TextButton(
-                        child: Row(children: [
-                          Icon(Icons.save,
-                              color:
-                                  Theme.of(context).textTheme.bodyText1!.color),
-                          Text(' Save',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w400,
-                                  color: Theme.of(context)
-                                      .textTheme
-                                      .bodyText1!
-                                      .color)),
-                        ]),
-                        onPressed: () {},
-                      ),
-                    ]),
-                  ]),
-            ),
-      body: BlocBuilder<ItemsCubit, ItemsState>(
-          buildWhen: (p, n) => p.selectedNote != n.selectedNote,
-          builder: (context, state) {
-            final noteCubit = state.selectedNote;
-            if (noteCubit == null) {
-              return const Center(child: Text('no Note selected'));
-            }
-            switch (noteCubit.item_type) {
-              case 1:
-                return SimpleNoteView(note: noteCubit);
-              default:
-                return Center(child: Text(noteCubit.item.title));
-            }
-          }),
-    );
+    return BlocBuilder<ItemsCubit, ItemsState>(
+        buildWhen: (p, n) => p.selectedNote != n.selectedNote,
+        builder: (context, state) {
+          final noteCubit = state.selectedNote;
+          if (noteCubit == null) {
+            return const Center(child: Text('no Note selected'));
+          }
+          Widget? body;
+          switch (noteCubit.item_type) {
+            case 1:
+              body = SimpleNoteView(note: noteCubit);
+              break;
+            default:
+              body = Center(child: Text(noteCubit.item.title));
+              break;
+          }
+          return Scaffold(appBar: buildActionPanel(context), body: body);
+        });
   }
+
+  PreferredSizeWidget buildActionPanel(context) => AppBar(
+        shadowColor: Colors.transparent,
+        backgroundColor: Colors.transparent,
+        title:
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+          Row(
+            children: [
+              TextButton(
+                style: ButtonStyle(
+                    padding: MaterialStateProperty.all(
+                        const EdgeInsets.symmetric(horizontal: 0))),
+                child: Row(children: const [
+                  Icon(FontAwesomeIcons.solidTrashCan, color: Colors.red),
+                  Text(' Move to Trash',
+                      style: TextStyle(
+                          fontWeight: FontWeight.w400, color: Colors.red)),
+                ]),
+                onPressed: () {},
+              ),
+            ],
+          ),
+          TextButton(
+            child: Row(children: [
+              Icon(FontAwesomeIcons.mapPin,
+                  color: Theme.of(context).textTheme.bodyText1!.color),
+              Text(' Pin Globally',
+                  style: TextStyle(
+                      fontWeight: FontWeight.w400,
+                      color: Theme.of(context).textTheme.bodyText1!.color)),
+            ]),
+            onPressed: () {},
+          ),
+          Row(children: [
+            TextButton(
+              child: Row(children: [
+                Icon(Icons.cancel,
+                    color: Theme.of(context).textTheme.bodyText1!.color),
+                Text(' Discard Changes',
+                    style: TextStyle(
+                        fontWeight: FontWeight.w400,
+                        color: Theme.of(context).textTheme.bodyText1!.color)),
+              ]),
+              onPressed: () {},
+            ),
+            TextButton(
+              child: Row(children: [
+                Icon(Icons.save,
+                    color: Theme.of(context).textTheme.bodyText1!.color),
+                Text(' Save',
+                    style: TextStyle(
+                        fontWeight: FontWeight.w400,
+                        color: Theme.of(context).textTheme.bodyText1!.color)),
+              ]),
+              onPressed: () {},
+            ),
+          ]),
+        ]),
+      );
 }

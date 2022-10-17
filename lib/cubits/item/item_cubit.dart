@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 
 part 'item_state.dart';
 
+enum FocussedElement { title, content }
+
 class ItemCubit extends Cubit<ItemState> {
   ItemCubit(
       {required this.item,
@@ -48,7 +50,7 @@ class ItemCubit extends Cubit<ItemState> {
   String contentField;
   int contentExtentOffset;
   int contentBaseOffset;
-  FocusNode? focusNode;
+  FocussedElement? focussedElement;
 
   Future<void> save({String? title, String? content}) async {
     try {
@@ -67,14 +69,14 @@ class ItemCubit extends Cubit<ItemState> {
       String? content,
       int contentBaseOffset = 0,
       int contentExtentOffset = 0,
-      FocusNode? focusNode}) {
+      FocussedElement? focussedElement}) {
     // instead of "success" we should add another state like "draft"
     // IMPORTANT TODO !! ^
     titleField = title ?? titleField;
     contentField = content ?? contentField;
     this.contentExtentOffset = contentExtentOffset;
     this.contentBaseOffset = contentBaseOffset;
-    this.focusNode = focusNode;
+    this.focussedElement = focussedElement;
   }
 
   void addChild(ItemCubit child) {
