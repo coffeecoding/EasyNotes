@@ -12,7 +12,9 @@ class NotesList extends StatelessWidget {
         buildWhen: (prev, next) =>
             prev.selectedNote != next.selectedNote ||
             prev.selectedTopic != next.selectedTopic ||
-            prev.differentialRebuildToggle != next.differentialRebuildToggle ||
+            prev.didChildExpansionToggle != next.didChildExpansionToggle ||
+            prev.differentialRebuildNoteToggle !=
+                next.differentialRebuildNoteToggle ||
             prev.selectedTopic?.children.length !=
                 next.selectedTopic?.children.length,
         builder: (context, state) {

@@ -9,7 +9,8 @@ class ItemsState extends Equatable {
       this.topicCubits = const <ItemCubit>[],
       this.selectedTopic,
       this.selectedNote,
-      this.differentialRebuildToggle = false,
+      this.didChildExpansionToggle = false,
+      this.differentialRebuildNoteToggle = false,
       this.errorMsg = ''});
 
   const ItemsState.busy() : this._();
@@ -18,7 +19,6 @@ class ItemsState extends Equatable {
     required List<ItemCubit> topicCubits,
     ItemCubit? selectedTopic,
     ItemCubit? selectedNote,
-    required bool differentialRebuildToggle,
   }) : this._(
           status: ItemsStatus.loaded,
           topicCubits: topicCubits,
@@ -31,14 +31,17 @@ class ItemsState extends Equatable {
       List<ItemCubit>? topicCubits,
       ItemCubit? selectedTopic,
       ItemCubit? selectedNote,
-      bool? differentialRebuildToggle})
+      bool? didChildExpansionToggle,
+      bool? differentialRebuildNoteToggle})
       : this._(
           status: ItemsStatus.changed,
           topicCubits: topicCubits ?? prev.topicCubits,
           selectedTopic: selectedTopic ?? prev.selectedTopic,
           selectedNote: selectedNote ?? prev.selectedNote,
-          differentialRebuildToggle:
-              differentialRebuildToggle ?? prev.differentialRebuildToggle,
+          didChildExpansionToggle:
+              didChildExpansionToggle ?? prev.didChildExpansionToggle,
+          differentialRebuildNoteToggle: differentialRebuildNoteToggle ??
+              prev.differentialRebuildNoteToggle,
         );
 
   // potentially pass previous state as well, to keep the UI state
@@ -52,16 +55,17 @@ class ItemsState extends Equatable {
   // boolean to toggle whenever a child item gets expanded/collapsed,
   // so this flag can be used to discern wh ther to rebuild the item
   // listview
-  //final bool didChildExpansionToggle;
+  final bool didChildExpansionToggle;
   //final bool didSelectedNoteChangeToggle;
-  final bool differentialRebuildToggle;
+  final bool differentialRebuildNoteToggle;
 
   final String errorMsg;
 
   @override
   List<Object?> get props => [
         status,
-        differentialRebuildToggle,
+        didChildExpansionToggle,
+        differentialRebuildNoteToggle,
         selectedTopic,
         selectedNote,
         topicCubits

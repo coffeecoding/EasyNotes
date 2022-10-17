@@ -96,8 +96,9 @@ class ItemCubit extends Cubit<ItemState> {
       itemsCubit.emit(ItemsState.changed(
           prev: itemsCubit.state,
           selectedNote: itemsCubit.selectedNote,
-          differentialRebuildToggle:
-              !itemsCubit.state.differentialRebuildToggle));
+          didChildExpansionToggle: itemsCubit.state.didChildExpansionToggle,
+          differentialRebuildNoteToggle:
+              !itemsCubit.state.differentialRebuildNoteToggle));
     }
   }
 
@@ -111,8 +112,9 @@ class ItemCubit extends Cubit<ItemState> {
     itemsCubit.emit(ItemsState.changed(
         prev: itemsCubit.state,
         selectedNote: itemsCubit.selectedNote,
-        differentialRebuildToggle:
-            !itemsCubit.state.differentialRebuildToggle));
+        didChildExpansionToggle: itemsCubit.state.didChildExpansionToggle,
+        differentialRebuildNoteToggle:
+            !itemsCubit.state.differentialRebuildNoteToggle));
     emit(const ItemState.persisted());
   }
 
@@ -134,6 +136,7 @@ class ItemCubit extends Cubit<ItemState> {
       parent!.removeChild(this);
       newParent.addChild(this);
       emit(const ItemState.persisted());
+      // emit ItemsState state changed
     } catch (e) {
       print("error changing item parent: $e");
       emit(ItemState.error(errorMsg: 'Failed to change parent: $e'));

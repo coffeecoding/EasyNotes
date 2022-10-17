@@ -23,12 +23,14 @@ class ItemsCubit extends Cubit<ItemsState> {
       item.expanded = !item.expanded;
       emit(ItemsState.changed(
           prev: state,
-          differentialRebuildToggle: !state.differentialRebuildToggle));
+          didChildExpansionToggle: !state.didChildExpansionToggle,
+          differentialRebuildNoteToggle: state.differentialRebuildNoteToggle));
     } else {
       emit(ItemsState.changed(
           prev: state,
           selectedNote: item,
-          differentialRebuildToggle: !state.differentialRebuildToggle));
+          didChildExpansionToggle: state.didChildExpansionToggle,
+          differentialRebuildNoteToggle: !state.differentialRebuildNoteToggle));
     }
   }
 
@@ -37,8 +39,7 @@ class ItemsCubit extends Cubit<ItemsState> {
       final items = await itemRepo.fetchItems();
       final topicCubits =
           ItemCubit.createChildrenCubitsForParent(this, null, items);
-      emit(ItemsState.loaded(
-          topicCubits: topicCubits, differentialRebuildToggle: true));
+      emit(ItemsState.loaded(topicCubits: topicCubits));
     } catch (e) {
       print("error in items_cubit fetchTopics: $e");
       emit(ItemsState.error(errorMsg: 'Failed to retrieve data: $e'));

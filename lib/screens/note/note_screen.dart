@@ -24,7 +24,7 @@ class NoteScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<ItemsCubit, ItemsState>(
         buildWhen: (p, n) =>
-            p.differentialRebuildToggle != n.differentialRebuildToggle,
+            p.differentialRebuildNoteToggle != n.differentialRebuildNoteToggle,
         builder: (context, state) {
           final noteCubit = state.selectedNote;
           if (noteCubit == null) {
