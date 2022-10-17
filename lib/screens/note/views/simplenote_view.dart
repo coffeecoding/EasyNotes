@@ -1,5 +1,4 @@
 import 'package:easynotes/cubits/cubits.dart';
-import 'package:easynotes/cubits/item/item_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -8,7 +7,7 @@ import 'abstract_note_view.dart';
 class SimpleNoteView extends StatefulWidget implements NoteView {
   SimpleNoteView({super.key, required this.note})
       : titleCtr = TextEditingController(text: note.title),
-        contentCtr = TextEditingController(text: note.content) {}
+        contentCtr = TextEditingController(text: note.content);
 
   @override
   ItemCubit note;

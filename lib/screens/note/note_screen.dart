@@ -1,8 +1,5 @@
 import 'package:easynotes/cubits/cubits.dart';
-import 'package:easynotes/extensions/color_ext.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
