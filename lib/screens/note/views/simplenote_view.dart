@@ -46,9 +46,11 @@ class _SimpleNoteViewState extends State<SimpleNoteView> {
             },
             focusNode: widget.titleFN,
             controller: widget.titleCtr),
+        const SizedBox(height: 16),
         Expanded(
             child: TextField(
                 cursorWidth: 1,
+                decoration: null,
                 style:
                     const TextStyle(fontSize: 24, fontWeight: FontWeight.w100),
                 onChanged: (n) => ensureStateIsDraft(contentDraft: n),
