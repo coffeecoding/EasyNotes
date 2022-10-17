@@ -30,7 +30,7 @@ class _SimpleNoteViewState extends State<SimpleNoteView> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    Widget result = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(children: [
         TextField(
@@ -58,6 +58,12 @@ class _SimpleNoteViewState extends State<SimpleNoteView> {
                 maxLines: null)),
       ]),
     );
+    if (widget.focussedElement == FocussedElement.title) {
+      widget.titleFN.requestFocus();
+    } else {
+      widget.contentFN.requestFocus();
+    }
+    return result;
   }
 
   // Todo: Add everything else too, like options etc, once they are implemented
