@@ -6,8 +6,8 @@ import 'abstract_note_view.dart';
 
 class SimpleNoteView extends StatefulWidget implements NoteView {
   SimpleNoteView({super.key, required this.note})
-      : titleCtr = TextEditingController(text: note.title),
-        contentCtr = TextEditingController(text: note.content);
+      : titleCtr = TextEditingController(text: note.state.titleField),
+        contentCtr = TextEditingController(text: note.state.contentField);
 
   @override
   ItemCubit note;
@@ -46,7 +46,7 @@ class _SimpleNoteViewState extends State<SimpleNoteView> {
                                 .devicePixelRatio, // this is how to generally achieve 1 pixel width in Flutter
                         color: Theme.of(context).dividerColor))),
             style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w100),
-            onChanged: (n) => ensureStateIsDraft(titleDraft: n),
+            onChanged: (_) => ensureStateIsDraft(),
             onEditingComplete: () => widget.contentFN.requestFocus(),
             toolbarOptions: const ToolbarOptions(
                 paste: true, copy: true, selectAll: true, cut: true),
@@ -63,7 +63,7 @@ class _SimpleNoteViewState extends State<SimpleNoteView> {
                 decoration: null,
                 style:
                     const TextStyle(fontSize: 24, fontWeight: FontWeight.w100),
-                onChanged: (n) => ensureStateIsDraft(contentDraft: n),
+                onChanged: (_) => ensureStateIsDraft(),
                 toolbarOptions: const ToolbarOptions(
                     paste: true, copy: true, selectAll: true, cut: true),
                 onTap: () {
@@ -84,11 +84,13 @@ class _SimpleNoteViewState extends State<SimpleNoteView> {
   }
 
   // Todo: Add everything else too, like options etc, once they are implemented
-  void ensureStateIsDraft({String? titleDraft, String? contentDraft}) {
+  void ensureStateIsDraft() {
     ItemCubit? noteCubit = BlocProvider.of<ItemsCubit>(context).selectedNote;
     if (noteCubit!.status != ItemStatus.draft) {
       noteCubit.saveLocalState(
         newStatus: ItemStatus.draft,
+        titleField: widget.titleCtr.text,
+        contentField: widget.contentCtr.text,
       );
     }
   }

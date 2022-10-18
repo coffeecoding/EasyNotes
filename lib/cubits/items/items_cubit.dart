@@ -6,7 +6,7 @@ import 'package:equatable/equatable.dart';
 part 'items_state.dart';
 
 class ItemsCubit extends Cubit<ItemsState> {
-  ItemsCubit({required this.itemRepo}) : super(const ItemsState.busy());
+  ItemsCubit({required this.itemRepo}) : super(const ItemsState.initial());
 
   final ItemRepository itemRepo;
 

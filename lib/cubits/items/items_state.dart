@@ -1,7 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 part of 'items_cubit.dart';
 
-enum ItemsStatus { busy, loaded, changed, error }
+enum ItemsStatus { initial, busy, loaded, changed, error }
 
 class ItemsState extends Equatable {
   const ItemsState._(
@@ -13,7 +13,17 @@ class ItemsState extends Equatable {
       this.differentialRebuildNoteToggle = false,
       this.errorMsg = ''});
 
-  const ItemsState.busy() : this._();
+  const ItemsState.initial() : this._();
+
+  ItemsState.busy({required ItemsState prev})
+      : this._(
+          status: ItemsStatus.changed,
+          topicCubits: prev.topicCubits,
+          selectedTopic: prev.selectedTopic,
+          selectedNote: prev.selectedNote,
+          didChildExpansionToggle: prev.didChildExpansionToggle,
+          differentialRebuildNoteToggle: prev.differentialRebuildNoteToggle,
+        );
 
   const ItemsState.loaded({
     required List<ItemCubit> topicCubits,

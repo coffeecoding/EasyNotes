@@ -19,7 +19,8 @@ class ItemCubit extends Cubit<ItemState> {
       : itemRepo = locator.get<ItemRepository>(),
         super(item.id.isEmpty
             ? const ItemState.newDraft()
-            : const ItemState.persisted()) {
+            : ItemState.persisted(
+                titleField: item.title, contentField: item.content)) {
     initChildren(items);
   }
 
@@ -47,23 +48,36 @@ class ItemCubit extends Cubit<ItemState> {
 
   Future<void> save({String? title, String? content}) async {
     try {
-      emit(const ItemState.busy());
+      //emit(const ItemState.busy());
+      // this seriously needs to be refactored:
+      // We need a "SelectedItemCubit" to directly set the item-limited
+      // busy state and other states, rather than the whole itemsCubit state
+      itemsCubit.emit(ItemsState.busy(prev: itemsCubit.state));
       Item updated = item.copyWith(title: title, content: content);
       await itemRepo.insertOrUpdateItem(updated);
-      emit(const ItemState.persisted());
+      item = updated;
+      emit(ItemState.persisted(
+          titleField: item.title, contentField: item.content));
     } catch (e) {
       print("error saving item: $e");
-      emit(ItemState.error(errorMsg: 'Failed to save: $e'));
+      emit(ItemState.error(
+          titleField: title ?? item.title,
+          contentField: content ?? item.content,
+          errorMsg: 'Failed to save: $e'));
     }
   }
 
   void saveLocalState(
-      {ItemStatus? newStatus, FocussedElement? focussedElement}) {
+      {ItemStatus? newStatus,
+      required String titleField,
+      required String contentField}) {
     if (newStatus != state.status) {
       if (newStatus == ItemStatus.draft) {
-        emit(const ItemState.draft());
+        emit(ItemState.draft(
+            titleField: titleField, contentField: contentField));
       } else if (newStatus == ItemStatus.persisted) {
-        emit(const ItemState.persisted());
+        emit(ItemState.persisted(
+            titleField: item.title, contentField: item.content));
       }
       itemsCubit.emit(ItemsState.changed(
           prev: itemsCubit.state,
@@ -81,7 +95,8 @@ class ItemCubit extends Cubit<ItemState> {
         didChildExpansionToggle: itemsCubit.state.didChildExpansionToggle,
         differentialRebuildNoteToggle:
             !itemsCubit.state.differentialRebuildNoteToggle));
-    emit(const ItemState.persisted());
+    emit(ItemState.persisted(
+        titleField: item.title, contentField: item.content));
   }
 
   void addChild(ItemCubit child) {
@@ -95,17 +110,17 @@ class ItemCubit extends Cubit<ItemState> {
 
   Future<void> changeParent(ItemCubit newParent) async {
     try {
-      emit(const ItemState.busy());
       Item updated = item.copyWith(parent_id: newParent.id);
       await itemRepo.updateItemParent(updated.id, newParent.id);
       parent = newParent;
       parent!.removeChild(this);
       newParent.addChild(this);
-      emit(const ItemState.persisted());
-      // Todo: emit ItemsState state changed
+      // Todo: emit ItemsState state changed?
     } catch (e) {
       print("error changing item parent: $e");
-      emit(ItemState.error(errorMsg: 'Failed to change parent: $e'));
+      // Reconsider: trigger error state in the item itself instead?
+      itemsCubit
+          .emit(ItemsState.error(errorMsg: 'Failed to change parent: $e'));
     }
   }
 
