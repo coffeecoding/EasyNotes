@@ -35,6 +35,16 @@ class _SimpleNoteViewState extends State<SimpleNoteView> {
       child: Column(children: [
         TextField(
             cursorWidth: 1,
+            decoration: InputDecoration(
+                hoverColor: Colors.green,
+                focusedBorder: const UnderlineInputBorder(
+                    borderSide: BorderSide(width: 0, color: Colors.purple)),
+                enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(
+                        width: 1.0 /
+                            MediaQuery.of(context)
+                                .devicePixelRatio, // this is how to generally achieve 1 pixel width in Flutter
+                        color: Theme.of(context).dividerColor))),
             style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w100),
             onChanged: (n) => ensureStateIsDraft(titleDraft: n),
             onEditingComplete: () => widget.contentFN.requestFocus(),
