@@ -132,8 +132,8 @@ class ItemRow extends StatelessWidget {
         item.title,
         style: TextStyle(
             fontWeight: item.status == ItemStatus.draft
-                ? FontWeight.bold
-                : FontWeight.normal),
+                ? FontWeight.w700
+                : FontWeight.w100),
         overflow: TextOverflow.ellipsis, // remove this to line-break instead
         softWrap: false,
         maxLines: 1, // remove this to line-break instead

@@ -29,7 +29,8 @@ class TopicsList extends StatelessWidget {
                     onTap: () => context.read<ItemsCubit>().selectTopic(idx),
                     title: Column(children: [
                       Icon(Icons.folder, color: clr),
-                      Text(topics[idx].title),
+                      Text(topics[idx].title,
+                          style: const TextStyle(fontWeight: FontWeight.w100)),
                     ]),
                   ),
                 );

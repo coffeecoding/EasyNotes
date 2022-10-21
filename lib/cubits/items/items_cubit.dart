@@ -6,13 +6,15 @@ import 'package:equatable/equatable.dart';
 part 'items_state.dart';
 
 class ItemsCubit extends Cubit<ItemsState> {
-  ItemsCubit({required this.itemRepo}) : super(const ItemsState.initial());
+  ItemsCubit({required this.itemRepo, required this.selection})
+      : super(const ItemsState.initial());
 
   final ItemRepository itemRepo;
 
   List<ItemCubit> get topicCubits => state.topicCubits;
   ItemCubit? get selectedTopic => state.selectedTopic;
   ItemCubit? get selectedNote => state.selectedNote;
+  SelectionCubit selection;
 
   void selectTopic(int? i) => emit(ItemsState.changed(
       prev: state, selectedTopic: i == null ? null : topicCubits[i]));
@@ -26,6 +28,7 @@ class ItemsCubit extends Cubit<ItemsState> {
           didChildExpansionToggle: !state.didChildExpansionToggle,
           differentialRebuildNoteToggle: state.differentialRebuildNoteToggle));
     } else {
+      selection.selectSingle(item);
       emit(ItemsState.changed(
           prev: state,
           selectedNote: item,
