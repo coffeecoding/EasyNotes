@@ -26,7 +26,8 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _pageController = PageController(initialPage: 0);
+  _LoginScreenState() : _pageController = PageController(initialPage: 1);
+  PageController _pageController;
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +65,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Expanded(
                       flex: 1,
                       child: Center(
-                          child: _pageController.page! == 0
+                          child: false
                               ? Container()
                               : InkWell(
                                   onTap: () => Future.delayed(
@@ -113,7 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Expanded(
                       flex: 1,
                       child: Center(
-                          child: _pageController.page! == 2
+                          child: false
                               ? Container()
                               : InkWell(
                                   onTap: () => Future.delayed(
