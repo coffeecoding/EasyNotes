@@ -1,6 +1,7 @@
 import 'package:easynotes/extensions/color_ext.dart';
 import 'package:easynotes/models/item.dart';
 import 'package:easynotes/config/sample_data.dart';
+import 'package:easynotes/screens/common/responsive.dart';
 import 'package:easynotes/screens/common/styles.dart';
 import 'package:easynotes/screens/common/uiconstants.dart';
 import 'package:easynotes/screens/items/items_screen.dart';
@@ -89,7 +90,8 @@ class HomeScreen extends StatelessWidget {
       body: Row(children: [
         const Expanded(flex: 1, child: ItemsScreen()),
         const VerticalDivider(width: 1),
-        Expanded(flex: 2, child: NoteScreen()),
+        if (Responsive.isDesktop(context))
+          Expanded(flex: 2, child: NoteScreen()),
       ]),
     ));
   }

@@ -10,44 +10,65 @@ class TopicsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ItemsCubit, ItemsState>(
-        buildWhen: (prev, next) =>
-            prev.status != next.status ||
-            prev.selectedTopic != next.selectedTopic ||
-            prev.topicCubits != next.topicCubits,
-        builder: (context, state) {
-          final topics = state.topicCubits;
-          return Column(
+    return Scaffold(
+      appBar: AppBar(
+          toolbarHeight: 40,
+          backgroundColor: Colors.black12,
+          elevation: 0,
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: topics.length,
-                  itemBuilder: (context, idx) {
-                    final topic = topics[idx];
-                    final clr = HexColor.fromHex(topic.color);
-                    final dragHandle = Container(
-                        child: Responsive.isDesktop(context)
-                            ? ReorderableDragStartListener(
-                                index: idx,
-                                child: const Icon(Icons.drag_handle))
-                            : ReorderableDelayedDragStartListener(
-                                index: idx,
-                                child: const Icon(Icons.drag_handle)));
-                    return RootItemContainer(
-                        key: UniqueKey(),
-                        item: topic,
-                        selectedTopic: state.selectedTopic,
-                        color: clr);
-                  }),
-              Expanded(
-                  child: DragTarget<ItemCubit>(
-                      onWillAccept: (itemCubit) =>
-                          itemCubit != null && itemCubit.isTopic,
-                      onAccept: (itemCubit) => itemCubit.changeParent(null),
-                      builder: (context, __, ___) => Container())),
+              TextButton(
+                child: Row(children: const [
+                  Icon(FluentIcons.folder_add_20_filled, color: Colors.white70),
+                  SizedBox(width: 4),
+                  Text('Topic',
+                      style: TextStyle(
+                          fontWeight: FontWeight.w400, color: Colors.white70)),
+                ]),
+                onPressed: () {},
+              ),
             ],
-          );
-        });
+          )),
+      body: BlocBuilder<ItemsCubit, ItemsState>(
+          buildWhen: (prev, next) =>
+              prev.status != next.status ||
+              prev.selectedTopic != next.selectedTopic ||
+              prev.topicCubits != next.topicCubits,
+          builder: (context, state) {
+            final topics = state.topicCubits;
+            return Column(
+              children: [
+                ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: topics.length,
+                    itemBuilder: (context, idx) {
+                      final topic = topics[idx];
+                      final clr = HexColor.fromHex(topic.color);
+                      final dragHandle = Container(
+                          child: Responsive.isDesktop(context)
+                              ? ReorderableDragStartListener(
+                                  index: idx,
+                                  child: const Icon(Icons.drag_handle))
+                              : ReorderableDelayedDragStartListener(
+                                  index: idx,
+                                  child: const Icon(Icons.drag_handle)));
+                      return RootItemContainer(
+                          key: UniqueKey(),
+                          item: topic,
+                          selectedTopic: state.selectedTopic,
+                          color: clr);
+                    }),
+                Expanded(
+                    child: DragTarget<ItemCubit>(
+                        onWillAccept: (itemCubit) =>
+                            itemCubit != null && itemCubit.isTopic,
+                        onAccept: (itemCubit) => itemCubit.changeParent(null),
+                        builder: (context, __, ___) => Container())),
+              ],
+            );
+          }),
+    );
   }
 }
 

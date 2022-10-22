@@ -9,44 +9,77 @@ class NotesList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ItemsCubit, ItemsState>(
-        buildWhen: (prev, next) =>
-            prev.selectedNote != next.selectedNote ||
-            prev.selectedTopic != next.selectedTopic ||
-            prev.didChildExpansionToggle != next.didChildExpansionToggle ||
-            prev.differentialRebuildNoteToggle !=
-                next.differentialRebuildNoteToggle ||
-            prev.selectedTopic?.children.length !=
-                next.selectedTopic?.children.length,
-        builder: (context, state) {
-          final selectedTopic = state.selectedTopic;
-          if (selectedTopic == null) {
-            return const Center(child: Text('No Topic selected'));
-          }
-          final itemCubits = selectedTopic.children;
-          final clr = HexColor.fromHex(selectedTopic.color);
-          return Container(
-            alignment: Alignment.topLeft,
-            child: ListView.builder(
-                shrinkWrap: true,
-                physics: const ClampingScrollPhysics(),
-                itemCount: itemCubits.length,
-                itemBuilder: (context, i) {
-                  final item = itemCubits[i];
-                  return Draggable(
-                      data: item,
-                      feedback: Material(
-                        child: Container(
-                          color: Colors.transparent,
-                          width: 300,
-                          height: 50,
-                          child: ItemRow(color: clr, item: item),
+    return Scaffold(
+      appBar: AppBar(
+          titleSpacing: 8,
+          toolbarHeight: 40,
+          backgroundColor: Colors.black12,
+          elevation: 0,
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              TextButton(
+                child: Row(children: const [
+                  Icon(FluentIcons.folder_add_20_regular,
+                      color: Colors.white70),
+                  SizedBox(width: 4),
+                  Text('Subtopic',
+                      style: TextStyle(
+                          fontWeight: FontWeight.w400, color: Colors.white70)),
+                ]),
+                onPressed: () {},
+              ),
+              TextButton(
+                child: Row(children: const [
+                  Icon(FluentIcons.note_add_20_regular, color: Colors.white70),
+                  SizedBox(width: 4),
+                  Text('Note',
+                      style: TextStyle(
+                          fontWeight: FontWeight.w400, color: Colors.white70)),
+                ]),
+                onPressed: () {},
+              ),
+            ],
+          )),
+      body: BlocBuilder<ItemsCubit, ItemsState>(
+          buildWhen: (prev, next) =>
+              prev.selectedNote != next.selectedNote ||
+              prev.selectedTopic != next.selectedTopic ||
+              prev.didChildExpansionToggle != next.didChildExpansionToggle ||
+              prev.differentialRebuildNoteToggle !=
+                  next.differentialRebuildNoteToggle ||
+              prev.selectedTopic?.children.length !=
+                  next.selectedTopic?.children.length,
+          builder: (context, state) {
+            final selectedTopic = state.selectedTopic;
+            if (selectedTopic == null) {
+              return const Center(child: Text('No Topic selected'));
+            }
+            final itemCubits = selectedTopic.children;
+            final clr = HexColor.fromHex(selectedTopic.color);
+            return Container(
+              alignment: Alignment.topLeft,
+              child: ListView.builder(
+                  shrinkWrap: true,
+                  physics: const ClampingScrollPhysics(),
+                  itemCount: itemCubits.length,
+                  itemBuilder: (context, i) {
+                    final item = itemCubits[i];
+                    return Draggable(
+                        data: item,
+                        feedback: Material(
+                          child: Container(
+                            color: Colors.transparent,
+                            width: 300,
+                            height: 50,
+                            child: ItemRow(color: clr, item: item),
+                          ),
                         ),
-                      ),
-                      child: ExpandableItemContainer(color: clr, item: item));
-                }),
-          );
-        });
+                        child: ExpandableItemContainer(color: clr, item: item));
+                  }),
+            );
+          }),
+    );
   }
 }
 

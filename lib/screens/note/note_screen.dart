@@ -54,8 +54,10 @@ class NoteScreen extends StatelessWidget {
   }
 
   PreferredSizeWidget buildActionPanel(context) => AppBar(
-        shadowColor: Colors.transparent,
-        backgroundColor: Colors.transparent,
+        toolbarHeight: 40,
+        elevation: 0,
+        titleSpacing: 8,
+        backgroundColor: Colors.black12,
         title:
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
           ActionButton(
@@ -141,15 +143,14 @@ class ActionButton extends StatelessWidget {
       child: Row(
         children: [
           Icon(iconData,
-              color: enabled
-                  ? Theme.of(context).textTheme.bodyText1!.color
-                  : Theme.of(context).disabledColor),
+              color:
+                  enabled ? Colors.white70 : Theme.of(context).disabledColor),
           const SizedBox(width: 4),
           Text(title,
               style: TextStyle(
                   fontWeight: FontWeight.w400,
                   color: enabled
-                      ? Theme.of(context).textTheme.bodyText1!.color
+                      ? Colors.white70
                       : Theme.of(context).disabledColor)),
         ],
       ),

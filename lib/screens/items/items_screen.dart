@@ -46,14 +46,14 @@ class _ItemsScreenState extends State<ItemsScreen> {
                   child: Text('Failed to retrieve notes ... :('));
             default:
               return Stack(children: [
-                Row(children: [
-                  Container(width: 120, child: const TopicsList()),
-                  const VerticalDivider(
+                Row(children: const [
+                  Expanded(flex: 1, child: TopicsList()),
+                  VerticalDivider(
                     indent: 0,
                     endIndent: 0,
                     width: 1,
                   ),
-                  const Expanded(child: NotesList()),
+                  Expanded(flex: 2, child: NotesList()),
                 ]),
                 state.status == ItemsStatus.busy
                     ? Positioned.fill(
