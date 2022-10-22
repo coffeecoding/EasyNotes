@@ -100,19 +100,28 @@ class ItemCubit extends Cubit<ItemState> {
     children = children.where((c) => c.id != child.id).toList();
   }
 
-  Future<void> changeParent(ItemCubit newParent) async {
+  Future<void> changeParent(ItemCubit? newParent) async {
     try {
       itemsCubit.emit(ItemsState.busy(prev: itemsCubit.state));
-      Item updated = item.copyWith(parent_id: newParent.id);
-      await itemRepo.updateItemParent(updated.id, newParent.id);
+      Item updated = item.copyWith(parent_id: newParent?.id);
+      await itemRepo.updateItemParent(updated.id, newParent?.id);
       if (parent != null) {
         parent!.removeChild(this);
       } else {
         itemsCubit.topicCubits.remove(this);
-        itemsCubit.selectTopicDirectly(newParent);
+        // if the new item is a new topic, select that one,
+        // else if it's null (i.e. a child topic became a root topic),
+        // then don't reselect the topic
+        if (newParent != null) {
+          itemsCubit.selectTopicDirectly(newParent);
+        }
       }
       parent = newParent;
-      newParent.addChild(this);
+      if (newParent == null) {
+        itemsCubit.addTopic(this);
+      } else {
+        newParent.addChild(this);
+      }
       itemsCubit.handleItemsChanged();
       itemsCubit.handleRootItemsChanged();
     } catch (e) {

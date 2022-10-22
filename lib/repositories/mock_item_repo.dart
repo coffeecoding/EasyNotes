@@ -76,32 +76,32 @@ class MockItemRepo implements ItemRepository {
   }
 
   @override
-  Future<bool> updateItemGloballyPinned(String id, int pin) async {
+  Future<Item> updateItemGloballyPinned(String id, int pin) async {
     // TODO: implement updateItemGloballyPinned
     throw UnimplementedError();
   }
 
   @override
-  Future<bool> updateItemHeader(ItemHeader header) async {
+  Future<Item> updateItemHeader(ItemHeader header) async {
     // TODO: implement updateItemHeader
     throw UnimplementedError();
   }
 
   @override
-  Future<bool> updateItemParent(String id, String parent_id) async {
+  Future<Item> updateItemParent(String id, String? parent_id) async {
     await Future.delayed(const Duration(milliseconds: 200));
     int i = items.indexWhere((i) => i.id == id);
     items[i].parent_id = parent_id;
-    return true;
+    return items[i];
   }
 
   @override
-  Future<bool> updateItemPinned(String id, int pin) async {
+  Future<Item> updateItemPinned(String id, int pin) async {
     await Future.delayed(const Duration(milliseconds: 500));
     int timestamp = DateTime.now().millisecondsSinceEpoch;
     int i = items.indexWhere((i) => i.id == id);
     items[i] = items[i].copyWith(pinned: pin != 0, modified_header: timestamp);
-    return true;
+    return items[i];
   }
 
   @override
@@ -111,8 +111,12 @@ class MockItemRepo implements ItemRepository {
   }
 
   @override
-  Future<bool> updateItemTrashed(String id, int trashed) async {
-    // TODO: implement updateItemTrashed
-    throw UnimplementedError();
+  Future<Item> updateItemTrashed(String id, int? trashed) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    int timestamp = DateTime.now().millisecondsSinceEpoch;
+    int i = items.indexWhere((i) => i.id == id);
+    items[i] = items[i]
+        .copyWith(trashed: trashed, modified_header: trashed ?? timestamp);
+    return items[i];
   }
 }

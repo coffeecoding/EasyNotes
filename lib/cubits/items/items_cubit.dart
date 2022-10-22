@@ -36,6 +36,11 @@ class ItemsCubit extends Cubit<ItemsState> {
     }
   }
 
+  void addTopic(ItemCubit topicCubit) {
+    // todo : apply preferred sorting
+    topicCubits.add(topicCubit);
+  }
+
   void handleRootItemsChanged() {
     emit(ItemsState.changed(
         prev: state,

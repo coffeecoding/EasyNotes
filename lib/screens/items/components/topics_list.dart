@@ -15,34 +15,46 @@ class TopicsList extends StatelessWidget {
             prev.topicCubits != next.topicCubits,
         builder: (context, state) {
           final topics = state.topicCubits;
-          return ListView.builder(
-              itemCount: topics.length,
-              itemBuilder: (context, idx) {
-                final clr = HexColor.fromHex(topics[idx].color);
-                return DragTarget<ItemCubit>(
-                  onWillAccept: (itemCubit) =>
-                      itemCubit != null && itemCubit.parent != topics[idx],
-                  onAccept: (itemCubit) => itemCubit.changeParent(topics[idx]),
-                  builder: (context, __, ___) => Draggable(
-                    data: topics[idx],
-                    feedback: Material(
-                      child: Container(
-                        color: Colors.black26,
-                        width: 100,
-                        height: 50,
+          return Column(
+            children: [
+              ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: topics.length,
+                  itemBuilder: (context, idx) {
+                    final clr = HexColor.fromHex(topics[idx].color);
+                    return DragTarget<ItemCubit>(
+                      onWillAccept: (itemCubit) =>
+                          itemCubit != null && itemCubit.parent != topics[idx],
+                      onAccept: (itemCubit) =>
+                          itemCubit.changeParent(topics[idx]),
+                      builder: (context, __, ___) => Draggable(
+                        data: topics[idx],
+                        feedback: Material(
+                          child: Container(
+                            color: Colors.black26,
+                            width: 100,
+                            height: 50,
+                            child: RootItemContainer(
+                                selectedTopic: state.selectedTopic,
+                                item: topics[idx],
+                                color: clr),
+                          ),
+                        ),
                         child: RootItemContainer(
                             selectedTopic: state.selectedTopic,
                             item: topics[idx],
                             color: clr),
                       ),
-                    ),
-                    child: RootItemContainer(
-                        selectedTopic: state.selectedTopic,
-                        item: topics[idx],
-                        color: clr),
-                  ),
-                );
-              });
+                    );
+                  }),
+              Expanded(
+                  child: DragTarget<ItemCubit>(
+                      onWillAccept: (itemCubit) =>
+                          itemCubit != null && itemCubit.isTopic,
+                      onAccept: (itemCubit) => itemCubit.changeParent(null),
+                      builder: (context, __, ___) => Container())),
+            ],
+          );
         });
   }
 }

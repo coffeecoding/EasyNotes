@@ -24,11 +24,11 @@ abstract class ItemRepository {
   Future<List<Item>> fetchRootItems();
   Future<Item> insertOrUpdateItem(Item item);
   Future<List<Item>> insertOrUpdateItems(List<Item> items);
-  Future<bool> updateItemHeader(ItemHeader header);
-  Future<bool> updateItemParent(String id, String parent_id);
-  Future<bool> updateItemTrashed(String id, int trashed);
-  Future<bool> updateItemPinned(String id, int pin);
-  Future<bool> updateItemGloballyPinned(String id, int pin);
+  Future<Item> updateItemHeader(ItemHeader header);
+  Future<Item> updateItemParent(String id, String? parent_id);
+  Future<Item> updateItemTrashed(String id, int? trashed);
+  Future<Item> updateItemPinned(String id, int pin);
+  Future<Item> updateItemGloballyPinned(String id, int pin);
   Future<List<Item>> updateItemPositions(ItemPositionData ipd);
   Future<bool> delete(String id);
   Future<bool> deleteItems(List<String> ids);
@@ -127,17 +127,17 @@ class ItemRepo implements ItemRepository {
   }
 
   @override
-  Future<bool> updateItemHeader(ItemHeader header) async {
+  Future<Item> updateItemHeader(ItemHeader header) async {
     Response? response =
         await netClient.put('/api/item/header', jsonEncode(header));
     if (!response.isSuccessStatusCode()) throw 'Error updating item header';
     int i = items.indexWhere((i) => i.id == header.id);
     items[i] = items[i].copyWithHeader(header);
-    return true;
+    return items[i];
   }
 
   @override
-  Future<bool> updateItemParent(String id, String parent_id) async {
+  Future<Item> updateItemParent(String id, String? parent_id) async {
     Response? response =
         await netClient.put('/api/item/$id?parent_id=$parent_id', "");
     if (!response.isSuccessStatusCode()) throw 'Error updating item parent';
@@ -145,32 +145,33 @@ class ItemRepo implements ItemRepository {
     int i = items.indexWhere((i) => i.id == id);
     items[i] =
         items[i].copyWith(parent_id: parent_id, modified_header: timestamp);
-    return true;
+    return items[i];
   }
 
   @override
-  Future<bool> updateItemTrashed(String id, int trashed) async {
+  Future<Item> updateItemTrashed(String id, int? trashed) async {
     Response? response =
         await netClient.put('/api/item/$id?trashed=$trashed', "");
     if (!response.isSuccessStatusCode()) throw 'Error updating item trashed';
     int timestamp = int.parse(response.body);
     int i = items.indexWhere((i) => i.id == id);
-    items[i] = items[i].copyWith(trashed: trashed, modified_header: timestamp);
-    return true;
+    items[i] = items[i]
+        .copyWith(trashed: trashed, modified_header: trashed ?? timestamp);
+    return items[i];
   }
 
   @override
-  Future<bool> updateItemPinned(String id, int pin) async {
+  Future<Item> updateItemPinned(String id, int pin) async {
     Response? response = await netClient.put('/api/item/$id?pin=$pin', "");
     if (!response.isSuccessStatusCode()) throw 'Error updating item pinned';
     int timestamp = int.parse(response.body);
     int i = items.indexWhere((i) => i.id == id);
     items[i] = items[i].copyWith(pinned: pin != 0, modified_header: timestamp);
-    return true;
+    return items[i];
   }
 
   @override
-  Future<bool> updateItemGloballyPinned(String id, int pin) async {
+  Future<Item> updateItemGloballyPinned(String id, int pin) async {
     Response? response =
         await netClient.put('/api/item/$id?pin_globally=$pin', "");
     if (!response.isSuccessStatusCode()) throw 'Error updating item gl. pinned';
@@ -178,7 +179,7 @@ class ItemRepo implements ItemRepository {
     int i = items.indexWhere((i) => i.id == id);
     items[i] = items[i]
         .copyWith(pinned_globally: pin != 0, modified_header: timestamp);
-    return true;
+    return items[i];
   }
 
   @override
