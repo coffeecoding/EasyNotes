@@ -1,5 +1,6 @@
 import 'package:easynotes/blocs/auth/auth_bloc.dart';
 import 'package:easynotes/config/constants.dart';
+import 'package:easynotes/extensions/color_ext.dart';
 import 'package:easynotes/main.dart';
 import 'package:easynotes/repositories/auth_repository.dart';
 import 'package:easynotes/screens/common/app_scroll_behaviour.dart';
@@ -38,28 +39,100 @@ class _LoginScreenState extends State<LoginScreen> {
       },
       child: Material(
         child: SafeArea(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.only(left: 64, right: 64, top: 92),
-                child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxHeight: 200),
-                    child: const Image(image: AssetImage(logoPath3x))),
+          child: Column(children: [
+            Expanded(
+              flex: 1,
+              child: Row(children: [
+                Expanded(flex: 1, child: Container()),
+                Expanded(
+                  flex: 4,
+                  child: Container(
+                    alignment: Alignment.center,
+                    child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxHeight: 200),
+                        child: const Image(image: AssetImage(logoPath3x))),
+                  ),
+                ),
+                Expanded(flex: 1, child: Container()),
+              ]),
+            ),
+            Expanded(
+              flex: 2,
+              child: Container(
+                color: HexColor.fromHex('#222222'),
+                child: Row(children: [
+                  Expanded(
+                      flex: 1,
+                      child: Center(
+                          child: _pageController.page! == 0
+                              ? Container()
+                              : InkWell(
+                                  onTap: () => Future.delayed(
+                                          const Duration(milliseconds: 0),
+                                          () => _pageController.previousPage(
+                                              duration: const Duration(
+                                                  milliseconds: 150),
+                                              curve: Curves.ease))
+                                      .then((_) => setState(() {})),
+                                  child: const Icon(
+                                    Icons.chevron_left,
+                                    size: 64,
+                                    color: Colors.white30,
+                                  ),
+                                ))),
+                  Expanded(
+                    flex: 4,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          flex: 4,
+                          child: PageView(
+                              onPageChanged: (p) {
+                                print(p);
+                                Future.delayed(
+                                    const Duration(milliseconds: 400),
+                                    () => setState(() {}));
+                              },
+                              controller: _pageController,
+                              scrollBehavior: AppScrollBehavior(),
+                              children: <Widget>[
+                                const Center(
+                                  child: Text(
+                                      textAlign: TextAlign.center,
+                                      maxLines: null,
+                                      'Made by YousufCodes\n\nThis app is free and ad-free.\nPlease consider supporting:\nhttps://easynotes.app/donate'),
+                                ),
+                                LoginForm(pageController: _pageController),
+                                SignupForm(pageController: _pageController)
+                              ]),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                      flex: 1,
+                      child: Center(
+                          child: _pageController.page! == 2
+                              ? Container()
+                              : InkWell(
+                                  onTap: () => Future.delayed(
+                                          const Duration(milliseconds: 0),
+                                          () => _pageController.nextPage(
+                                              duration: const Duration(
+                                                  milliseconds: 150),
+                                              curve: Curves.ease))
+                                      .then((_) => setState(() {})),
+                                  child: const Icon(
+                                    Icons.chevron_right,
+                                    size: 64,
+                                    color: Colors.white30,
+                                  ),
+                                ))),
+                ]),
               ),
-              Expanded(
-                flex: 4,
-                child: PageView(
-                    controller: _pageController,
-                    scrollBehavior: AppScrollBehavior(),
-                    children: <Widget>[
-                      LoginForm(pageController: _pageController),
-                      SignupForm(pageController: _pageController)
-                    ]),
-              ),
-              Expanded(flex: 1, child: Container())
-            ],
-          ),
+            ),
+          ]),
         ),
       ),
     );

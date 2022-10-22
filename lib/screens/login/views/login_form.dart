@@ -18,7 +18,7 @@ class LoginForm extends StatelessWidget {
     return Center(
       child: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 64),
+          padding: const EdgeInsets.symmetric(horizontal: 92),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -69,7 +69,7 @@ class LoginForm extends StatelessWidget {
               ),
               const SizedBox(height: ConstSpacing.m),
               ElevatedButton(
-                  onPressed: () => pageController.animateTo(0,
+                  onPressed: () => pageController.animateToPage(1,
                       duration: const Duration(milliseconds: 500),
                       curve: Curves.ease),
                   style: ElevatedButton.styleFrom(
