@@ -112,7 +112,8 @@ class RootItemRow extends StatelessWidget {
         onTap: () => context.read<ItemsCubit>().selectTopicDirectly(item),
         title: Column(children: [
           Icon(FluentIcons.folder_20_filled, color: color),
-          Text(item.title, style: const TextStyle(fontWeight: FontWeight.w100)),
+          Text(item.title,
+              style: TextStyle(fontWeight: FontWeight.w400, color: color)),
         ]),
       ),
     );
