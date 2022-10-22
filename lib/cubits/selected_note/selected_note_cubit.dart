@@ -17,17 +17,17 @@ class SelectedNoteCubit extends Cubit<SelectedNoteState> {
 
   Future<void> save() async {
     try {
-      emit(SelectedNoteState.busy(note: note));
+      emit(SelectedNoteState.busy(note!));
       final success = await note!.save();
       if (!success) {
         print("error saving item (no success)");
-        emit(SelectedNoteState.error(note: note));
+        emit(SelectedNoteState.error(note!));
       } else {
         handleChanged();
       }
     } catch (e) {
       print("error saving item: $e");
-      emit(SelectedNoteState.error(note: note));
+      emit(SelectedNoteState.error(note!));
     }
   }
 
@@ -53,17 +53,17 @@ class SelectedNoteCubit extends Cubit<SelectedNoteState> {
 
   void update(ItemCubit? note) {
     if (note == null) return emit(const SelectedNoteState.empty());
-    switch (note!.status) {
+    switch (note.status) {
       case ItemStatus.busy:
-        return emit(SelectedNoteState.busy(note: note));
+        return emit(SelectedNoteState.busy(note));
       case ItemStatus.draft:
-        return emit(SelectedNoteState.draft(note: note));
+        return emit(SelectedNoteState.draft(note));
       case ItemStatus.error:
-        return emit(SelectedNoteState.error(note: note));
+        return emit(SelectedNoteState.error(note));
       case ItemStatus.newDraft:
-        return emit(SelectedNoteState.newDraft(note: note));
+        return emit(SelectedNoteState.newDraft(note));
       case ItemStatus.persisted:
-        return emit(SelectedNoteState.persisted(note: note));
+        return emit(SelectedNoteState.persisted(note));
     }
   }
 }

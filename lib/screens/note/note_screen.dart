@@ -89,7 +89,7 @@ class DiscardButton extends StatelessWidget {
           return ActionButton(
               iconData: FluentIcons.dismiss_16_regular,
               onPressed: () => state.selectedNote!.resetState(),
-              enabled: state.status != SelectedNoteStatus.persisted,
+              enabled: state.status != ItemStatus.persisted,
               title: 'Discard');
         });
   }
@@ -106,7 +106,7 @@ class SaveButton extends StatelessWidget {
         buildWhen: (p, n) => p.status != n.status,
         builder: (context, state) {
           switch (state.status) {
-            case SelectedNoteStatus.busy:
+            case ItemStatus.busy:
               return const Center(child: CircularProgressIndicator());
             default:
               return ActionButton(
@@ -116,7 +116,7 @@ class SaveButton extends StatelessWidget {
                     //state.selectedNote!.save();
                     context.read<SelectedNoteCubit>().save();
                   },
-                  enabled: state.status != SelectedNoteStatus.persisted,
+                  enabled: state.status != ItemStatus.persisted,
                   title: 'Save');
           }
         });

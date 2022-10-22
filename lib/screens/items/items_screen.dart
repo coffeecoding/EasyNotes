@@ -40,6 +40,7 @@ class _ItemsScreenState extends State<ItemsScreen> {
         builder: (context, state) {
           switch (state.status) {
             case ItemsStatus.loading:
+              // todo: here add placeholder views
               return const Center(child: CircularProgressIndicator());
             case ItemsStatus.error:
               return const Center(
@@ -65,5 +66,32 @@ class _ItemsScreenState extends State<ItemsScreen> {
               ]);
           }
         });
+  }
+}
+
+class PlaceholderRootItem extends StatelessWidget {
+  const PlaceholderRootItem({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container();
+  }
+}
+
+class PlaceholderSubtopic extends StatelessWidget {
+  const PlaceholderSubtopic({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container();
+  }
+}
+
+class PlaceholderSubItem extends StatelessWidget {
+  const PlaceholderSubItem({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container();
   }
 }
