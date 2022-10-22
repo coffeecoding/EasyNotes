@@ -102,7 +102,7 @@ class RootItemRow extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
           color: (selectedTopic != null && item.id == selectedTopic!.id)
-              ? Colors.black12
+              ? Colors.white10
               : Colors.transparent,
           border: (selectedTopic != null && item.id == selectedTopic!.id)
               ? Border(right: BorderSide(color: color, width: 5))
