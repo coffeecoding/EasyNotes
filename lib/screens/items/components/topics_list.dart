@@ -1,6 +1,7 @@
 import 'package:easynotes/cubits/cubits.dart';
 import 'package:easynotes/extensions/color_ext.dart';
 import 'package:easynotes/screens/common/responsive.dart';
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -110,7 +111,7 @@ class RootItemRow extends StatelessWidget {
       child: ListTile(
         onTap: () => context.read<ItemsCubit>().selectTopicDirectly(item),
         title: Column(children: [
-          Icon(Icons.folder, color: color),
+          Icon(FluentIcons.folder_20_filled, color: color),
           Text(item.title, style: const TextStyle(fontWeight: FontWeight.w100)),
         ]),
       ),

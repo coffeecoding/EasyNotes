@@ -1,9 +1,11 @@
 import 'package:easynotes/extensions/color_ext.dart';
 import 'package:easynotes/models/item.dart';
 import 'package:easynotes/config/sample_data.dart';
+import 'package:easynotes/screens/common/styles.dart';
 import 'package:easynotes/screens/common/uiconstants.dart';
 import 'package:easynotes/screens/items/items_screen.dart';
 import 'package:easynotes/screens/note/note_screen.dart';
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -24,14 +26,17 @@ class HomeScreen extends StatelessWidget {
     return SafeArea(
         child: Scaffold(
       appBar: AppBar(
+        toolbarHeight: 64,
         elevation: 1,
         title:
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
           Row(
             children: [
               ElevatedButton(
+                style: const ENPrimaryButtonStyle(),
                 child: Row(children: [
-                  const Icon(Icons.add),
+                  const Icon(FluentIcons.folder_add_20_regular),
+                  const SizedBox(width: 4),
                   Text('Create Topic',
                       style: TextStyle(
                           fontWeight: FontWeight.w400,
@@ -41,8 +46,9 @@ class HomeScreen extends StatelessWidget {
               ),
               TextButton(
                 child: Row(children: [
-                  Icon(Icons.note_add,
+                  Icon(FluentIcons.note_add_20_regular,
                       color: Theme.of(context).textTheme.bodyText1!.color),
+                  const SizedBox(width: 4),
                   Text('Create Note',
                       style: TextStyle(
                           fontWeight: FontWeight.w400,
@@ -56,8 +62,7 @@ class HomeScreen extends StatelessWidget {
             width: 256,
             padding: const EdgeInsets.only(left: ConstSpacing.m),
             decoration: BoxDecoration(
-                color: Theme.of(context).backgroundColor,
-                borderRadius: BorderRadius.circular(8)),
+                color: Colors.black26, borderRadius: BorderRadius.circular(4)),
             child: Row(children: [
               Expanded(
                   child: TextField(
@@ -68,7 +73,7 @@ class HomeScreen extends StatelessWidget {
               )),
               IconButton(
                 icon: const Icon(
-                  Icons.search,
+                  FluentIcons.search_20_regular,
                   size: 16,
                 ),
                 onPressed: () {},
@@ -76,7 +81,7 @@ class HomeScreen extends StatelessWidget {
             ]),
           ),
           IconButton(
-            icon: const Icon(Icons.settings),
+            icon: const Icon(FluentIcons.settings_20_regular),
             onPressed: () {},
           )
         ]),

@@ -6,5 +6,7 @@ class ENButtonTextStyle extends TextStyle {
 
 class ENPrimaryButtonStyle extends ButtonStyle {
   const ENPrimaryButtonStyle()
-      : super(textStyle: const MaterialStatePropertyAll(ENButtonTextStyle()));
+      : super(
+            textStyle: const MaterialStatePropertyAll(ENButtonTextStyle()),
+            minimumSize: const MaterialStatePropertyAll(Size(144, 40)));
 }

@@ -1,5 +1,6 @@
 import 'package:easynotes/cubits/cubits.dart';
 import 'package:easynotes/extensions/color_ext.dart';
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -132,7 +133,10 @@ class ItemRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       onTap: onTap,
-      leading: Icon(item.item_type == 0 ? Icons.folder : Icons.note_outlined,
+      leading: Icon(
+          item.item_type == 0
+              ? FluentIcons.folder_20_filled
+              : FluentIcons.note_20_regular,
           color: color),
       horizontalTitleGap: 0,
       title: Text(

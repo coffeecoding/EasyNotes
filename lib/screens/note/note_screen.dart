@@ -2,6 +2,7 @@ import 'package:easynotes/cubits/cubits.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 
 import 'views/abstract_note_view.dart';
 import 'views/simplenote_view.dart';
@@ -57,33 +58,16 @@ class NoteScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
         title:
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Row(
-            children: [
-              TextButton(
-                style: ButtonStyle(
-                    padding: MaterialStateProperty.all(
-                        const EdgeInsets.symmetric(horizontal: 0))),
-                child: Row(children: const [
-                  Icon(FontAwesomeIcons.solidTrashCan, color: Colors.red),
-                  Text(' Move to Trash',
-                      style: TextStyle(
-                          fontWeight: FontWeight.w400, color: Colors.red)),
-                ]),
-                onPressed: () {},
-              ),
-            ],
-          ),
-          TextButton(
-            child: Row(children: [
-              Icon(FontAwesomeIcons.mapPin,
-                  color: Theme.of(context).textTheme.bodyText1!.color),
-              Text(' Pin Globally',
-                  style: TextStyle(
-                      fontWeight: FontWeight.w400,
-                      color: Theme.of(context).textTheme.bodyText1!.color)),
-            ]),
-            onPressed: () {},
-          ),
+          ActionButton(
+              iconData: FluentIcons.delete_20_regular,
+              title: 'Move to Trash',
+              enabled: true,
+              onPressed: () {}),
+          ActionButton(
+              iconData: FluentIcons.pin_20_regular,
+              title: 'Pin Globally',
+              enabled: true,
+              onPressed: () {}),
           Row(children: [
             DiscardButton(key: UniqueKey()),
             SaveButton(key: UniqueKey(), noteView: noteView!),
@@ -101,7 +85,7 @@ class DiscardButton extends StatelessWidget {
         buildWhen: (p, n) => p.status != n.status,
         builder: (context, state) {
           return ActionButton(
-              iconData: Icons.cancel,
+              iconData: FluentIcons.dismiss_16_regular,
               onPressed: () => state.selectedNote!.resetState(),
               enabled: state.status != SelectedNoteStatus.persisted,
               title: 'Discard');
@@ -124,7 +108,7 @@ class SaveButton extends StatelessWidget {
               return const Center(child: CircularProgressIndicator());
             default:
               return ActionButton(
-                  iconData: Icons.save,
+                  iconData: FluentIcons.save_16_regular,
                   onPressed: () {
                     noteView.saveLocalState(context);
                     //state.selectedNote!.save();
@@ -154,18 +138,21 @@ class ActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextButton(
       onPressed: enabled ? onPressed : null,
-      child: Row(children: [
-        Icon(iconData,
-            color: enabled
-                ? Theme.of(context).textTheme.bodyText1!.color
-                : Theme.of(context).disabledColor),
-        Text(title,
-            style: TextStyle(
-                fontWeight: FontWeight.w400,
-                color: enabled
-                    ? Theme.of(context).textTheme.bodyText1!.color
-                    : Theme.of(context).disabledColor)),
-      ]),
+      child: Row(
+        children: [
+          Icon(iconData,
+              color: enabled
+                  ? Theme.of(context).textTheme.bodyText1!.color
+                  : Theme.of(context).disabledColor),
+          const SizedBox(width: 4),
+          Text(title,
+              style: TextStyle(
+                  fontWeight: FontWeight.w400,
+                  color: enabled
+                      ? Theme.of(context).textTheme.bodyText1!.color
+                      : Theme.of(context).disabledColor)),
+        ],
+      ),
     );
   }
 }
