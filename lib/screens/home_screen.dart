@@ -24,6 +24,7 @@ class HomeScreen extends StatelessWidget {
     return SafeArea(
         child: Scaffold(
       appBar: AppBar(
+        elevation: 1,
         title:
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
           Row(

@@ -1,5 +1,6 @@
 import 'package:easynotes/cubits/cubits.dart';
 import 'package:easynotes/extensions/color_ext.dart';
+import 'package:easynotes/screens/common/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -21,31 +22,21 @@ class TopicsList extends StatelessWidget {
                   shrinkWrap: true,
                   itemCount: topics.length,
                   itemBuilder: (context, idx) {
-                    final clr = HexColor.fromHex(topics[idx].color);
-                    return DragTarget<ItemCubit>(
-                      onWillAccept: (itemCubit) =>
-                          itemCubit != null && itemCubit.parent != topics[idx],
-                      onAccept: (itemCubit) =>
-                          itemCubit.changeParent(topics[idx]),
-                      builder: (context, __, ___) => Draggable(
-                        data: topics[idx],
-                        feedback: Material(
-                          child: Container(
-                            color: Colors.black26,
-                            width: 100,
-                            height: 50,
-                            child: RootItemContainer(
-                                selectedTopic: state.selectedTopic,
-                                item: topics[idx],
-                                color: clr),
-                          ),
-                        ),
-                        child: RootItemContainer(
-                            selectedTopic: state.selectedTopic,
-                            item: topics[idx],
-                            color: clr),
-                      ),
-                    );
+                    final topic = topics[idx];
+                    final clr = HexColor.fromHex(topic.color);
+                    final dragHandle = Container(
+                        child: Responsive.isDesktop(context)
+                            ? ReorderableDragStartListener(
+                                index: idx,
+                                child: const Icon(Icons.drag_handle))
+                            : ReorderableDelayedDragStartListener(
+                                index: idx,
+                                child: const Icon(Icons.drag_handle)));
+                    return RootItemContainer(
+                        key: UniqueKey(),
+                        item: topic,
+                        selectedTopic: state.selectedTopic,
+                        color: clr);
                   }),
               Expanded(
                   child: DragTarget<ItemCubit>(
@@ -60,7 +51,43 @@ class TopicsList extends StatelessWidget {
 }
 
 class RootItemContainer extends StatelessWidget {
-  const RootItemContainer(
+  const RootItemContainer({
+    super.key,
+    required this.item,
+    required this.selectedTopic,
+    required this.color,
+  });
+
+  final ItemCubit item;
+  final ItemCubit? selectedTopic;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return DragTarget<ItemCubit>(
+      onWillAccept: (itemCubit) =>
+          itemCubit != null && itemCubit.parent != item && itemCubit != item,
+      onAccept: (itemCubit) => itemCubit.changeParent(item),
+      builder: (context, __, ___) => Draggable(
+        data: item,
+        feedback: Material(
+          child: Container(
+            color: Colors.black26,
+            width: 100,
+            height: 50,
+            child: RootItemRow(
+                selectedTopic: selectedTopic, item: item, color: color),
+          ),
+        ),
+        child:
+            RootItemRow(selectedTopic: selectedTopic, item: item, color: color),
+      ),
+    );
+  }
+}
+
+class RootItemRow extends StatelessWidget {
+  const RootItemRow(
       {super.key,
       required this.item,
       required this.selectedTopic,

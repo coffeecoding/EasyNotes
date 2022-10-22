@@ -163,7 +163,8 @@ class Item extends Equatable with JsonData {
     );
   }
 
-  factory Item.mock(String id, String? parent_id, String title, int type) {
+  factory Item.mock(String id, String? parent_id, String title, int type,
+      [String color = '#ff8a8a']) {
     int timestamp = DateTime.now().millisecondsSinceEpoch;
     return Item(
         id: id,
@@ -176,7 +177,7 @@ class Item extends Equatable with JsonData {
         pinned_globally: false,
         symbol: type == 0 ? 'T' : 'N',
         item_type: type,
-        color: '#ff8a8a',
+        color: color,
         options: '',
         ivkey: '',
         signature: '',

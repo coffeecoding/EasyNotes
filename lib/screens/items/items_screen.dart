@@ -47,7 +47,7 @@ class _ItemsScreenState extends State<ItemsScreen> {
             default:
               return Stack(children: [
                 Row(children: [
-                  Container(width: 100, child: const TopicsList()),
+                  Container(width: 120, child: const TopicsList()),
                   const VerticalDivider(
                     indent: 0,
                     endIndent: 0,
@@ -56,7 +56,7 @@ class _ItemsScreenState extends State<ItemsScreen> {
                   const Expanded(child: NotesList()),
                 ]),
                 state.status == ItemsStatus.busy
-                    ? Expanded(
+                    ? Positioned.fill(
                         child: Container(
                             color: Colors.black26,
                             child: const Center(
