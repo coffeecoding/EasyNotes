@@ -17,44 +17,53 @@ class SelectedNoteCubit extends Cubit<SelectedNoteState> {
 
   Future<void> save() async {
     try {
-      String title = note!.titleField;
-      String content = note!.contentField;
-      emit(SelectedNoteState.changed(
-          status: SelectedNoteStatus.busy, note: note));
-      final success = await note!.save(title: title, content: content);
-      if (success) {
-        emit(SelectedNoteState.changed(
-            status: _mapItemStatusToEmptyable(note), note: note));
-      } else {
+      emit(SelectedNoteState.busy(note: note));
+      final success = await note!.save();
+      if (!success) {
         print("error saving item (no success)");
-        emit(SelectedNoteState.changed(
-            status: SelectedNoteStatus.error, note: note));
+        emit(SelectedNoteState.error(note: note));
+      } else {
+        handleChanged();
       }
     } catch (e) {
       print("error saving item: $e");
-      emit(SelectedNoteState.changed(
-          status: SelectedNoteStatus.error, note: note));
+      emit(SelectedNoteState.error(note: note));
     }
   }
 
-  void update(ItemCubit? note) => emit(SelectedNoteState.changed(
-      status: _mapItemStatusToEmptyable(note), note: note));
+  void resetState() {
+    note!.resetState();
+    handleChanged();
+  }
 
-  SelectedNoteStatus _mapItemStatusToEmptyable(ItemCubit? note) {
-    if (note != null) {
-      switch (note.status) {
-        case ItemStatus.busy:
-          return SelectedNoteStatus.busy;
-        case ItemStatus.draft:
-          return SelectedNoteStatus.draft;
-        case ItemStatus.error:
-          return SelectedNoteStatus.error;
-        case ItemStatus.newDraft:
-          return SelectedNoteStatus.newDraft;
-        case ItemStatus.persisted:
-          return SelectedNoteStatus.persisted;
-      }
+  void saveLocalState(
+      {ItemStatus? newStatus,
+      required String titleField,
+      required String contentField}) {
+    note!.saveLocalState(
+        newStatus: newStatus,
+        titleField: titleField,
+        contentField: contentField);
+    handleChanged();
+  }
+
+  void handleChanged() {
+    update(note);
+  }
+
+  void update(ItemCubit? note) {
+    if (note == null) return emit(const SelectedNoteState.empty());
+    switch (note!.status) {
+      case ItemStatus.busy:
+        return emit(SelectedNoteState.busy(note: note));
+      case ItemStatus.draft:
+        return emit(SelectedNoteState.draft(note: note));
+      case ItemStatus.error:
+        return emit(SelectedNoteState.error(note: note));
+      case ItemStatus.newDraft:
+        return emit(SelectedNoteState.newDraft(note: note));
+      case ItemStatus.persisted:
+        return emit(SelectedNoteState.persisted(note: note));
     }
-    return SelectedNoteStatus.empty;
   }
 }

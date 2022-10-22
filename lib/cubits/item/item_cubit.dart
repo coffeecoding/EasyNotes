@@ -48,21 +48,23 @@ class ItemCubit extends Cubit<ItemState> {
   String get titleField => state.titleField;
   String get contentField => state.contentField;
 
-  Future<bool> save({String? title, String? content}) async {
+  Future<bool> save() async {
+    String t = state.titleField;
+    String c = state.contentField;
     try {
-      itemsCubit.emit(ItemsState.busy(prev: itemsCubit.state));
-      Item updated = item.copyWith(title: title, content: content);
+      // itemsCubit.emit(ItemsState.busy(prev: itemsCubit.state));
+      //emit(ItemState.busy(titleField: t, contentField: c));
+      Item updated = item.copyWith(title: t, content: c);
       await itemRepo.insertOrUpdateItem(updated);
       item = updated;
       emit(ItemState.persisted(
           titleField: item.title, contentField: item.content));
+      itemsCubit.handleSelectedNoteChanged(this);
       return true;
     } catch (e) {
       print("error saving item: $e");
       emit(ItemState.error(
-          titleField: title ?? item.title,
-          contentField: content ?? item.content,
-          errorMsg: 'Failed to save: $e'));
+          titleField: t, contentField: c, errorMsg: 'Failed to save: $e'));
       return false;
     }
   }
@@ -71,7 +73,6 @@ class ItemCubit extends Cubit<ItemState> {
       {ItemStatus? newStatus,
       required String titleField,
       required String contentField}) {
-    // this shouldn
     if (newStatus != state.status) {
       if (newStatus == ItemStatus.draft) {
         emit(ItemState.draft(
@@ -80,18 +81,14 @@ class ItemCubit extends Cubit<ItemState> {
         emit(ItemState.persisted(
             titleField: item.title, contentField: item.content));
       }
-      _handleSelectedNoteChanged(itemsCubit.selectedNote);
+      itemsCubit.handleSelectedNoteChanged(this);
     }
   }
 
   void resetState() {
     emit(ItemState.persisted(
         titleField: item.title, contentField: item.content));
-    _handleSelectedNoteChanged(this);
-  }
-
-  void _handleSelectedNoteChanged(ItemCubit? note) {
-    itemsCubit.handleSelectedNoteChanged(note);
+    itemsCubit.handleSelectedNoteChanged(this);
   }
 
   void addChild(ItemCubit child) {

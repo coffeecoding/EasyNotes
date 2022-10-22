@@ -8,9 +8,20 @@ class SelectedNoteState extends Equatable {
 
   const SelectedNoteState.empty() : this._();
 
-  const SelectedNoteState.changed(
-      {required SelectedNoteStatus status, ItemCubit? note})
-      : this._(status: status, selectedNote: note);
+  const SelectedNoteState.persisted({ItemCubit? note})
+      : this._(status: SelectedNoteStatus.persisted, selectedNote: note);
+
+  const SelectedNoteState.newDraft({ItemCubit? note})
+      : this._(status: SelectedNoteStatus.newDraft, selectedNote: note);
+
+  const SelectedNoteState.draft({ItemCubit? note})
+      : this._(status: SelectedNoteStatus.draft, selectedNote: note);
+
+  const SelectedNoteState.busy({ItemCubit? note})
+      : this._(status: SelectedNoteStatus.busy, selectedNote: note);
+
+  const SelectedNoteState.error({ItemCubit? note})
+      : this._(status: SelectedNoteStatus.error, selectedNote: note);
 
   final SelectedNoteStatus status;
   final ItemCubit? selectedNote;

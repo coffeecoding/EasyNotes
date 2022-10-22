@@ -6,5 +6,5 @@ abstract class NoteView extends Widget {
 
   ItemCubit get note;
 
-  void saveLocalState();
+  void saveLocalState(BuildContext context);
 }

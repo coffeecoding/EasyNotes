@@ -18,12 +18,11 @@ class SimpleNoteView extends StatefulWidget implements NoteView {
   FocussedElement? focussedElement;
 
   @override
-  void saveLocalState() {
-    note.saveLocalState(
-      newStatus: ItemStatus.draft,
-      titleField: titleCtr.text,
-      contentField: contentCtr.text,
-    );
+  void saveLocalState(BuildContext context) {
+    BlocProvider.of<SelectedNoteCubit>(context).saveLocalState(
+        newStatus: ItemStatus.draft,
+        titleField: titleCtr.text,
+        contentField: contentCtr.text);
   }
 
   @override
@@ -55,7 +54,7 @@ class _SimpleNoteViewState extends State<SimpleNoteView> {
                                 .devicePixelRatio, // this is how to generally achieve 1 pixel width in Flutter
                         color: Theme.of(context).dividerColor))),
             style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w100),
-            onChanged: (_) => ensureStateIsDraft(),
+            onChanged: (_) => ensureStateIsDraft(context),
             onEditingComplete: () => widget.contentFN.requestFocus(),
             toolbarOptions: const ToolbarOptions(
                 paste: true, copy: true, selectAll: true, cut: true),
@@ -72,7 +71,7 @@ class _SimpleNoteViewState extends State<SimpleNoteView> {
                 decoration: null,
                 style:
                     const TextStyle(fontSize: 24, fontWeight: FontWeight.w100),
-                onChanged: (_) => ensureStateIsDraft(),
+                onChanged: (_) => ensureStateIsDraft(context),
                 toolbarOptions: const ToolbarOptions(
                     paste: true, copy: true, selectAll: true, cut: true),
                 onTap: () {
@@ -93,9 +92,9 @@ class _SimpleNoteViewState extends State<SimpleNoteView> {
   }
 
   // Todo: Add everything else too, like options etc, once they are implemented
-  void ensureStateIsDraft() {
-    if (widget.note == ItemStatus.newDraft) return;
-    if (widget.note.status != ItemStatus.draft) widget.saveLocalState();
+  void ensureStateIsDraft(BuildContext context) {
+    if (widget.note.status == ItemStatus.newDraft) return;
+    if (widget.note.status != ItemStatus.draft) widget.saveLocalState(context);
   }
 
   @override

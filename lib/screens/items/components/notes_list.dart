@@ -32,8 +32,7 @@ class NotesList extends StatelessWidget {
                 itemCount: itemCubits.length,
                 itemBuilder: (context, i) {
                   final item = itemCubits[i];
-                  return ExpandableItemContainer(
-                      color: clr, item: item, selectedNote: state.selectedNote);
+                  return ExpandableItemContainer(color: clr, item: item);
                 }),
           );
         });
@@ -44,12 +43,10 @@ class ExpandableItemContainer extends StatelessWidget {
   const ExpandableItemContainer({
     super.key,
     required this.item,
-    this.selectedNote,
     required this.color,
   });
 
   final ItemCubit item;
-  final ItemCubit? selectedNote;
   final Color color;
 
   @override
@@ -57,7 +54,6 @@ class ExpandableItemContainer extends StatelessWidget {
     final itemContainerView = ItemContainer(
         color: color,
         item: item,
-        selectedNote: selectedNote,
         onTap: () => context.read<ItemsCubit>().selectChild(item));
     return item.isTopic && item.expanded
         ? Column(children: [
@@ -68,13 +64,10 @@ class ExpandableItemContainer extends StatelessWidget {
                 itemBuilder: (context, j) {
                   return item.children[j].isTopic && item.children[j].expanded
                       ? ExpandableItemContainer(
-                          item: item.children[j],
-                          color: color,
-                          selectedNote: selectedNote)
+                          item: item.children[j], color: color)
                       : ItemContainer(
                           color: color,
                           item: item.children[j],
-                          selectedNote: selectedNote,
                           onTap: () => context
                               .read<ItemsCubit>()
                               .selectChild(item.children[j]));
@@ -88,28 +81,32 @@ class ItemContainer extends StatelessWidget {
   const ItemContainer({
     super.key,
     required this.item,
-    this.selectedNote,
     required this.color,
     this.onTap,
   });
 
   final ItemCubit item;
-  final ItemCubit? selectedNote;
   final Color color;
   final Function()? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        padding: EdgeInsets.only(left: (item.getAncestorCount() - 1) * 20),
-        decoration: BoxDecoration(
-          color: (selectedNote != null && item.id == selectedNote!.id)
-              ? Theme.of(context).cardColor
-              : Colors.transparent,
-          border: Border(
-              bottom: BorderSide(color: Theme.of(context).cardColor, width: 1)),
-        ),
-        child: ItemRow(item: item, color: color, onTap: onTap));
+    return BlocBuilder<SelectedNoteCubit, SelectedNoteState>(
+      builder: (context, state) {
+        return Container(
+            padding: EdgeInsets.only(left: (item.getAncestorCount() - 1) * 20),
+            decoration: BoxDecoration(
+              color: (state.selectedNote != null &&
+                      item.id == state.selectedNote!.id)
+                  ? Theme.of(context).cardColor
+                  : Colors.transparent,
+              border: Border(
+                  bottom:
+                      BorderSide(color: Theme.of(context).cardColor, width: 1)),
+            ),
+            child: ItemRow(item: item, color: color, onTap: onTap));
+      },
+    );
   }
 }
 

@@ -126,7 +126,8 @@ class SaveButton extends StatelessWidget {
               return ActionButton(
                   iconData: Icons.save,
                   onPressed: () {
-                    noteView.saveLocalState();
+                    noteView.saveLocalState(context);
+                    //state.selectedNote!.save();
                     context.read<SelectedNoteCubit>().save();
                   },
                   enabled: state.status != SelectedNoteStatus.persisted,
