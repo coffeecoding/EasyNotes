@@ -1,12 +1,13 @@
 import 'package:bloc/bloc.dart';
 import 'package:easynotes/cubits/cubits.dart';
+import 'package:easynotes/cubits/selected_note/selected_note_cubit.dart';
 import 'package:easynotes/repositories/item_repository.dart';
 import 'package:equatable/equatable.dart';
 
 part 'items_state.dart';
 
 class ItemsCubit extends Cubit<ItemsState> {
-  ItemsCubit({required this.itemRepo, required this.selection})
+  ItemsCubit({required this.itemRepo, required this.selectedNoteCubit})
       : super(const ItemsState.initial());
 
   final ItemRepository itemRepo;
@@ -14,7 +15,7 @@ class ItemsCubit extends Cubit<ItemsState> {
   List<ItemCubit> get topicCubits => state.topicCubits;
   ItemCubit? get selectedTopic => state.selectedTopic;
   ItemCubit? get selectedNote => state.selectedNote;
-  SelectionCubit selection;
+  SelectedNoteCubit selectedNoteCubit;
 
   void selectTopic(int? i) => emit(ItemsState.changed(
       prev: state, selectedTopic: i == null ? null : topicCubits[i]));
@@ -28,13 +29,18 @@ class ItemsCubit extends Cubit<ItemsState> {
           didChildExpansionToggle: !state.didChildExpansionToggle,
           differentialRebuildNoteToggle: state.differentialRebuildNoteToggle));
     } else {
-      selection.selectSingle(item);
-      emit(ItemsState.changed(
-          prev: state,
-          selectedNote: item,
-          didChildExpansionToggle: state.didChildExpansionToggle,
-          differentialRebuildNoteToggle: !state.differentialRebuildNoteToggle));
+      handleSelectedNoteChanged(item);
     }
+  }
+
+  void handleSelectedNoteChanged(ItemCubit? note) {
+    emit(ItemsState.changed(
+        prev: state,
+        selectedNote: note,
+        didChildExpansionToggle: state.didChildExpansionToggle,
+        differentialRebuildNoteToggle: !state.differentialRebuildNoteToggle));
+    selectedNoteCubit.update(null);
+    selectedNoteCubit.update(note);
   }
 
   Future<void> fetchItems() async {

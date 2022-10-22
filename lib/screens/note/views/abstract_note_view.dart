@@ -5,4 +5,6 @@ abstract class NoteView extends Widget {
   const NoteView({dynamic key});
 
   ItemCubit get note;
+
+  void saveLocalState();
 }

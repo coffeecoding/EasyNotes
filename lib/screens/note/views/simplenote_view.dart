@@ -18,6 +18,15 @@ class SimpleNoteView extends StatefulWidget implements NoteView {
   FocussedElement? focussedElement;
 
   @override
+  void saveLocalState() {
+    note.saveLocalState(
+      newStatus: ItemStatus.draft,
+      titleField: titleCtr.text,
+      contentField: contentCtr.text,
+    );
+  }
+
+  @override
   State<SimpleNoteView> createState() => _SimpleNoteViewState();
 }
 
@@ -85,14 +94,8 @@ class _SimpleNoteViewState extends State<SimpleNoteView> {
 
   // Todo: Add everything else too, like options etc, once they are implemented
   void ensureStateIsDraft() {
-    ItemCubit? noteCubit = BlocProvider.of<ItemsCubit>(context).selectedNote;
-    if (noteCubit!.status != ItemStatus.draft) {
-      noteCubit.saveLocalState(
-        newStatus: ItemStatus.draft,
-        titleField: widget.titleCtr.text,
-        contentField: widget.contentCtr.text,
-      );
-    }
+    if (widget.note == ItemStatus.newDraft) return;
+    if (widget.note.status != ItemStatus.draft) widget.saveLocalState();
   }
 
   @override

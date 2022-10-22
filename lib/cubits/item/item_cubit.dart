@@ -45,25 +45,25 @@ class ItemCubit extends Cubit<ItemState> {
 
   // Local UI state
   bool expanded;
+  String get titleField => state.titleField;
+  String get contentField => state.contentField;
 
-  Future<void> save({String? title, String? content}) async {
+  Future<bool> save({String? title, String? content}) async {
     try {
-      //emit(const ItemState.busy());
-      // this seriously needs to be refactored:
-      // We need a "SelectedItemCubit" to directly set the item-limited
-      // busy state and other states, rather than the whole itemsCubit state
       itemsCubit.emit(ItemsState.busy(prev: itemsCubit.state));
       Item updated = item.copyWith(title: title, content: content);
       await itemRepo.insertOrUpdateItem(updated);
       item = updated;
       emit(ItemState.persisted(
           titleField: item.title, contentField: item.content));
+      return true;
     } catch (e) {
       print("error saving item: $e");
       emit(ItemState.error(
           titleField: title ?? item.title,
           contentField: content ?? item.content,
           errorMsg: 'Failed to save: $e'));
+      return false;
     }
   }
 
@@ -71,6 +71,7 @@ class ItemCubit extends Cubit<ItemState> {
       {ItemStatus? newStatus,
       required String titleField,
       required String contentField}) {
+    // this shouldn
     if (newStatus != state.status) {
       if (newStatus == ItemStatus.draft) {
         emit(ItemState.draft(
@@ -79,24 +80,18 @@ class ItemCubit extends Cubit<ItemState> {
         emit(ItemState.persisted(
             titleField: item.title, contentField: item.content));
       }
-      itemsCubit.emit(ItemsState.changed(
-          prev: itemsCubit.state,
-          selectedNote: itemsCubit.selectedNote,
-          didChildExpansionToggle: itemsCubit.state.didChildExpansionToggle,
-          differentialRebuildNoteToggle:
-              !itemsCubit.state.differentialRebuildNoteToggle));
+      _handleSelectedNoteChanged(itemsCubit.selectedNote);
     }
   }
 
   void resetState() {
-    itemsCubit.emit(ItemsState.changed(
-        prev: itemsCubit.state,
-        selectedNote: itemsCubit.selectedNote,
-        didChildExpansionToggle: itemsCubit.state.didChildExpansionToggle,
-        differentialRebuildNoteToggle:
-            !itemsCubit.state.differentialRebuildNoteToggle));
     emit(ItemState.persisted(
         titleField: item.title, contentField: item.content));
+    _handleSelectedNoteChanged(this);
+  }
+
+  void _handleSelectedNoteChanged(ItemCubit? note) {
+    itemsCubit.handleSelectedNoteChanged(note);
   }
 
   void addChild(ItemCubit child) {
