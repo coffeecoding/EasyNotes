@@ -20,6 +20,9 @@ class ItemsCubit extends Cubit<ItemsState> {
   void selectTopic(int? i) => emit(ItemsState.changed(
       prev: state, selectedTopic: i == null ? null : topicCubits[i]));
 
+  void selectTopicDirectly(ItemCubit? topic) =>
+      emit(ItemsState.changed(prev: state, selectedTopic: topic));
+
   void selectChild(ItemCubit? item) {
     if (item != null && item.isTopic) {
       // only if the selected item is a subtopic, don't reselect the note
@@ -31,6 +34,14 @@ class ItemsCubit extends Cubit<ItemsState> {
     } else {
       handleSelectedNoteChanged(item);
     }
+  }
+
+  void handleRootItemsChanged() {
+    emit(ItemsState.changed(
+        prev: state,
+        topicCubits: state.topicCubits,
+        didChildExpansionToggle: state.didChildExpansionToggle,
+        differentialRebuildNoteToggle: !state.differentialRebuildNoteToggle));
   }
 
   void handleItemsChanged() {
@@ -53,6 +64,7 @@ class ItemsCubit extends Cubit<ItemsState> {
 
   Future<void> fetchItems() async {
     try {
+      emit(ItemsState.loading(prev: state));
       final items = await itemRepo.fetchItems();
       final topicCubits =
           ItemCubit.createChildrenCubitsForParent(this, null, items);

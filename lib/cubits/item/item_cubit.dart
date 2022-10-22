@@ -102,12 +102,19 @@ class ItemCubit extends Cubit<ItemState> {
 
   Future<void> changeParent(ItemCubit newParent) async {
     try {
+      itemsCubit.emit(ItemsState.busy(prev: itemsCubit.state));
       Item updated = item.copyWith(parent_id: newParent.id);
       await itemRepo.updateItemParent(updated.id, newParent.id);
-      parent?.removeChild(this);
+      if (parent != null) {
+        parent!.removeChild(this);
+      } else {
+        itemsCubit.topicCubits.remove(this);
+        itemsCubit.selectTopicDirectly(newParent);
+      }
       parent = newParent;
       newParent.addChild(this);
       itemsCubit.handleItemsChanged();
+      itemsCubit.handleRootItemsChanged();
     } catch (e) {
       print("error changing item parent: $e");
       // Reconsider: trigger error state in the item itself instead?

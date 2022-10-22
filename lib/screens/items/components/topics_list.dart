@@ -23,28 +23,58 @@ class TopicsList extends StatelessWidget {
                   onWillAccept: (itemCubit) =>
                       itemCubit != null && itemCubit.parent != topics[idx],
                   onAccept: (itemCubit) => itemCubit.changeParent(topics[idx]),
-                  builder: (context, __, ___) => Container(
-                    decoration: BoxDecoration(
-                        color: (state.selectedTopic != null &&
-                                topics[idx].id == state.selectedTopic!.id)
-                            ? Colors.black12
-                            : Colors.transparent,
-                        border: (state.selectedTopic != null &&
-                                topics[idx].id == state.selectedTopic!.id)
-                            ? Border(right: BorderSide(color: clr, width: 5))
-                            : null),
-                    child: ListTile(
-                      onTap: () => context.read<ItemsCubit>().selectTopic(idx),
-                      title: Column(children: [
-                        Icon(Icons.folder, color: clr),
-                        Text(topics[idx].title,
-                            style:
-                                const TextStyle(fontWeight: FontWeight.w100)),
-                      ]),
+                  builder: (context, __, ___) => Draggable(
+                    data: topics[idx],
+                    feedback: Material(
+                      child: Container(
+                        color: Colors.black26,
+                        width: 100,
+                        height: 50,
+                        child: RootItemContainer(
+                            selectedTopic: state.selectedTopic,
+                            item: topics[idx],
+                            color: clr),
+                      ),
                     ),
+                    child: RootItemContainer(
+                        selectedTopic: state.selectedTopic,
+                        item: topics[idx],
+                        color: clr),
                   ),
                 );
               });
         });
+  }
+}
+
+class RootItemContainer extends StatelessWidget {
+  const RootItemContainer(
+      {super.key,
+      required this.item,
+      required this.selectedTopic,
+      required this.color});
+
+  final ItemCubit item;
+  final ItemCubit? selectedTopic;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+          color: (selectedTopic != null && item.id == selectedTopic!.id)
+              ? Colors.black12
+              : Colors.transparent,
+          border: (selectedTopic != null && item.id == selectedTopic!.id)
+              ? Border(right: BorderSide(color: color, width: 5))
+              : null),
+      child: ListTile(
+        onTap: () => context.read<ItemsCubit>().selectTopicDirectly(item),
+        title: Column(children: [
+          Icon(Icons.folder, color: color),
+          Text(item.title, style: const TextStyle(fontWeight: FontWeight.w100)),
+        ]),
+      ),
+    );
   }
 }

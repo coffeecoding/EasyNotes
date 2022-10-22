@@ -35,23 +35,35 @@ class _ItemsScreenState extends State<ItemsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ItemsCubit, ItemsState>(builder: (context, state) {
-      switch (state.status) {
-        case ItemsStatus.busy:
-          return const Center(child: CircularProgressIndicator());
-        case ItemsStatus.error:
-          return const Center(child: Text('Failed to retrieve notes ... :('));
-        default:
-          return Row(children: [
-            Container(width: 100, child: const TopicsList()),
-            const VerticalDivider(
-              indent: 0,
-              endIndent: 0,
-              width: 1,
-            ),
-            const Expanded(child: NotesList()),
-          ]);
-      }
-    });
+    return BlocBuilder<ItemsCubit, ItemsState>(
+        buildWhen: (p, n) => p.status != n.status,
+        builder: (context, state) {
+          switch (state.status) {
+            case ItemsStatus.loading:
+              return const Center(child: CircularProgressIndicator());
+            case ItemsStatus.error:
+              return const Center(
+                  child: Text('Failed to retrieve notes ... :('));
+            default:
+              return Stack(children: [
+                Row(children: [
+                  Container(width: 100, child: const TopicsList()),
+                  const VerticalDivider(
+                    indent: 0,
+                    endIndent: 0,
+                    width: 1,
+                  ),
+                  const Expanded(child: NotesList()),
+                ]),
+                state.status == ItemsStatus.busy
+                    ? Expanded(
+                        child: Container(
+                            color: Colors.black26,
+                            child: const Center(
+                                child: CircularProgressIndicator())))
+                    : Container(),
+              ]);
+          }
+        });
   }
 }
