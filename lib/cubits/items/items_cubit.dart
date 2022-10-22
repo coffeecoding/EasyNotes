@@ -33,6 +33,14 @@ class ItemsCubit extends Cubit<ItemsState> {
     }
   }
 
+  void handleItemsChanged() {
+    emit(ItemsState.changed(
+        prev: state,
+        selectedNote: selectedNote,
+        didChildExpansionToggle: state.didChildExpansionToggle,
+        differentialRebuildNoteToggle: !state.differentialRebuildNoteToggle));
+  }
+
   void handleSelectedNoteChanged(ItemCubit? note) {
     emit(ItemsState.changed(
         prev: state,

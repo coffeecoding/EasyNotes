@@ -32,7 +32,17 @@ class NotesList extends StatelessWidget {
                 itemCount: itemCubits.length,
                 itemBuilder: (context, i) {
                   final item = itemCubits[i];
-                  return ExpandableItemContainer(color: clr, item: item);
+                  return Draggable(
+                      data: item,
+                      feedback: Material(
+                        child: Container(
+                          color: Colors.transparent,
+                          width: 300,
+                          height: 50,
+                          child: ItemRow(color: clr, item: item),
+                        ),
+                      ),
+                      child: ExpandableItemContainer(color: clr, item: item));
                 }),
           );
         });

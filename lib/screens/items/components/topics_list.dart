@@ -19,19 +19,29 @@ class TopicsList extends StatelessWidget {
               itemCount: topics.length,
               itemBuilder: (context, idx) {
                 final clr = HexColor.fromHex(topics[idx].color);
-                return Container(
-                  decoration: BoxDecoration(
-                      border: (state.selectedTopic != null &&
-                              topics[idx].id == state.selectedTopic!.id)
-                          ? Border(right: BorderSide(color: clr, width: 5))
-                          : null),
-                  child: ListTile(
-                    onTap: () => context.read<ItemsCubit>().selectTopic(idx),
-                    title: Column(children: [
-                      Icon(Icons.folder, color: clr),
-                      Text(topics[idx].title,
-                          style: const TextStyle(fontWeight: FontWeight.w100)),
-                    ]),
+                return DragTarget<ItemCubit>(
+                  onWillAccept: (itemCubit) =>
+                      itemCubit != null && itemCubit.parent != topics[idx],
+                  onAccept: (itemCubit) => itemCubit.changeParent(topics[idx]),
+                  builder: (context, __, ___) => Container(
+                    decoration: BoxDecoration(
+                        color: (state.selectedTopic != null &&
+                                topics[idx].id == state.selectedTopic!.id)
+                            ? Colors.black12
+                            : Colors.transparent,
+                        border: (state.selectedTopic != null &&
+                                topics[idx].id == state.selectedTopic!.id)
+                            ? Border(right: BorderSide(color: clr, width: 5))
+                            : null),
+                    child: ListTile(
+                      onTap: () => context.read<ItemsCubit>().selectTopic(idx),
+                      title: Column(children: [
+                        Icon(Icons.folder, color: clr),
+                        Text(topics[idx].title,
+                            style:
+                                const TextStyle(fontWeight: FontWeight.w100)),
+                      ]),
+                    ),
                   ),
                 );
               });

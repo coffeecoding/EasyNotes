@@ -104,10 +104,10 @@ class ItemCubit extends Cubit<ItemState> {
     try {
       Item updated = item.copyWith(parent_id: newParent.id);
       await itemRepo.updateItemParent(updated.id, newParent.id);
+      parent?.removeChild(this);
       parent = newParent;
-      parent!.removeChild(this);
       newParent.addChild(this);
-      // Todo: emit ItemsState state changed?
+      itemsCubit.handleItemsChanged();
     } catch (e) {
       print("error changing item parent: $e");
       // Reconsider: trigger error state in the item itself instead?
