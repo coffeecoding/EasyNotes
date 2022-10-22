@@ -65,17 +65,7 @@ class NotesList extends StatelessWidget {
                   itemCount: itemCubits.length,
                   itemBuilder: (context, i) {
                     final item = itemCubits[i];
-                    return Draggable(
-                        data: item,
-                        feedback: Material(
-                          child: Container(
-                            color: Colors.transparent,
-                            width: 300,
-                            height: 50,
-                            child: ItemRow(color: clr, item: item),
-                          ),
-                        ),
-                        child: ExpandableItemContainer(color: clr, item: item));
+                    return ExpandableItemContainer(color: clr, item: item);
                   }),
             );
           }),
@@ -95,10 +85,20 @@ class ExpandableItemContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final itemContainerView = ItemContainer(
-        color: color,
-        item: item,
-        onTap: () => context.read<ItemsCubit>().selectChild(item));
+    final itemContainerView = Draggable(
+        data: item,
+        feedback: Material(
+          child: Container(
+            color: Colors.transparent,
+            width: 300,
+            height: 50,
+            child: ItemRow(color: color, item: item),
+          ),
+        ),
+        child: ItemContainer(
+            color: color,
+            item: item,
+            onTap: () => context.read<ItemsCubit>().selectChild(item)));
     return item.isTopic && item.expanded
         ? Column(children: [
             itemContainerView,
@@ -109,12 +109,23 @@ class ExpandableItemContainer extends StatelessWidget {
                   return item.children[j].isTopic && item.children[j].expanded
                       ? ExpandableItemContainer(
                           item: item.children[j], color: color)
-                      : ItemContainer(
-                          color: color,
-                          item: item.children[j],
-                          onTap: () => context
-                              .read<ItemsCubit>()
-                              .selectChild(item.children[j]));
+                      : Draggable(
+                          data: item.children[j],
+                          feedback: Material(
+                            child: Container(
+                              color: Colors.transparent,
+                              width: 300,
+                              height: 50,
+                              child:
+                                  ItemRow(color: color, item: item.children[j]),
+                            ),
+                          ),
+                          child: ItemContainer(
+                              color: color,
+                              item: item.children[j],
+                              onTap: () => context
+                                  .read<ItemsCubit>()
+                                  .selectChild(item.children[j])));
                 })
           ])
         : itemContainerView;
