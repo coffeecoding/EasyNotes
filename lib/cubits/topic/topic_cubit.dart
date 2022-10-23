@@ -13,6 +13,14 @@ class TopicCubit extends Cubit<TopicState> {
     select(topicCubit!);
   }
 
+  void selectColor(int color) {
+    if (state.status == ItemStatus.newDraft) {
+      emit(TopicState.newDraft(topicCubit!));
+    } else {
+      emit(TopicState.draft(topicCubit!));
+    }
+  }
+
   void select(ItemCubit topic) {
     switch (topic.status) {
       case ItemStatus.busy:

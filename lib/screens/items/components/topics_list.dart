@@ -1,6 +1,5 @@
 import 'package:easynotes/cubits/cubits.dart';
 import 'package:easynotes/extensions/color_ext.dart';
-import 'package:easynotes/screens/common/responsive.dart';
 import 'package:easynotes/screens/common/toolbar_button.dart';
 import 'package:easynotes/screens/topic/topic_screen.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
@@ -35,7 +34,7 @@ class TopicsList extends StatelessWidget {
                         child: TopicScreen());
                     final created = await showDialog(
                         context: context, builder: (context) => dlg);
-                    if (created) {
+                    if (created != null && created == true) {
                       ic.insertTopicInTop(tc.topicCubit!);
                     }
                   }),
@@ -59,14 +58,6 @@ class TopicsList extends StatelessWidget {
                       itemBuilder: (context, idx) {
                         final topic = topics[idx];
                         final clr = HexColor.fromHex(topic.color);
-                        final dragHandle = Container(
-                            child: Responsive.isDesktop(context)
-                                ? ReorderableDragStartListener(
-                                    index: idx,
-                                    child: const Icon(Icons.drag_handle))
-                                : ReorderableDelayedDragStartListener(
-                                    index: idx,
-                                    child: const Icon(Icons.drag_handle)));
                         return RootItemContainer(
                             key: UniqueKey(),
                             item: topic,

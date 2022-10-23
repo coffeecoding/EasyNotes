@@ -86,7 +86,10 @@ class _TopicScreenState extends State<TopicScreen> {
                             ThemeColorButton(
                                 color: themeColor,
                                 selectedColor:
-                                    Color(int.parse(color, radix: 16))),
+                                    Color(int.parse(color, radix: 16)),
+                                onSelected: (v) {
+                                  context.read<TopicCubit>().selectColor(0);
+                                }),
                         ],
                       )
                     ],
@@ -123,12 +126,14 @@ class _TopicScreenState extends State<TopicScreen> {
 class ThemeColorButton extends StatelessWidget {
   const ThemeColorButton({
     super.key,
-    Color? color,
+    required this.color,
     required this.selectedColor,
-  }) : color = color ?? const Color(0xFFA9B852);
+    required this.onSelected,
+  });
 
   final Color color;
   final Color selectedColor;
+  final Function(bool)? onSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -150,11 +155,11 @@ class ThemeColorButton extends StatelessWidget {
         ),
         child: ChoiceChip(
           label: Icon(
-            FluentIcons.checkmark_24_regular,
-            color: selected ? color : Colors.transparent,
+            FluentIcons.checkmark_32_filled,
+            color: selected ? Colors.white : Colors.transparent,
           ),
-          selected: selected,
-          onSelected: (_) async {},
+          selected: false,
+          onSelected: onSelected,
           visualDensity: const VisualDensity(
             horizontal: VisualDensity.minimumDensity,
           ),
