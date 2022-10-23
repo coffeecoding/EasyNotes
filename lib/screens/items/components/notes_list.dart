@@ -1,5 +1,6 @@
 import 'package:easynotes/cubits/cubits.dart';
 import 'package:easynotes/extensions/color_ext.dart';
+import 'package:easynotes/screens/common/toolbar_button.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -34,30 +35,14 @@ class NotesList extends StatelessWidget {
                   title: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      TextButton(
-                        child: Row(children: const [
-                          Icon(FluentIcons.folder_add_20_regular,
-                              color: Colors.white70),
-                          SizedBox(width: 4),
-                          Text('Subtopic',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w400,
-                                  color: Colors.white70)),
-                        ]),
-                        onPressed: () {},
-                      ),
-                      TextButton(
-                        child: Row(children: const [
-                          Icon(FluentIcons.note_add_20_regular,
-                              color: Colors.white70),
-                          SizedBox(width: 4),
-                          Text('Note',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w400,
-                                  color: Colors.white70)),
-                        ]),
-                        onPressed: () {},
-                      ),
+                      ToolbarButton(
+                          iconData: FluentIcons.folder_add_20_regular,
+                          title: 'Subtopic',
+                          onPressed: () {}),
+                      ToolbarButton(
+                          iconData: FluentIcons.note_add_20_regular,
+                          title: 'Note',
+                          onPressed: () {}),
                     ],
                   )),
               body: Container(

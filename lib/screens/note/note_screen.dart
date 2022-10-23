@@ -1,4 +1,5 @@
 import 'package:easynotes/cubits/cubits.dart';
+import 'package:easynotes/screens/common/toolbar_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -60,12 +61,12 @@ class NoteScreen extends StatelessWidget {
         backgroundColor: Colors.black12,
         title:
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          ActionButton(
+          ToolbarButton(
               iconData: FluentIcons.delete_20_regular,
               title: 'Move to Trash',
               enabled: true,
               onPressed: () {}),
-          ActionButton(
+          ToolbarButton(
               iconData: FluentIcons.pin_20_regular,
               title: 'Pin Globally',
               enabled: true,
@@ -86,7 +87,7 @@ class DiscardButton extends StatelessWidget {
     return BlocBuilder<SelectedNoteCubit, SelectedNoteState>(
         buildWhen: (p, n) => p.status != n.status,
         builder: (context, state) {
-          return ActionButton(
+          return ToolbarButton(
               iconData: FluentIcons.dismiss_16_regular,
               onPressed: () => state.selectedNote!.resetState(),
               enabled: state.status != ItemStatus.persisted,
@@ -109,7 +110,7 @@ class SaveButton extends StatelessWidget {
             case ItemStatus.busy:
               return const Center(child: CircularProgressIndicator());
             default:
-              return ActionButton(
+              return ToolbarButton(
                   iconData: FluentIcons.save_16_regular,
                   onPressed: () {
                     noteView.saveLocalState(context);
@@ -120,40 +121,5 @@ class SaveButton extends StatelessWidget {
                   title: 'Save');
           }
         });
-  }
-}
-
-class ActionButton extends StatelessWidget {
-  const ActionButton(
-      {super.key,
-      this.onPressed,
-      required this.iconData,
-      required this.title,
-      this.enabled = true});
-
-  final Function()? onPressed;
-  final bool enabled;
-  final IconData iconData;
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return TextButton(
-      onPressed: enabled ? onPressed : null,
-      child: Row(
-        children: [
-          Icon(iconData,
-              color:
-                  enabled ? Colors.white70 : Theme.of(context).disabledColor),
-          const SizedBox(width: 4),
-          Text(title,
-              style: TextStyle(
-                  fontWeight: FontWeight.w400,
-                  color: enabled
-                      ? Colors.white70
-                      : Theme.of(context).disabledColor)),
-        ],
-      ),
-    );
   }
 }

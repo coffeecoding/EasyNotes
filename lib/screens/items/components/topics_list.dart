@@ -1,6 +1,7 @@
 import 'package:easynotes/cubits/cubits.dart';
 import 'package:easynotes/extensions/color_ext.dart';
 import 'package:easynotes/screens/common/responsive.dart';
+import 'package:easynotes/screens/common/toolbar_button.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -18,16 +19,10 @@ class TopicsList extends StatelessWidget {
           title: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              TextButton(
-                child: Row(children: const [
-                  Icon(FluentIcons.folder_add_20_filled, color: Colors.white70),
-                  SizedBox(width: 4),
-                  Text('Topic',
-                      style: TextStyle(
-                          fontWeight: FontWeight.w400, color: Colors.white70)),
-                ]),
-                onPressed: () {},
-              ),
+              ToolbarButton(
+                  iconData: FluentIcons.folder_add_20_filled,
+                  title: 'Topic',
+                  onPressed: () {}),
             ],
           )),
       body: BlocBuilder<ItemsCubit, ItemsState>(
