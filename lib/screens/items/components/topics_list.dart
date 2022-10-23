@@ -2,6 +2,7 @@ import 'package:easynotes/cubits/cubits.dart';
 import 'package:easynotes/extensions/color_ext.dart';
 import 'package:easynotes/screens/common/responsive.dart';
 import 'package:easynotes/screens/common/toolbar_button.dart';
+import 'package:easynotes/screens/topic/topic_screen.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -22,7 +23,14 @@ class TopicsList extends StatelessWidget {
               ToolbarButton(
                   iconData: FluentIcons.folder_add_20_filled,
                   title: 'Topic',
-                  onPressed: () {}),
+                  onPressed: () async {
+                    Dialog dlg = const Dialog(
+                        insetPadding:
+                            EdgeInsets.symmetric(horizontal: 128, vertical: 64),
+                        child: TopicScreen());
+                    await showDialog(
+                        context: context, builder: (context) => dlg);
+                  }),
             ],
           )),
       body: BlocBuilder<ItemsCubit, ItemsState>(

@@ -43,6 +43,8 @@ class EasyNotesApp extends StatelessWidget {
                     selectedNoteCubit:
                         BlocProvider.of<SelectedNoteCubit>(context),
                   )),
+          BlocProvider<TopicCubit>(
+              lazy: false, create: (context) => TopicCubit()),
         ],
         child: MaterialApp(
           title: 'EasyNotes',
@@ -50,7 +52,8 @@ class EasyNotesApp extends StatelessWidget {
           theme: ThemeData(
             visualDensity: VisualDensity.adaptivePlatformDensity,
             brightness: Brightness.dark,
-            primarySwatch: Colors.purple,
+            primaryColor: Colors.lightBlue,
+            primarySwatch: Colors.lightBlue,
           ),
           themeMode: ThemeMode.light,
           navigatorKey: navigatorKey,

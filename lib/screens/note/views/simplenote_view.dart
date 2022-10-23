@@ -1,4 +1,5 @@
 import 'package:easynotes/cubits/cubits.dart';
+import 'package:easynotes/screens/common/title_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -41,23 +42,9 @@ class _SimpleNoteViewState extends State<SimpleNoteView> {
     Widget result = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(children: [
-        TextField(
-            cursorWidth: 1,
-            decoration: InputDecoration(
-                hoverColor: Colors.green,
-                focusedBorder: const UnderlineInputBorder(
-                    borderSide: BorderSide(width: 0, color: Colors.purple)),
-                enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(
-                        width: 1.0 /
-                            MediaQuery.of(context)
-                                .devicePixelRatio, // this is how to generally achieve 1 pixel width in Flutter
-                        color: Theme.of(context).dividerColor))),
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w100),
+        TitleTextfield(
             onChanged: (_) => ensureStateIsDraft(context),
             onEditingComplete: () => widget.contentFN.requestFocus(),
-            toolbarOptions: const ToolbarOptions(
-                paste: true, copy: true, selectAll: true, cut: true),
             onTap: () {
               widget.contentFN.unfocus();
               widget.focussedElement = FocussedElement.title;
