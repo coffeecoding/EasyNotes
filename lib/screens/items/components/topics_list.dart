@@ -24,9 +24,13 @@ class TopicsList extends StatelessWidget {
                   iconData: FluentIcons.folder_add_20_filled,
                   title: 'Topic',
                   onPressed: () async {
+                    await BlocProvider.of<ItemsCubit>(context)
+                        .createItem(null, 0)
+                        .then((cubit) =>
+                            BlocProvider.of<TopicCubit>(context).select(cubit));
                     Dialog dlg = const Dialog(
                         insetPadding:
-                            EdgeInsets.symmetric(horizontal: 128, vertical: 64),
+                            EdgeInsets.symmetric(horizontal: 8, vertical: 32),
                         child: TopicScreen());
                     await showDialog(
                         context: context, builder: (context) => dlg);

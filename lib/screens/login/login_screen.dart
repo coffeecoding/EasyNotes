@@ -60,7 +60,7 @@ class _LoginScreenState extends State<LoginScreen> {
             Expanded(
               flex: 2,
               child: Container(
-                color: HexColor.fromHex('#222222'),
+                color: HexColor.fromHex('ff222222'),
                 child: Row(children: [
                   Expanded(
                       flex: 1,

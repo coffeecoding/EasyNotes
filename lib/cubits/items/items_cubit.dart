@@ -9,7 +9,10 @@ import 'package:equatable/equatable.dart';
 part 'items_state.dart';
 
 class ItemsCubit extends Cubit<ItemsState> {
-  ItemsCubit({required this.itemRepo, required this.selectedNoteCubit})
+  ItemsCubit(
+      {required this.itemRepo,
+      required this.selectedNoteCubit,
+      required this.topicScreenCubit})
       : super(const ItemsState.initial());
 
   final ItemRepository itemRepo;
@@ -18,6 +21,7 @@ class ItemsCubit extends Cubit<ItemsState> {
   ItemCubit? get selectedTopic => state.selectedTopic;
   ItemCubit? get selectedNote => state.selectedNote;
   SelectedNoteCubit selectedNoteCubit;
+  TopicCubit topicScreenCubit;
 
   void selectTopic(int? i) => emit(ItemsState.changed(
       prev: state, selectedTopic: i == null ? null : topicCubits[i]));
@@ -43,7 +47,7 @@ class ItemsCubit extends Cubit<ItemsState> {
     topicCubits.add(topicCubit);
   }
 
-  Future createItem(ItemCubit? parent, ItemCubit topic, int type) async {
+  Future<ItemCubit> createItem(ItemCubit? parent, int type) async {
     Item newItem = await itemRepo.createNewItem(
         parent_id: parent?.id,
         color: parent?.color ?? defaultItemColor,
@@ -54,14 +58,19 @@ class ItemsCubit extends Cubit<ItemsState> {
         itemsCubit: this,
         parent: parent,
         expanded: false);
-    if (parent == null) {
+    /*if (parent == null) {
       addTopic(newCubit);
     } else {
       parent.addChild(newCubit);
     }
     selectChild(newCubit);
     handleItemsChanged();
-    if (!newItem.isTopic) handleSelectedNoteChanged(newCubit);
+    if (!newItem.isTopic) {
+      handleSelectedNoteChanged(newCubit);
+    } else {
+      topicScreenCubit.select(newCubit);
+    }*/
+    return newCubit;
   }
 
   void handleRootItemsChanged() {

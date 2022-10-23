@@ -1,11 +1,12 @@
 part of 'topic_cubit.dart';
 
 class TopicState extends Equatable {
-  const TopicState._({this.status, this.topicCubit, this.color = '#A9B852'});
+  const TopicState._(
+      {this.status, this.topicCubit, this.colorSelection = 'ffe57373'});
 
   const TopicState.empty() : this._();
 
-  const TopicState.persisted(ItemCubit topic)
+  const TopicState.persisted(ItemCubit? topic)
       : this._(status: ItemStatus.persisted, topicCubit: topic);
 
   const TopicState.newDraft(ItemCubit topic)
@@ -22,8 +23,8 @@ class TopicState extends Equatable {
 
   final ItemStatus? status;
   final ItemCubit? topicCubit;
-  final String color;
+  final String colorSelection;
 
   @override
-  List<Object?> get props => [status, topicCubit];
+  List<Object?> get props => [status, colorSelection, topicCubit];
 }

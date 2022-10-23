@@ -36,15 +36,16 @@ class EasyNotesApp extends StatelessWidget {
                   itemRepository: locator.get<ItemRepository>())),
           BlocProvider<SelectedNoteCubit>(
               lazy: false, create: (context) => SelectedNoteCubit()),
+          BlocProvider<TopicCubit>(
+              lazy: false, create: (context) => TopicCubit(null)),
           BlocProvider<ItemsCubit>(
               lazy: false,
               create: (context) => ItemsCubit(
                     itemRepo: locator.get<ItemRepository>(),
+                    topicScreenCubit: BlocProvider.of<TopicCubit>(context),
                     selectedNoteCubit:
                         BlocProvider.of<SelectedNoteCubit>(context),
                   )),
-          BlocProvider<TopicCubit>(
-              lazy: false, create: (context) => TopicCubit()),
         ],
         child: MaterialApp(
           title: 'EasyNotes',

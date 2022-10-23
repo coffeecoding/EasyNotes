@@ -1,3 +1,4 @@
+import 'package:easynotes/app_theme.dart';
 import 'package:easynotes/cubits/cubits.dart';
 import 'package:easynotes/cubits/topic/topic_cubit.dart';
 import 'package:easynotes/screens/common/input_label.dart';
@@ -25,10 +26,8 @@ class TopicScreen extends StatelessWidget {
         titleFN.requestFocus();
         TextEditingController titleCtr = TextEditingController();
         titleCtr.selection = TextSelection(
-            baseOffset: state.topicCubit?.title == null
-                ? 0
-                : state.topicCubit!.title.length,
-            extentOffset: 0);
+            baseOffset: state.topicCubit!.title.length, extentOffset: 0);
+        String color = state.topicCubit!.color;
         return Container(
           height: 400,
           width: 400,
@@ -60,12 +59,79 @@ class TopicScreen extends StatelessWidget {
                   TitleTextfield(focusNode: titleFN),
                   const SizedBox(height: 32),
                   const InputLabel(text: 'Color:'),
+                  const SizedBox(height: 8),
+                  GridView.count(
+                    crossAxisCount: 6,
+                    childAspectRatio: 1,
+                    shrinkWrap: true,
+                    children: <Widget>[
+                      for (Color themeColor in AppTheme.themeColors)
+                        ThemeColorButton(
+                            color: themeColor,
+                            selectedColor: Color(int.parse(color, radix: 16))),
+                    ],
+                  )
                 ],
               ),
             ),
           ),
         );
       },
+    );
+  }
+
+  Widget _buildHorizontalScrollable(BuildContext context,
+      {required List<Widget> children}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(children: children),
+      ),
+    );
+  }
+}
+
+class ThemeColorButton extends StatelessWidget {
+  const ThemeColorButton({
+    super.key,
+    Color? color,
+    required this.selectedColor,
+  }) : color = color ?? const Color(0xFFA9B852);
+
+  final Color color;
+  final Color selectedColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool selected = color == selectedColor;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: ChipTheme(
+        data: ChipThemeData.fromDefaults(
+          brightness: ThemeData.estimateBrightnessForColor(color),
+          secondaryColor: color,
+          labelStyle: const TextStyle(),
+        ).copyWith(
+          backgroundColor: color,
+          labelPadding: EdgeInsets.zero,
+          side: selected
+              ? BorderSide(color: color)
+              : const BorderSide(color: Colors.transparent),
+        ),
+        child: ChoiceChip(
+          label: Icon(
+            FluentIcons.checkmark_24_regular,
+            color: selected ? color : Colors.transparent,
+          ),
+          selected: selected,
+          onSelected: (_) async {},
+          visualDensity: const VisualDensity(
+            horizontal: VisualDensity.minimumDensity,
+          ),
+        ),
+      ),
     );
   }
 }
