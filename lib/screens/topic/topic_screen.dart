@@ -59,7 +59,7 @@ class _TopicScreenState extends State<TopicScreen> {
                                 newStatus: state.status,
                                 titleField: titleCtr.text,
                                 contentField: '',
-                                color: color);
+                                colorSelection: color);
                             bool s = await context.read<TopicCubit>().save();
                             if (s && mounted) {
                               Navigator.of(context).pop(true);

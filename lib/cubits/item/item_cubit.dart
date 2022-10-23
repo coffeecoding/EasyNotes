@@ -18,9 +18,6 @@ class ItemCubit extends Cubit<ItemState> {
       required List<Item> items,
       this.expanded = false})
       : itemRepo = locator.get<ItemRepository>(),
-        titleField = item.title,
-        contentField = item.content,
-        colorSelection = item.color,
         error = '',
         super(item.id.isEmpty
             ? const ItemState.newDraft()
@@ -49,12 +46,10 @@ class ItemCubit extends Cubit<ItemState> {
 
   // Local UI state
   bool expanded;
-  String titleField;
-  String contentField;
-  String colorSelection;
   String error;
 
-  ItemUpdateAction getWriteAction() {
+  ItemUpdateAction getWriteAction(
+      String titleField, String contentField, String colorSelection) {
     if (status == ItemStatus.newDraft) {
       return ItemUpdateAction.insert;
     } else if (titleField == title &&
@@ -68,10 +63,15 @@ class ItemCubit extends Cubit<ItemState> {
     return ItemUpdateAction.update;
   }
 
-  Future<bool> save() async {
+  Future<bool> save({
+    String? titleField,
+    String? contentField,
+    String? colorSelection,
+  }) async {
     try {
       int ts = DateTime.now().toUtc().millisecondsSinceEpoch;
-      ItemUpdateAction iua = getWriteAction();
+      ItemUpdateAction iua = getWriteAction(titleField ?? title,
+          contentField ?? content, colorSelection ?? color);
       Item updated = item.copyWith(
           title: titleField,
           content: contentField,
@@ -94,10 +94,7 @@ class ItemCubit extends Cubit<ItemState> {
       {ItemStatus? newStatus,
       required String titleField,
       required String contentField,
-      String? color}) {
-    titleField = titleField;
-    contentField = contentField;
-    colorSelection = color ?? colorSelection;
+      String? colorSelection}) {
     if (newStatus == ItemStatus.draft) {
       emit(const ItemState.draft());
     } else if (newStatus == ItemStatus.newDraft) {

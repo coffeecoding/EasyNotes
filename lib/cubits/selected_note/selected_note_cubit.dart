@@ -15,15 +15,23 @@ class SelectedNoteCubit extends Cubit<SelectedNoteState> {
 
   ItemCubit? get note => state.selectedNote;
 
-  Future<void> save() async {
+  Future<void> save({
+    String? titleField,
+    String? contentField,
+    String? colorSelection,
+  }) async {
     try {
       emit(SelectedNoteState.busy(note!));
-      final success = await note!.save();
+      final success = await note!.save(
+          titleField: titleField,
+          contentField: contentField,
+          colorSelection: colorSelection);
       if (!success) {
         print("error saving item (no success)");
         emit(SelectedNoteState.error(note!));
       } else {
         handleChanged();
+        note!.itemsCubit.handleSelectedNoteChanged(note);
       }
     } catch (e) {
       print("error saving item: $e");

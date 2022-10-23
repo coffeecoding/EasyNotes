@@ -50,7 +50,8 @@ class NoteScreen extends StatelessWidget {
           draftNoteViews.add(noteView!);
         }
       }
-      return Scaffold(appBar: buildActionPanel(context), body: noteView);
+      return Scaffold(
+          key: UniqueKey(), appBar: buildActionPanel(context), body: noteView);
     });
   }
 
@@ -112,13 +113,14 @@ class SaveButton extends StatelessWidget {
               return const Center(child: CircularProgressIndicator());
             default:
               return ToolbarButton(
+                  key: UniqueKey(),
                   iconData: FluentIcons.save_16_regular,
                   onPressed: () {
                     noteView.saveLocalState(context);
-                    //state.selectedNote!.save();
-                    context.read<SelectedNoteCubit>().save().then((_) => context
-                        .read<ItemsCubit>()
-                        .handleSelectedNoteChanged(state.selectedNote));
+                    context.read<SelectedNoteCubit>().save(
+                          titleField: noteView.titleField,
+                          contentField: noteView.contentField,
+                        );
                   },
                   enabled: state.status != ItemStatus.persisted,
                   title: 'Save');
