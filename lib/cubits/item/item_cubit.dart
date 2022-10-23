@@ -76,9 +76,9 @@ class ItemCubit extends Cubit<ItemState> {
       ItemUpdateAction iua = getWriteAction(titleField ?? title,
           contentField ?? content, colorSelection ?? color);
       Item updated = item.copyWith(
-          title: titleField,
-          content: contentField,
-          color: colorSelection,
+          title: titleField ?? title,
+          content: contentField ?? content,
+          color: colorSelection ?? color,
           created: iua == ItemUpdateAction.insert ? ts : item.created,
           modified: ts,
           modified_header: ts);

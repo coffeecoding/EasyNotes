@@ -1,5 +1,6 @@
 import 'package:easynotes/app_theme.dart';
 import 'package:easynotes/cubits/cubits.dart';
+import 'package:easynotes/extensions/color_ext.dart';
 import 'package:easynotes/screens/common/input_label.dart';
 import 'package:easynotes/screens/common/title_textfield.dart';
 import 'package:easynotes/screens/common/toolbar_button.dart';
@@ -15,6 +16,8 @@ class TopicScreen extends StatefulWidget {
 }
 
 class _TopicScreenState extends State<TopicScreen> {
+  String? selectedColor;
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<TopicCubit, TopicState>(
@@ -29,7 +32,7 @@ class _TopicScreenState extends State<TopicScreen> {
         FocusNode titleFN = FocusNode();
         titleFN.requestFocus();
         TextEditingController titleCtr = TextEditingController();
-        String color = topicCubit.color;
+        selectedColor = topicCubit.color;
         return SizedBox(
           height: 400,
           width: 400,
@@ -59,10 +62,9 @@ class _TopicScreenState extends State<TopicScreen> {
                                 newStatus: state.status,
                                 titleField: titleCtr.text,
                                 contentField: '',
-                                colorSelection: color);
-                            bool s = await context
-                                .read<TopicCubit>()
-                                .save(title: titleCtr.text);
+                                colorSelection: selectedColor);
+                            bool s = await context.read<TopicCubit>().save(
+                                title: titleCtr.text, color: selectedColor);
                             if (s && mounted) {
                               Navigator.of(context).pop(true);
                             }
@@ -79,21 +81,26 @@ class _TopicScreenState extends State<TopicScreen> {
                       const SizedBox(height: 32),
                       const InputLabel(text: 'Color:'),
                       const SizedBox(height: 8),
-                      GridView.count(
-                        crossAxisCount: 6,
-                        childAspectRatio: 1,
-                        shrinkWrap: true,
-                        children: <Widget>[
-                          for (Color themeColor in AppTheme.themeColors)
-                            ThemeColorButton(
-                                color: themeColor,
-                                selectedColor:
-                                    Color(int.parse(color, radix: 16)),
-                                onSelected: (v) {
-                                  context.read<TopicCubit>().selectColor(0);
-                                }),
-                        ],
-                      )
+                      StatefulBuilder(
+                          builder: ((context, setState) => GridView.count(
+                                crossAxisCount: 6,
+                                childAspectRatio: 1,
+                                shrinkWrap: true,
+                                children: <Widget>[
+                                  for (Color themeColor in AppTheme.themeColors)
+                                    ThemeColorButton(
+                                        color: themeColor,
+                                        selectedColor: Color(int.parse(
+                                            selectedColor!,
+                                            radix: 16)),
+                                        onSelected: (v) {
+                                          if (v) {
+                                            selectedColor = themeColor.toHex();
+                                            setState(() {});
+                                          }
+                                        }),
+                                ],
+                              )))
                     ],
                   ),
                 ),
