@@ -24,7 +24,7 @@ class TopicCubit extends Cubit<TopicState> {
     }
   }
 
-  Future<void> save({String? title, String? color}) async {
+  Future<bool> save({String? title, String? color}) async {
     try {
       topicCubit!.saveLocalState(
           titleField: title ?? topicCubit!.title,
@@ -32,9 +32,12 @@ class TopicCubit extends Cubit<TopicState> {
           color: color);
       emit(TopicState.busy(topicCubit!));
       final success = await topicCubit!.save();
+      emit(TopicState.persisted(topicCubit));
+      return success;
     } catch (e) {
       print('error saving topic: $e');
       emit(TopicState.error(topicCubit!));
+      return false;
     }
   }
 }

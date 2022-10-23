@@ -87,7 +87,6 @@ class ItemCubit extends Cubit<ItemState> {
           titleField: item.title,
           contentField: item.content,
           modified: ts));
-      itemsCubit.handleSelectedNoteChanged(this);
       return true;
     } catch (e) {
       print("error saving item: $e");
@@ -119,7 +118,6 @@ class ItemCubit extends Cubit<ItemState> {
             contentField: item.content,
             modified: item.modified));
       }
-      itemsCubit.handleSelectedNoteChanged(this);
     }
   }
 

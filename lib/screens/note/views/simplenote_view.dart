@@ -24,6 +24,7 @@ class SimpleNoteView extends StatefulWidget implements NoteView {
         newStatus: ItemStatus.draft,
         titleField: titleCtr.text,
         contentField: contentCtr.text);
+    BlocProvider.of<ItemsCubit>(context).handleSelectedNoteChanged(note);
   }
 
   @override
