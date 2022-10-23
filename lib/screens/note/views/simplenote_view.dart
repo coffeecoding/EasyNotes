@@ -7,8 +7,8 @@ import 'abstract_note_view.dart';
 
 class SimpleNoteView extends StatefulWidget implements NoteView {
   SimpleNoteView({super.key, required this.note})
-      : titleCtr = TextEditingController(text: note.state.titleField),
-        contentCtr = TextEditingController(text: note.state.contentField);
+      : titleCtr = TextEditingController(text: note.titleField),
+        contentCtr = TextEditingController(text: note.contentField);
 
   @override
   ItemCubit note;

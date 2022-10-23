@@ -18,16 +18,13 @@ class ItemCubit extends Cubit<ItemState> {
       required List<Item> items,
       this.expanded = false})
       : itemRepo = locator.get<ItemRepository>(),
+        titleField = item.title,
+        contentField = item.content,
+        colorSelection = item.color,
+        error = '',
         super(item.id.isEmpty
-            ? const ItemState.newDraft(
-                colorSelection: defaultItemColor,
-                titleField: '',
-                contentField: '')
-            : ItemState.persisted(
-                colorSelection: item.color,
-                titleField: item.title,
-                contentField: item.content,
-                modified: item.modified)) {
+            ? const ItemState.newDraft()
+            : const ItemState.persisted()) {
     initChildren(items);
   }
 
@@ -52,9 +49,10 @@ class ItemCubit extends Cubit<ItemState> {
 
   // Local UI state
   bool expanded;
-  String get titleField => state.titleField;
-  String get contentField => state.contentField;
-  String get colorSelection => state.colorSelection;
+  String titleField;
+  String contentField;
+  String colorSelection;
+  String error;
 
   ItemUpdateAction getWriteAction() {
     if (status == ItemStatus.newDraft) {
@@ -71,33 +69,23 @@ class ItemCubit extends Cubit<ItemState> {
   }
 
   Future<bool> save() async {
-    String t = state.titleField;
-    String c = state.contentField;
-    String clr = state.colorSelection;
     try {
       int ts = DateTime.now().toUtc().millisecondsSinceEpoch;
       ItemUpdateAction iua = getWriteAction();
       Item updated = item.copyWith(
-          title: t,
-          content: c,
-          color: clr,
+          title: titleField,
+          content: contentField,
+          color: colorSelection,
           created: iua == ItemUpdateAction.insert ? ts : item.created,
           modified: ts,
           modified_header: ts);
       item = await itemRepo.insertOrUpdateItem(updated, iua);
-      emit(ItemState.persisted(
-          colorSelection: clr,
-          titleField: item.title,
-          contentField: item.content,
-          modified: ts));
+      emit(const ItemState.persisted());
       return true;
     } catch (e) {
       print("error saving item: $e");
-      emit(ItemState.error(
-          prev: state,
-          titleField: t,
-          contentField: c,
-          errorMsg: 'Failed to save: $e'));
+      error = 'failed to save item: $e';
+      emit(const ItemState.error());
       return false;
     }
   }
@@ -107,26 +95,18 @@ class ItemCubit extends Cubit<ItemState> {
       required String titleField,
       required String contentField,
       String? color}) {
+    titleField = titleField;
+    contentField = contentField;
+    colorSelection = color ?? colorSelection;
     if (newStatus == ItemStatus.draft) {
-      emit(ItemState.draft(
-          prev: state,
-          colorSelection: color,
-          titleField: titleField,
-          contentField: contentField));
+      emit(const ItemState.draft());
     } else if (newStatus == ItemStatus.newDraft) {
-      emit(ItemState.newDraft(
-          colorSelection: color ?? state.colorSelection,
-          titleField: titleField,
-          contentField: contentField));
+      emit(const ItemState.newDraft());
     }
   }
 
   void resetState() {
-    emit(ItemState.persisted(
-        colorSelection: item.color,
-        titleField: item.title,
-        contentField: item.content,
-        modified: item.modified));
+    emit(const ItemState.persisted());
     itemsCubit.handleSelectedNoteChanged(this);
   }
 
