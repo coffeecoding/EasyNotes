@@ -64,13 +64,14 @@ class NoteScreen extends StatelessWidget {
           ToolbarButton(
               iconData: FluentIcons.delete_20_regular,
               title: 'Move to Trash',
+              enabledColor: Colors.red,
               enabled: true,
               onPressed: () {}),
-          ToolbarButton(
+          /*ToolbarButton(
               iconData: FluentIcons.pin_20_regular,
               title: 'Pin Globally',
               enabled: true,
-              onPressed: () {}),
+              onPressed: () {}),*/
           Row(children: [
             DiscardButton(key: UniqueKey()),
             SaveButton(key: UniqueKey(), noteView: noteView!),

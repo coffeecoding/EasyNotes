@@ -3,6 +3,7 @@ import 'package:easynotes/models/item.dart';
 import 'package:easynotes/config/sample_data.dart';
 import 'package:easynotes/screens/common/responsive.dart';
 import 'package:easynotes/screens/common/styles.dart';
+import 'package:easynotes/screens/common/toolbar_button.dart';
 import 'package:easynotes/screens/common/uiconstants.dart';
 import 'package:easynotes/screens/items/items_screen.dart';
 import 'package:easynotes/screens/note/note_screen.dart';
@@ -29,32 +30,15 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         toolbarHeight: 64,
         elevation: 1,
+        titleSpacing: 8,
         title:
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
           Row(
             children: [
-              ElevatedButton(
-                style: const ENPrimaryButtonStyle(),
-                child: Row(children: [
-                  const Icon(FluentIcons.folder_add_20_regular),
-                  const SizedBox(width: 4),
-                  Text('Create Topic',
-                      style: TextStyle(
-                          fontWeight: FontWeight.w400,
-                          color: Theme.of(context).textTheme.bodyText1!.color)),
-                ]),
-                onPressed: () {},
-              ),
-              TextButton(
-                child: Row(children: [
-                  Icon(FluentIcons.note_add_20_regular,
-                      color: Theme.of(context).textTheme.bodyText1!.color),
-                  const SizedBox(width: 4),
-                  Text('Create Note',
-                      style: TextStyle(
-                          fontWeight: FontWeight.w400,
-                          color: Theme.of(context).textTheme.bodyText1!.color)),
-                ]),
+              ToolbarButton(
+                iconData: FluentIcons.settings_20_regular,
+                title: 'Settings',
+                enabledColor: Colors.white70,
                 onPressed: () {},
               ),
             ],
@@ -81,10 +65,6 @@ class HomeScreen extends StatelessWidget {
               ),
             ]),
           ),
-          IconButton(
-            icon: const Icon(FluentIcons.settings_20_regular),
-            onPressed: () {},
-          )
         ]),
       ),
       body: Row(children: [
