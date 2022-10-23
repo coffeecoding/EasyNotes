@@ -1,6 +1,8 @@
 import 'package:bloc/bloc.dart';
+import 'package:easynotes/config/constants.dart';
 import 'package:easynotes/cubits/cubits.dart';
 import 'package:easynotes/cubits/selected_note/selected_note_cubit.dart';
+import 'package:easynotes/models/item.dart';
 import 'package:easynotes/repositories/item_repository.dart';
 import 'package:equatable/equatable.dart';
 
@@ -39,6 +41,27 @@ class ItemsCubit extends Cubit<ItemsState> {
   void addTopic(ItemCubit topicCubit) {
     // todo : apply preferred sorting
     topicCubits.add(topicCubit);
+  }
+
+  Future createItem(ItemCubit? parent, ItemCubit topic, int type) async {
+    Item newItem = await itemRepo.createNewItem(
+        parent_id: parent?.id,
+        color: parent?.color ?? defaultItemColor,
+        type: type);
+    ItemCubit newCubit = ItemCubit(
+        item: newItem,
+        items: [],
+        itemsCubit: this,
+        parent: parent,
+        expanded: false);
+    if (parent == null) {
+      addTopic(newCubit);
+    } else {
+      parent.addChild(newCubit);
+    }
+    selectChild(newCubit);
+    handleItemsChanged();
+    if (!newItem.isTopic) handleSelectedNoteChanged(newCubit);
   }
 
   void handleRootItemsChanged() {

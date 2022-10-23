@@ -12,7 +12,7 @@ import '../models/item_position_data.dart';
 import '../services/network_provider.dart';
 import 'preference_repository.dart';
 
-enum ItemUpdateAction { insert, updateBody, updateHeader }
+enum ItemUpdateAction { none, insert, update, updateHeaderOnly }
 
 abstract class ItemRepository {
   Future<List<Item>> setItems(List<Item> items);
@@ -22,7 +22,7 @@ abstract class ItemRepository {
   Future<List<Item>> fetchItems();
   Future<List<Item>> fetchTrashedItems();
   Future<List<Item>> fetchRootItems();
-  Future<Item> insertOrUpdateItem(Item item);
+  Future<Item> insertOrUpdateItem(Item item, ItemUpdateAction action);
   Future<List<Item>> insertOrUpdateItems(List<Item> items);
   Future<Item> updateItemHeader(ItemHeader header);
   Future<Item> updateItemParent(String id, String? parent_id);
@@ -32,6 +32,9 @@ abstract class ItemRepository {
   Future<List<Item>> updateItemPositions(ItemPositionData ipd);
   Future<bool> delete(String id);
   Future<bool> deleteItems(List<String> ids);
+
+  Future<Item> createNewItem(
+      {required String? parent_id, required String color, required int type});
 }
 
 class ItemRepo implements ItemRepository {
@@ -46,6 +49,19 @@ class ItemRepo implements ItemRepository {
 
   List<Item> items = <Item>[];
   List<Item> trashedItems = <Item>[];
+
+  @override
+  Future<Item> createNewItem(
+      {required String? parent_id,
+      required String color,
+      required int type}) async {
+    return Item.empty(
+      color: color,
+      parent_id: parent_id,
+      receiver_id: (await prefsRepo.username)!,
+      type: type,
+    );
+  }
 
   // This function is used when initially getting the items from the auth_bloc
   // since they are already returned upon logging in
@@ -103,7 +119,7 @@ class ItemRepo implements ItemRepository {
   }
 
   @override
-  Future<Item> insertOrUpdateItem(Item item) async {
+  Future<Item> insertOrUpdateItem(Item item, ItemUpdateAction action) async {
     Item encrypted = await cryptoService.encryptItem(item);
     Response? response =
         await netClient.post('/api/item', jsonEncode(encrypted));

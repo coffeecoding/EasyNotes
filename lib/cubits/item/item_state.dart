@@ -8,46 +8,69 @@ class ItemState extends Equatable {
     this.titleField = '',
     this.contentField = '',
     this.errorMsg = '',
+    this.colorSelection = defaultItemColor,
+    this.modified = 0,
   });
 
   const ItemState.persisted(
-      {required String titleField, required String contentField})
+      {required String titleField,
+      required String contentField,
+      required String colorSelection,
+      required int modified})
       : this._(
             status: ItemStatus.persisted,
             titleField: titleField,
-            contentField: contentField);
+            contentField: contentField,
+            colorSelection: colorSelection,
+            modified: modified);
 
   const ItemState.newDraft() : this._(status: ItemStatus.newDraft);
 
-  const ItemState.draft(
-      {required String titleField, required String contentField})
+  ItemState.draft(
+      {required ItemState prev,
+      String? titleField,
+      String? contentField,
+      String? colorSelection})
       : this._(
             status: ItemStatus.draft,
-            titleField: titleField,
-            contentField: contentField);
+            titleField: titleField ?? prev.titleField,
+            contentField: contentField ?? prev.contentField,
+            colorSelection: prev.colorSelection,
+            modified: prev.modified);
 
-  const ItemState.busy(
-      {required String titleField, required String contentField})
+  ItemState.busy(
+      {required ItemState prev,
+      String? titleField,
+      String? contentField,
+      String? colorSelection})
       : this._(
             status: ItemStatus.busy,
-            titleField: titleField,
-            contentField: contentField);
+            titleField: titleField ?? prev.titleField,
+            contentField: contentField ?? prev.contentField,
+            colorSelection: prev.colorSelection,
+            modified: prev.modified);
 
-  const ItemState.error({
-    required String titleField,
-    required String contentField,
-    required String errorMsg,
-  }) : this._(
+  ItemState.error(
+      {required ItemState prev,
+      required String errorMsg,
+      String? titleField,
+      String? contentField,
+      String? colorSelection})
+      : this._(
             status: ItemStatus.error,
-            titleField: titleField,
-            contentField: contentField,
-            errorMsg: errorMsg);
+            titleField: titleField ?? prev.titleField,
+            contentField: contentField ?? prev.contentField,
+            colorSelection: prev.colorSelection,
+            modified: prev.modified);
 
   final ItemStatus status;
   final String titleField;
   final String contentField;
+  final String colorSelection;
+  final int modified;
   final String errorMsg;
 
   @override
-  List<Object?> get props => [status, errorMsg];
+  List<Object?> get props =>
+      [status, titleField, contentField, colorSelection, modified, errorMsg];
 }

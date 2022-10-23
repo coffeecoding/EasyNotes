@@ -188,6 +188,33 @@ class Item extends Equatable with JsonData {
         trashed: null);
   }
 
+  factory Item.empty(
+      {required String? parent_id,
+      required int type,
+      required String receiver_id,
+      String color = '#ff8a8a'}) {
+    return Item(
+        id: '',
+        title: '',
+        parent_id: parent_id,
+        receiver_id: receiver_id,
+        sender_id: '',
+        content: '',
+        pinned: false,
+        pinned_globally: false,
+        symbol: type == 0 ? 'T' : 'N',
+        item_type: type,
+        color: color,
+        options: '',
+        ivkey: '',
+        signature: '',
+        position: 0,
+        created: 0,
+        modified: 0,
+        modified_header: 0,
+        trashed: null);
+  }
+
   @override
   String toJson() => json.encode(toMap());
 

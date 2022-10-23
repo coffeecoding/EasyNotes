@@ -8,6 +8,19 @@ class MockItemRepo implements ItemRepository {
   List<Item> trashedItems = <Item>[];
 
   @override
+  Future<Item> createNewItem(
+      {required String? parent_id,
+      required String color,
+      required int type}) async {
+    return Item.empty(
+      color: color,
+      parent_id: parent_id,
+      receiver_id: 'a',
+      type: type,
+    );
+  }
+
+  @override
   Future<bool> delete(String id) async {
     await Future.delayed(const Duration(milliseconds: 500));
     items.removeWhere((element) => element.id == id);
@@ -56,7 +69,7 @@ class MockItemRepo implements ItemRepository {
   }
 
   @override
-  Future<Item> insertOrUpdateItem(Item item) async {
+  Future<Item> insertOrUpdateItem(Item item, ItemUpdateAction action) async {
     await Future.delayed(const Duration(milliseconds: 500));
     items.add(item);
     return item;

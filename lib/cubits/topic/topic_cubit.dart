@@ -11,6 +11,10 @@ class TopicCubit extends Cubit<TopicState> {
 
   Future<void> save({String? title, String? color}) async {
     try {
+      topicCubit!.saveLocalState(
+          titleField: title ?? topicCubit!.title,
+          contentField: '',
+          color: color);
       emit(TopicState.busy(topicCubit!));
       final success = await topicCubit!.save();
     } catch (e) {
