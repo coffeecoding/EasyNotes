@@ -72,20 +72,28 @@ class ExpandableItemContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final itemContainerView = Draggable(
-        data: item,
-        feedback: Material(
-          child: Container(
-            color: Colors.transparent,
-            width: 300,
-            height: 50,
-            child: ItemRow(color: color, item: item),
+    final itemContainerView = DragTarget<ItemCubit>(
+      onWillAccept: (itemCubit) =>
+          item.isTopic &&
+          itemCubit != null &&
+          itemCubit.parent != item &&
+          itemCubit != item,
+      onAccept: (itemCubit) => itemCubit.changeParent(item),
+      builder: (context, __, ___) => Draggable(
+          data: item,
+          feedback: Material(
+            child: Container(
+              color: Colors.transparent,
+              width: 300,
+              height: 50,
+              child: ItemRow(color: color, item: item),
+            ),
           ),
-        ),
-        child: ItemContainer(
-            color: color,
-            item: item,
-            onTap: () => context.read<ItemsCubit>().selectChild(item)));
+          child: ItemContainer(
+              color: color,
+              item: item,
+              onTap: () => context.read<ItemsCubit>().selectChild(item))),
+    );
     return item.isTopic && item.expanded
         ? Column(children: [
             itemContainerView,
