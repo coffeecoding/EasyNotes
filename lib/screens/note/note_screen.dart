@@ -2,7 +2,6 @@ import 'package:easynotes/cubits/cubits.dart';
 import 'package:easynotes/screens/common/toolbar_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 
 import 'views/abstract_note_view.dart';

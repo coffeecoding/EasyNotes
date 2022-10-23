@@ -60,7 +60,9 @@ class _TopicScreenState extends State<TopicScreen> {
                                 titleField: titleCtr.text,
                                 contentField: '',
                                 colorSelection: color);
-                            bool s = await context.read<TopicCubit>().save();
+                            bool s = await context
+                                .read<TopicCubit>()
+                                .save(title: titleCtr.text);
                             if (s && mounted) {
                               Navigator.of(context).pop(true);
                             }

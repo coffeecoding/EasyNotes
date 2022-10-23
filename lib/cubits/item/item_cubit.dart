@@ -46,6 +46,9 @@ class ItemCubit extends Cubit<ItemState> {
 
   // Local UI state
   bool expanded;
+  String? titleField;
+  String? contentField;
+  String? colorSelection;
   String error;
 
   ItemUpdateAction getWriteAction(
@@ -95,6 +98,9 @@ class ItemCubit extends Cubit<ItemState> {
       required String titleField,
       required String contentField,
       String? colorSelection}) {
+    this.titleField = titleField;
+    this.contentField = contentField;
+    this.colorSelection = colorSelection ?? item.color;
     if (newStatus == ItemStatus.draft) {
       emit(const ItemState.draft());
     } else if (newStatus == ItemStatus.newDraft) {
@@ -103,6 +109,9 @@ class ItemCubit extends Cubit<ItemState> {
   }
 
   void resetState() {
+    titleField = title;
+    contentField = content;
+    colorSelection = color;
     emit(const ItemState.persisted());
     itemsCubit.handleSelectedNoteChanged(this);
   }

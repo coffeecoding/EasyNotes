@@ -7,8 +7,9 @@ import 'abstract_note_view.dart';
 
 class SimpleNoteView extends StatefulWidget implements NoteView {
   SimpleNoteView({super.key, required this.note})
-      : titleCtr = TextEditingController(text: note.title),
-        contentCtr = TextEditingController(text: note.content);
+      : titleCtr = TextEditingController(text: note.titleField ?? note.title),
+        contentCtr =
+            TextEditingController(text: note.contentField ?? note.content);
 
   @override
   ItemCubit note;
@@ -34,6 +35,11 @@ class SimpleNoteView extends StatefulWidget implements NoteView {
         titleField: titleCtr.text,
         contentField: contentCtr.text);
     BlocProvider.of<ItemsCubit>(context).handleSelectedNoteChanged(note);
+    if (focussedElement == FocussedElement.title) {
+      titleFN.requestFocus();
+    } else {
+      contentFN.requestFocus();
+    }
   }
 
   @override

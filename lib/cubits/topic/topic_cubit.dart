@@ -39,7 +39,7 @@ class TopicCubit extends Cubit<TopicState> {
   Future<bool> save({String? title, String? color}) async {
     try {
       emit(TopicState.busy(topicCubit!));
-      final success = await topicCubit!.save();
+      final success = await topicCubit!.save(titleField: title);
       if (success) {
         handleChanged();
         return success;
