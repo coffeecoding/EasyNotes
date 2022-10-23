@@ -7,24 +7,29 @@ import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class TopicScreen extends StatelessWidget {
+class TopicScreen extends StatefulWidget {
   const TopicScreen({super.key});
 
   @override
+  State<TopicScreen> createState() => _TopicScreenState();
+}
+
+class _TopicScreenState extends State<TopicScreen> {
+  @override
   Widget build(BuildContext context) {
     return BlocBuilder<TopicCubit, TopicState>(
+      buildWhen: (p, n) => p.status != n.status,
       builder: (context, state) {
+        ItemCubit topicCubit = state.topicCubit!;
         final titleText =
             state.status == ItemStatus.newDraft || state.status == null
                 ? 'Create Topic'
-                : 'Edit Topic "${state.topicCubit?.title}"';
+                : 'Edit Topic "${topicCubit.title}"';
 
         FocusNode titleFN = FocusNode();
         titleFN.requestFocus();
         TextEditingController titleCtr = TextEditingController();
-        titleCtr.selection = TextSelection(
-            baseOffset: state.topicCubit!.title.length, extentOffset: 0);
-        String color = state.topicCubit!.color;
+        String color = topicCubit.color;
         return SizedBox(
           height: 400,
           width: 400,
@@ -41,7 +46,7 @@ class TopicScreen extends StatelessWidget {
                         onPressed: () => Navigator.of(context).pop(false)),
                     title: Text(titleText),
                     actions: [
-                      if (state.topicCubit!.status != ItemStatus.newDraft)
+                      if (topicCubit.status != ItemStatus.newDraft)
                         ToolbarButton(
                             iconData: FluentIcons.delete_20_regular,
                             title: 'Trash',
@@ -49,11 +54,17 @@ class TopicScreen extends StatelessWidget {
                       ToolbarButton(
                           iconData: FluentIcons.save_20_regular,
                           title: 'Save',
-                          onPressed: () => context
-                              .read<TopicCubit>()
-                              .save()
-                              .then((value) =>
-                                  () => Navigator.of(context).pop(value))),
+                          onPressed: () async {
+                            topicCubit.saveLocalState(
+                                newStatus: state.status,
+                                titleField: titleCtr.text,
+                                contentField: '',
+                                color: color);
+                            bool s = await context.read<TopicCubit>().save();
+                            if (s && mounted) {
+                              Navigator.of(context).pop(true);
+                            }
+                          }),
                     ]),
                 body: Padding(
                   padding:
@@ -62,7 +73,7 @@ class TopicScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const InputLabel(text: 'Title:'),
-                      TitleTextfield(focusNode: titleFN),
+                      TitleTextfield(focusNode: titleFN, controller: titleCtr),
                       const SizedBox(height: 32),
                       const InputLabel(text: 'Color:'),
                       const SizedBox(height: 8),

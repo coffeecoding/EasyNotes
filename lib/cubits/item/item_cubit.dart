@@ -19,7 +19,10 @@ class ItemCubit extends Cubit<ItemState> {
       this.expanded = false})
       : itemRepo = locator.get<ItemRepository>(),
         super(item.id.isEmpty
-            ? const ItemState.newDraft()
+            ? const ItemState.newDraft(
+                colorSelection: defaultItemColor,
+                titleField: '',
+                contentField: '')
             : ItemState.persisted(
                 colorSelection: item.color,
                 titleField: item.title,
@@ -104,20 +107,17 @@ class ItemCubit extends Cubit<ItemState> {
       required String titleField,
       required String contentField,
       String? color}) {
-    if (newStatus != state.status) {
-      if (newStatus == ItemStatus.draft) {
-        emit(ItemState.draft(
-            prev: state,
-            colorSelection: color,
-            titleField: titleField,
-            contentField: contentField));
-      } else if (newStatus == ItemStatus.persisted) {
-        emit(ItemState.persisted(
-            colorSelection: color ?? state.colorSelection,
-            titleField: item.title,
-            contentField: item.content,
-            modified: item.modified));
-      }
+    if (newStatus == ItemStatus.draft) {
+      emit(ItemState.draft(
+          prev: state,
+          colorSelection: color,
+          titleField: titleField,
+          contentField: contentField));
+    } else if (newStatus == ItemStatus.newDraft) {
+      emit(ItemState.newDraft(
+          colorSelection: color ?? state.colorSelection,
+          titleField: titleField,
+          contentField: contentField));
     }
   }
 

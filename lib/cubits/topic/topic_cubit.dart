@@ -9,6 +9,10 @@ class TopicCubit extends Cubit<TopicState> {
 
   ItemCubit? get topicCubit => state.topicCubit;
 
+  void handleChanged() {
+    select(topicCubit!);
+  }
+
   void select(ItemCubit topic) {
     switch (topic.status) {
       case ItemStatus.busy:
@@ -26,14 +30,15 @@ class TopicCubit extends Cubit<TopicState> {
 
   Future<bool> save({String? title, String? color}) async {
     try {
-      topicCubit!.saveLocalState(
-          titleField: title ?? topicCubit!.title,
-          contentField: '',
-          color: color);
       emit(TopicState.busy(topicCubit!));
       final success = await topicCubit!.save();
-      emit(TopicState.persisted(topicCubit));
-      return success;
+      if (success) {
+        handleChanged();
+        return success;
+      }
+      print('error saving topic');
+      emit(TopicState.error(topicCubit!));
+      return false;
     } catch (e) {
       print('error saving topic: $e');
       emit(TopicState.error(topicCubit!));

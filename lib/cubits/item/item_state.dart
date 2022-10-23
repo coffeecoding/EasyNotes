@@ -24,7 +24,15 @@ class ItemState extends Equatable {
             colorSelection: colorSelection,
             modified: modified);
 
-  const ItemState.newDraft() : this._(status: ItemStatus.newDraft);
+  const ItemState.newDraft(
+      {required String titleField,
+      required String contentField,
+      required String colorSelection})
+      : this._(
+            status: ItemStatus.newDraft,
+            titleField: titleField,
+            contentField: contentField,
+            colorSelection: colorSelection);
 
   ItemState.draft(
       {required ItemState prev,

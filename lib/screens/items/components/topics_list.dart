@@ -24,55 +24,62 @@ class TopicsList extends StatelessWidget {
                   iconData: FluentIcons.folder_add_20_filled,
                   title: 'Topic',
                   onPressed: () async {
-                    await BlocProvider.of<ItemsCubit>(context)
+                    ItemsCubit ic = BlocProvider.of<ItemsCubit>(context);
+                    TopicCubit tc = BlocProvider.of<TopicCubit>(context);
+                    await ic
                         .createItem(null, 0)
-                        .then((cubit) =>
-                            BlocProvider.of<TopicCubit>(context).select(cubit));
+                        .then((cubit) => tc.select(cubit));
                     Dialog dlg = const Dialog(
                         insetPadding:
                             EdgeInsets.symmetric(horizontal: 8, vertical: 32),
                         child: TopicScreen());
-                    await showDialog(
+                    final created = await showDialog(
                         context: context, builder: (context) => dlg);
+                    if (created) {
+                      ic.insertTopicInTop(tc.topicCubit!);
+                    }
                   }),
             ],
           )),
       body: BlocBuilder<ItemsCubit, ItemsState>(
           buildWhen: (prev, next) =>
               prev.status != next.status ||
+              prev.differentialRebuildNoteToggle !=
+                  next.differentialRebuildNoteToggle ||
               prev.selectedTopic != next.selectedTopic ||
               prev.topicCubits != next.topicCubits,
           builder: (context, state) {
             final topics = state.topicCubits;
-            return Column(
-              children: [
-                ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: topics.length,
-                    itemBuilder: (context, idx) {
-                      final topic = topics[idx];
-                      final clr = HexColor.fromHex(topic.color);
-                      final dragHandle = Container(
-                          child: Responsive.isDesktop(context)
-                              ? ReorderableDragStartListener(
-                                  index: idx,
-                                  child: const Icon(Icons.drag_handle))
-                              : ReorderableDelayedDragStartListener(
-                                  index: idx,
-                                  child: const Icon(Icons.drag_handle)));
-                      return RootItemContainer(
-                          key: UniqueKey(),
-                          item: topic,
-                          selectedTopic: state.selectedTopic,
-                          color: clr);
-                    }),
-                Expanded(
-                    child: DragTarget<ItemCubit>(
-                        onWillAccept: (itemCubit) =>
-                            itemCubit != null && itemCubit.isTopic,
-                        onAccept: (itemCubit) => itemCubit.changeParent(null),
-                        builder: (context, __, ___) => Container())),
-              ],
+            return SingleChildScrollView(
+              child: Column(
+                children: [
+                  ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: topics.length,
+                      itemBuilder: (context, idx) {
+                        final topic = topics[idx];
+                        final clr = HexColor.fromHex(topic.color);
+                        final dragHandle = Container(
+                            child: Responsive.isDesktop(context)
+                                ? ReorderableDragStartListener(
+                                    index: idx,
+                                    child: const Icon(Icons.drag_handle))
+                                : ReorderableDelayedDragStartListener(
+                                    index: idx,
+                                    child: const Icon(Icons.drag_handle)));
+                        return RootItemContainer(
+                            key: UniqueKey(),
+                            item: topic,
+                            selectedTopic: state.selectedTopic,
+                            color: clr);
+                      }),
+                  DragTarget<ItemCubit>(
+                      onWillAccept: (itemCubit) =>
+                          itemCubit != null && itemCubit.isTopic,
+                      onAccept: (itemCubit) => itemCubit.changeParent(null),
+                      builder: (context, __, ___) => Container()),
+                ],
+              ),
             );
           }),
     );

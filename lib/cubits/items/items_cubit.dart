@@ -47,6 +47,11 @@ class ItemsCubit extends Cubit<ItemsState> {
     topicCubits.add(topicCubit);
   }
 
+  void insertTopicInTop(ItemCubit topicCubit) {
+    topicCubits.insert(0, topicCubit);
+    handleRootItemsChanged();
+  }
+
   Future<ItemCubit> createItem(ItemCubit? parent, int type) async {
     Item newItem = await itemRepo.createNewItem(
         parent_id: parent?.id,
