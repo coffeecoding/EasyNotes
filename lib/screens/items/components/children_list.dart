@@ -113,31 +113,42 @@ class ExpandableItemContainer extends StatelessWidget {
     return item.isTopic && item.expanded
         ? Column(children: [
             itemContainerView,
-            ListView.builder(
-                shrinkWrap: true,
-                itemCount: item.children.length,
-                itemBuilder: (context, j) {
-                  return item.children[j].isTopic && item.children[j].expanded
-                      ? ExpandableItemContainer(
-                          item: item.children[j], color: color)
-                      : Draggable(
-                          data: item.children[j],
-                          feedback: Material(
-                            child: Container(
-                              color: Colors.transparent,
-                              width: 300,
-                              height: 50,
-                              child:
-                                  ItemRow(color: color, item: item.children[j]),
-                            ),
-                          ),
-                          child: ItemContainer(
-                              color: color,
-                              item: item.children[j],
-                              onTap: () => context
-                                  .read<ItemsCubit>()
-                                  .selectChild(item.children[j])));
-                })
+            item.children.isEmpty
+                ? Container(
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: Colors.transparent,
+                      border: Border(
+                          bottom: BorderSide(
+                              color: Theme.of(context).cardColor, width: 1)),
+                    ),
+                  )
+                : ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: item.children.length,
+                    itemBuilder: (context, j) {
+                      return item.children[j].isTopic &&
+                              item.children[j].expanded
+                          ? ExpandableItemContainer(
+                              item: item.children[j], color: color)
+                          : Draggable(
+                              data: item.children[j],
+                              feedback: Material(
+                                child: Container(
+                                  color: Colors.transparent,
+                                  width: 300,
+                                  height: 50,
+                                  child: ItemRow(
+                                      color: color, item: item.children[j]),
+                                ),
+                              ),
+                              child: ItemContainer(
+                                  color: color,
+                                  item: item.children[j],
+                                  onTap: () => context
+                                      .read<ItemsCubit>()
+                                      .selectChild(item.children[j])));
+                    })
           ])
         : itemContainerView;
   }
