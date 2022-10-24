@@ -140,7 +140,7 @@ class DragDropContainer extends StatelessWidget {
               ? EditableItemContainer(
                   color: color,
                   item: item,
-                  onDiscard: () => item.parent!.removeChild(item),
+                  onDiscard: () => item.parent!.discardSubtopicChanges(item),
                 )
               : ItemContainer(
                   color: color,
@@ -168,7 +168,6 @@ class ItemContainer extends StatelessWidget {
       builder: (context, state) {
         return Container(
             padding: EdgeInsets.only(left: (item.getAncestorCount() - 1) * 28),
-            // move the box decoration back to this level if we want
             child: Container(
                 decoration: BoxDecoration(
                   color:
@@ -206,9 +205,6 @@ class EditableItemContainer extends StatelessWidget {
                       item.id == state.selectedNote!.id)
                   ? Theme.of(context).cardColor
                   : Colors.transparent,
-              border: Border(
-                  bottom:
-                      BorderSide(color: Theme.of(context).cardColor, width: 1)),
             ),
             child: EditableItemRow(
                 item: item, color: color, onDiscard: onDiscard));
@@ -249,10 +245,7 @@ class EditableItemRow extends StatelessWidget {
               onChanged: (v) => item.saveLocalState(titleField: v),
               selectionHeightStyle: BoxHeightStyle.tight,
               controller: titleCtr,
-              style: TextStyle(
-                  fontWeight: item.status == ItemStatus.draft
-                      ? FontWeight.w700
-                      : FontWeight.w100),
+              style: const TextStyle(fontWeight: FontWeight.w100),
               maxLines: 1, // remove this to line-break instead
             ),
           ),
@@ -283,7 +276,7 @@ class EditableItemRow extends StatelessWidget {
   }
 }
 
-class ItemRow extends StatelessWidget {
+class ItemRow extends StatefulWidget {
   const ItemRow(
       {super.key, required this.item, required this.color, this.onTap});
 
@@ -292,24 +285,61 @@ class ItemRow extends StatelessWidget {
   final Function()? onTap;
 
   @override
+  State<ItemRow> createState() => _ItemRowState();
+}
+
+class _ItemRowState extends State<ItemRow> {
+  bool? hovering;
+
+  @override
   Widget build(BuildContext context) {
-    return ListTile(
-      onTap: onTap,
-      leading: Icon(
-          item.item_type == 0
-              ? FluentIcons.folder_20_filled
-              : FluentIcons.note_20_regular,
-          color: color),
-      horizontalTitleGap: 0,
-      title: Text(
-        item.title,
-        style: TextStyle(
-            fontWeight: item.status == ItemStatus.draft
-                ? FontWeight.w700
-                : FontWeight.w100),
-        overflow: TextOverflow.ellipsis, // remove this to line-break instead
-        softWrap: false,
-        maxLines: 1, // remove this to line-break instead
+    return MouseRegion(
+      onEnter: (PointerEvent e) => setState(() {
+        hovering = true;
+      }),
+      onExit: (PointerEvent e) => setState(() {
+        hovering = false;
+      }),
+      child: ListTile(
+        contentPadding: const EdgeInsets.only(left: 16, right: 4),
+        onTap: widget.onTap,
+        leading: Icon(
+            widget.item.item_type == 0
+                ? FluentIcons.folder_20_filled
+                : FluentIcons.note_20_regular,
+            color: widget.color),
+        horizontalTitleGap: 0,
+        title: Row(
+          children: [
+            Expanded(
+              child: Text(
+                widget.item.title,
+                style: TextStyle(
+                    fontWeight: widget.item.status == ItemStatus.draft &&
+                            !widget.item.isTopic
+                        ? FontWeight.w700
+                        : FontWeight.w100),
+                overflow:
+                    TextOverflow.ellipsis, // remove this to line-break instead
+                softWrap: false,
+                maxLines: 1, // remove this to line-break instead
+              ),
+            ),
+            if (hovering == true && widget.item.isTopic)
+              InlineButton(
+                iconData: FluentIcons.edit_16_regular,
+                onPressed: () {
+                  widget.item.saveLocalState(newStatus: ItemStatus.draft);
+                  widget.item.itemsCubit.handleItemsChanged();
+                },
+              ),
+            if (hovering == true)
+              InlineButton(
+                iconData: FluentIcons.pin_16_regular,
+                onPressed: () {},
+              )
+          ],
+        ),
       ),
     );
   }

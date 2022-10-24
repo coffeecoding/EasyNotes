@@ -18,6 +18,9 @@ class ItemCubit extends Cubit<ItemState> {
       required List<Item> items,
       this.expanded = false})
       : itemRepo = locator.get<ItemRepository>(),
+        titleField = item.title,
+        contentField = item.content,
+        colorSelection = item.color,
         error = '',
         super(item.id.isEmpty
             ? const ItemState.newDraft()
@@ -95,10 +98,10 @@ class ItemCubit extends Cubit<ItemState> {
 
   void saveLocalState(
       {ItemStatus? newStatus,
-      required String titleField,
+      String? titleField,
       String? contentField,
       String? colorSelection}) {
-    this.titleField = titleField;
+    this.titleField = titleField ?? this.titleField;
     this.contentField = contentField ?? this.contentField;
     this.colorSelection = colorSelection ?? item.color;
     if (newStatus == ItemStatus.draft) {
@@ -114,14 +117,22 @@ class ItemCubit extends Cubit<ItemState> {
       contentField = content;
       colorSelection = color;
       emit(const ItemState.persisted());
-      itemsCubit.handleSelectedNoteChanged(this);
+      if (isTopic) {
+        itemsCubit.handleItemsChanged();
+      } else {
+        itemsCubit.handleSelectedNoteChanged(this);
+      }
     } else if (status == ItemStatus.newDraft) {
       if (parent == null) {
         itemsCubit.removeTopic(this);
       } else {
         parent?.removeChild(this);
       }
-      itemsCubit.handleSelectedNoteChanged(null);
+      if (isTopic) {
+        itemsCubit.handleItemsChanged();
+      } else {
+        itemsCubit.handleSelectedNoteChanged(null);
+      }
     }
   }
 
@@ -140,6 +151,14 @@ class ItemCubit extends Cubit<ItemState> {
   void removeChild(ItemCubit child) {
     children.remove(child);
     itemsCubit.handleItemsChanged();
+  }
+
+  void discardSubtopicChanges(ItemCubit child) {
+    if (child.status == ItemStatus.newDraft) {
+      removeChild(child);
+    } else {
+      child.resetState();
+    }
   }
 
   Future<void> changeParent(ItemCubit? newParent) async {
