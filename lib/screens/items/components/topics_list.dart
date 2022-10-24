@@ -142,9 +142,8 @@ class _RootItemRowState extends State<RootItemRow> {
               : Colors.transparent,
           border: (widget.selectedTopic != null &&
                   widget.item.id == widget.selectedTopic!.id)
-              ? Border(right: BorderSide(color: widget.color, width: 5))
-              : const Border(
-                  right: BorderSide(color: Colors.transparent, width: 5))),
+              ? Border(right: BorderSide(color: widget.color, width: 2))
+              : null),
       child: MouseRegion(
         onEnter: (PointerEvent e) => setState(() {
           hovering = true;
