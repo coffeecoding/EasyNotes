@@ -200,7 +200,7 @@ class EditableItemContainer extends StatelessWidget {
     return BlocBuilder<SelectedNoteCubit, SelectedNoteState>(
       builder: (context, state) {
         return Container(
-            padding: EdgeInsets.only(left: (item.getAncestorCount() - 1) * 20),
+            padding: EdgeInsets.only(left: (item.getAncestorCount() - 1) * 28),
             decoration: BoxDecoration(
               color: (state.selectedNote != null &&
                       item.id == state.selectedNote!.id)
@@ -323,6 +323,18 @@ class _ItemRowState extends State<ItemRow> {
                 maxLines: 1, // remove this to line-break instead
               ),
             ),
+            if (hovering == true && widget.item.isTopic)
+              InlineButton(
+                iconData: FluentIcons.folder_add_20_regular,
+                onPressed: () => BlocProvider.of<ItemsCubit>(context)
+                    .createSubTopic(widget.item),
+              ),
+            if (hovering == true && widget.item.isTopic)
+              InlineButton(
+                iconData: FluentIcons.note_add_20_regular,
+                onPressed: () => BlocProvider.of<ItemsCubit>(context)
+                    .createNote(widget.item),
+              ),
             if (hovering == true && widget.item.isTopic)
               InlineButton(
                 iconData: FluentIcons.edit_16_regular,
