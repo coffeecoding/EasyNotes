@@ -4,7 +4,6 @@ import 'package:easynotes/cubits/cubits.dart';
 import 'package:easynotes/extensions/color_ext.dart';
 import 'package:easynotes/screens/common/inline_button.dart';
 import 'package:easynotes/screens/common/toolbar_button.dart';
-import 'package:easynotes/screens/topic/topic_screen.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -84,13 +83,14 @@ class ExpandableItemContainer extends StatelessWidget {
             itemContainerView,
             item.children.isEmpty
                 ? Container(
+                    padding: EdgeInsets.only(
+                        left: (item.getAncestorCount() - 1) * 28),
                     height: 20,
-                    decoration: BoxDecoration(
-                      color: Colors.transparent,
-                      border: Border(
-                          bottom: BorderSide(
-                              color: Theme.of(context).cardColor, width: 1)),
-                    ),
+                    child: Center(
+                        child: Text('This topic is empty',
+                            style: TextStyle(
+                                fontStyle: FontStyle.italic,
+                                color: Theme.of(context).hintColor))),
                   )
                 : ListView.builder(
                     shrinkWrap: true,
@@ -118,7 +118,6 @@ class DragDropContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     return DragTarget<ItemCubit>(
       onWillAccept: (itemCubit) {
-        print('testing will ${item.title} accept ${itemCubit?.title}');
         return item.isTopic &&
             itemCubit != null &&
             itemCubit.parent != item &&
@@ -168,16 +167,16 @@ class ItemContainer extends StatelessWidget {
     return BlocBuilder<SelectedNoteCubit, SelectedNoteState>(
       builder: (context, state) {
         return Container(
-            padding: EdgeInsets.only(left: (item.getAncestorCount() - 1) * 20),
-            decoration: BoxDecoration(
-              color: (state.selectedNote != null && item == state.selectedNote)
-                  ? Theme.of(context).cardColor
-                  : Colors.transparent,
-              border: Border(
-                  bottom:
-                      BorderSide(color: Theme.of(context).cardColor, width: 1)),
-            ),
-            child: ItemRow(item: item, color: color, onTap: onTap));
+            padding: EdgeInsets.only(left: (item.getAncestorCount() - 1) * 28),
+            // move the box decoration back to this level if we want
+            child: Container(
+                decoration: BoxDecoration(
+                  color:
+                      (state.selectedNote != null && item == state.selectedNote)
+                          ? Theme.of(context).cardColor
+                          : Colors.transparent,
+                ),
+                child: ItemRow(item: item, color: color, onTap: onTap)));
       },
     );
   }
