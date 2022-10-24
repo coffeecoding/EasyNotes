@@ -323,26 +323,6 @@ class _ItemRowState extends State<ItemRow> {
                 maxLines: 1, // remove this to line-break instead
               ),
             ),
-            if (hovering == true && widget.item.isTopic)
-              InlineButton(
-                iconData: FluentIcons.folder_add_20_regular,
-                onPressed: () => BlocProvider.of<ItemsCubit>(context)
-                    .createSubTopic(widget.item),
-              ),
-            if (hovering == true && widget.item.isTopic)
-              InlineButton(
-                iconData: FluentIcons.note_add_20_regular,
-                onPressed: () => BlocProvider.of<ItemsCubit>(context)
-                    .createNote(widget.item),
-              ),
-            if (hovering == true && widget.item.isTopic)
-              InlineButton(
-                iconData: FluentIcons.edit_16_regular,
-                onPressed: () {
-                  widget.item.saveLocalState(newStatus: ItemStatus.draft);
-                  widget.item.itemsCubit.handleItemsChanged();
-                },
-              ),
             if ((hovering == true || widget.item.pinned) && isSaving != true)
               InlineButton(
                 iconData: FluentIcons.pin_16_regular,
@@ -356,7 +336,48 @@ class _ItemRowState extends State<ItemRow> {
                   });
                 },
               ),
-            if (isSaving == true) const InlineCircularProgressIndicator()
+            if (isSaving == true) const InlineCircularProgressIndicator(),
+            if (hovering == true && widget.item.isTopic)
+              SizedBox(
+                  width: 32,
+                  child: PopupMenuButton(
+                      splashRadius: 1,
+                      elevation: 1,
+                      padding: EdgeInsets.zero,
+                      icon: const Icon(FluentIcons.more_vertical_16_regular),
+                      itemBuilder: (context) {
+                        ItemsCubit ic = BlocProvider.of<ItemsCubit>(context);
+                        return <PopupMenuItem<InlineButton>>[
+                          PopupMenuItem<InlineButton>(
+                              onTap: () {
+                                widget.item.saveLocalState(
+                                    newStatus: ItemStatus.draft);
+                                widget.item.itemsCubit.handleItemsChanged();
+                              },
+                              padding: const EdgeInsets.only(left: 8),
+                              key: UniqueKey(),
+                              child: InlineButton(
+                                  title: 'Edit',
+                                  iconData: FluentIcons.edit_16_regular,
+                                  onPressed: () {})),
+                          PopupMenuItem<InlineButton>(
+                              onTap: () => ic.createSubTopic(widget.item),
+                              padding: const EdgeInsets.only(left: 8),
+                              key: UniqueKey(),
+                              child: InlineButton(
+                                  title: 'Add Subtopic',
+                                  iconData: FluentIcons.folder_add_20_regular,
+                                  onPressed: () {})),
+                          PopupMenuItem<InlineButton>(
+                              onTap: () => ic.createNote(widget.item),
+                              padding: const EdgeInsets.only(left: 8),
+                              key: UniqueKey(),
+                              child: InlineButton(
+                                  title: 'Add Note',
+                                  iconData: FluentIcons.note_add_20_regular,
+                                  onPressed: () {})),
+                        ];
+                      }))
           ],
         ),
       ),

@@ -62,6 +62,7 @@ class ItemsCubit extends Cubit<ItemsState> {
     if (parent == null) {
       selectedTopic!.insertChildAtTop(newTopic);
     } else {
+      parent.expanded = true;
       parent.insertChildAtTop(newTopic);
     }
     handleItemsChanged();
@@ -72,9 +73,11 @@ class ItemsCubit extends Cubit<ItemsState> {
     if (parent == null) {
       selectedTopic!.insertChildAtTop(newNote);
     } else {
+      parent.expanded = true;
       parent.insertChildAtTop(newNote);
     }
-    handleItemsChanged();
+    selectChild(newNote);
+    //handleItemsChanged();
   }
 
   Future<ItemCubit> createItem(ItemCubit? parent, int type) async {
