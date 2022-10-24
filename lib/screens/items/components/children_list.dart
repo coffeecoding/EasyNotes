@@ -323,20 +323,6 @@ class _ItemRowState extends State<ItemRow> {
                 maxLines: 1, // remove this to line-break instead
               ),
             ),
-            if ((hovering == true || widget.item.pinned) && isSaving != true)
-              InlineButton(
-                iconData: FluentIcons.pin_16_regular,
-                onPressed: () async {
-                  setState(() {
-                    isSaving = true;
-                  });
-                  await widget.item.togglePinned();
-                  setState(() {
-                    isSaving = false;
-                  });
-                },
-              ),
-            if (isSaving == true) const InlineCircularProgressIndicator(),
             if (hovering == true && widget.item.isTopic)
               SizedBox(
                   width: 32,
@@ -377,7 +363,21 @@ class _ItemRowState extends State<ItemRow> {
                                   iconData: FluentIcons.note_add_20_regular,
                                   onPressed: () {})),
                         ];
-                      }))
+                      })),
+            if ((hovering == true || widget.item.pinned) && isSaving != true)
+              InlineButton(
+                iconData: FluentIcons.pin_16_regular,
+                onPressed: () async {
+                  setState(() {
+                    isSaving = true;
+                  });
+                  await widget.item.togglePinned();
+                  setState(() {
+                    isSaving = false;
+                  });
+                },
+              ),
+            if (isSaving == true) const InlineCircularProgressIndicator(),
           ],
         ),
       ),

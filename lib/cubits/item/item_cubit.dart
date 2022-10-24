@@ -105,7 +105,6 @@ class ItemCubit extends Cubit<ItemState> {
       final updated = await itemRepo.updateItemPinned(id, newValue ? 1 : 0);
       item = updated;
       emit(const ItemState.persisted());
-      final bla = children;
       parent!.sortChildren();
       itemsCubit.handleItemsChanged();
     } catch (e) {
@@ -121,7 +120,7 @@ class ItemCubit extends Cubit<ItemState> {
     } else {
       children.sort((a, b) => a.isTopic && !b.isTopic
           ? -1
-          : !a.pinned && b.pinned
+          : !a.isTopic && b.isTopic
               ? 1
               : 0);
       children.sort((a, b) => a.pinned && !b.pinned
@@ -173,8 +172,8 @@ class ItemCubit extends Cubit<ItemState> {
   }
 
   void addChild(ItemCubit child) {
-    // todo: resort according to preferences
     children.add(child);
+    sortChildren();
     // todo: consider if we need an event emission here
   }
 
