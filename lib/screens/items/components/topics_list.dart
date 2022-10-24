@@ -1,5 +1,6 @@
 import 'package:easynotes/cubits/cubits.dart';
 import 'package:easynotes/extensions/color_ext.dart';
+import 'package:easynotes/screens/common/inline_button.dart';
 import 'package:easynotes/screens/common/toolbar_button.dart';
 import 'package:easynotes/screens/topic/topic_screen.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
@@ -113,7 +114,7 @@ class RootItemContainer extends StatelessWidget {
   }
 }
 
-class RootItemRow extends StatelessWidget {
+class RootItemRow extends StatefulWidget {
   const RootItemRow(
       {super.key,
       required this.item,
@@ -125,22 +126,59 @@ class RootItemRow extends StatelessWidget {
   final Color color;
 
   @override
+  State<RootItemRow> createState() => _RootItemRowState();
+}
+
+class _RootItemRowState extends State<RootItemRow> {
+  bool? hovering;
+
+  @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-          color: (selectedTopic != null && item.id == selectedTopic!.id)
+          color: (widget.selectedTopic != null &&
+                  widget.item.id == widget.selectedTopic!.id)
               ? Colors.white10
               : Colors.transparent,
-          border: (selectedTopic != null && item.id == selectedTopic!.id)
-              ? Border(right: BorderSide(color: color, width: 5))
-              : null),
-      child: ListTile(
-        onTap: () => context.read<ItemsCubit>().selectTopicDirectly(item),
-        title: Column(children: [
-          Icon(FluentIcons.folder_20_filled, color: color),
-          Text(item.title,
-              style: TextStyle(fontWeight: FontWeight.w400, color: color)),
-        ]),
+          border: (widget.selectedTopic != null &&
+                  widget.item.id == widget.selectedTopic!.id)
+              ? Border(right: BorderSide(color: widget.color, width: 5))
+              : const Border(
+                  right: BorderSide(color: Colors.transparent, width: 5))),
+      child: MouseRegion(
+        onEnter: (PointerEvent e) => setState(() {
+          hovering = true;
+        }),
+        onExit: (PointerEvent e) => setState(() {
+          hovering = false;
+        }),
+        child: ListTile(
+          contentPadding: EdgeInsets.zero,
+          trailing: null,
+          onTap: () =>
+              context.read<ItemsCubit>().selectTopicDirectly(widget.item),
+          title: Stack(
+            alignment: Alignment.center,
+            children: [
+              Column(children: [
+                Icon(FluentIcons.folder_20_filled, color: widget.color),
+                Text(widget.item.title,
+                    style: TextStyle(
+                        fontWeight: FontWeight.w400, color: widget.color)),
+              ]),
+              if (hovering == true)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    InlineButton(
+                      iconData: FluentIcons.edit_16_regular,
+                      onPressed: () {},
+                    ),
+                  ],
+                )
+            ],
+          ),
+        ),
       ),
     );
   }

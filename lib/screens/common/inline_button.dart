@@ -6,6 +6,7 @@ class InlineButton extends StatelessWidget {
       this.onPressed,
       required this.iconData,
       this.enabled = true,
+      this.small = false,
       Color? enabledColor})
       : enabledColor = enabledColor ?? Colors.white;
 
@@ -13,13 +14,14 @@ class InlineButton extends StatelessWidget {
   final bool enabled;
   final Color? enabledColor;
   final IconData iconData;
+  final bool small;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 32,
+      width: small ? 24 : 32,
       child: IconButton(
-        iconSize: 20,
+        iconSize: small ? 12 : 20,
         padding: EdgeInsets.zero,
         splashRadius: 1,
         style: ButtonStyle(padding: MaterialStateProperty.all(EdgeInsets.zero)),
