@@ -57,6 +57,12 @@ class ItemsCubit extends Cubit<ItemsState> {
     handleRootItemsChanged();
   }
 
+  void createSubTopic() async {
+    ItemCubit newTopic = await createItem(selectedTopic, 0);
+    selectedTopic!.insertChildAtTop(newTopic);
+    handleItemsChanged();
+  }
+
   Future<ItemCubit> createItem(ItemCubit? parent, int type) async {
     Item newItem = await itemRepo.createNewItem(
         parent_id: parent?.id,

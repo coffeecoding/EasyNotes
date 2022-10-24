@@ -1,12 +1,16 @@
+import 'dart:ui';
+
 import 'package:easynotes/cubits/cubits.dart';
 import 'package:easynotes/extensions/color_ext.dart';
+import 'package:easynotes/screens/common/inline_button.dart';
 import 'package:easynotes/screens/common/toolbar_button.dart';
+import 'package:easynotes/screens/topic/topic_screen.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class NotesList extends StatelessWidget {
-  const NotesList({Key? key}) : super(key: key);
+class ChildrenList extends StatelessWidget {
+  const ChildrenList({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +42,8 @@ class NotesList extends StatelessWidget {
                       ToolbarButton(
                           iconData: FluentIcons.folder_add_20_regular,
                           title: 'Subtopic',
-                          onPressed: () {}),
+                          onPressed: () => BlocProvider.of<ItemsCubit>(context)
+                              .createSubTopic()),
                       ToolbarButton(
                           iconData: FluentIcons.note_add_20_regular,
                           title: 'Note',
@@ -91,10 +96,17 @@ class ExpandableItemContainer extends StatelessWidget {
               child: ItemRow(color: color, item: item),
             ),
           ),
-          child: ItemContainer(
-              color: color,
-              item: item,
-              onTap: () => context.read<ItemsCubit>().selectChild(item))),
+          child: item.status == ItemStatus.draft ||
+                  item.status == ItemStatus.newDraft
+              ? EditableItemContainer(
+                  color: color,
+                  item: item,
+                  onDiscard: () => item.parent!.removeChild(item),
+                )
+              : ItemContainer(
+                  color: color,
+                  item: item,
+                  onTap: () => context.read<ItemsCubit>().selectChild(item))),
     );
     return item.isTopic && item.expanded
         ? Column(children: [
@@ -158,6 +170,100 @@ class ItemContainer extends StatelessWidget {
             ),
             child: ItemRow(item: item, color: color, onTap: onTap));
       },
+    );
+  }
+}
+
+/// Used for newly created subtopics that are editable in line
+class EditableItemContainer extends StatelessWidget {
+  const EditableItemContainer({
+    super.key,
+    required this.item,
+    required this.color,
+    this.onDiscard,
+  });
+
+  final ItemCubit item;
+  final Color color;
+  final Function()? onDiscard;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<SelectedNoteCubit, SelectedNoteState>(
+      builder: (context, state) {
+        return Container(
+            padding: EdgeInsets.only(left: (item.getAncestorCount() - 1) * 20),
+            decoration: BoxDecoration(
+              color: (state.selectedNote != null &&
+                      item.id == state.selectedNote!.id)
+                  ? Theme.of(context).cardColor
+                  : Colors.transparent,
+              border: Border(
+                  bottom:
+                      BorderSide(color: Theme.of(context).cardColor, width: 1)),
+            ),
+            child: EditableItemRow(
+                item: item, color: color, onDiscard: onDiscard));
+      },
+    );
+  }
+}
+
+class EditableItemRow extends StatelessWidget {
+  EditableItemRow(
+      {super.key, required this.item, required this.color, this.onDiscard})
+      : titleCtr = TextEditingController(text: item.titleField);
+
+  final ItemCubit item;
+  final Color color;
+  final Function()? onDiscard;
+  final TextEditingController titleCtr;
+
+  bool? isSaving;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      onTap: () {},
+      leading: Icon(
+          item.item_type == 0
+              ? FluentIcons.folder_20_filled
+              : FluentIcons.note_20_regular,
+          color: color),
+      horizontalTitleGap: 0,
+      title: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              onChanged: (v) => item.saveLocalState(titleField: v),
+              selectionHeightStyle: BoxHeightStyle.tight,
+              controller: titleCtr,
+              style: TextStyle(
+                  fontWeight: item.status == ItemStatus.draft
+                      ? FontWeight.w700
+                      : FontWeight.w100),
+              maxLines: 1, // remove this to line-break instead
+            ),
+          ),
+          InlineButton(
+              iconData: FluentIcons.dismiss_12_regular,
+              enabledColor: Colors.white70,
+              onPressed: onDiscard),
+          StatefulBuilder(builder: ((context, setState) {
+            return isSaving == true
+                ? const Center(child: CircularProgressIndicator())
+                : InlineButton(
+                    iconData: FluentIcons.save_16_regular,
+                    enabledColor: Colors.white70,
+                    onPressed: () async {
+                      setState(() => isSaving = true);
+                      await item.save(titleField: titleCtr.text);
+                      item.itemsCubit.handleItemsChanged();
+                      setState(() => isSaving = false);
+                    });
+          })),
+        ],
+      ),
     );
   }
 }

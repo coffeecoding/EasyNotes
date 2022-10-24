@@ -96,10 +96,10 @@ class ItemCubit extends Cubit<ItemState> {
   void saveLocalState(
       {ItemStatus? newStatus,
       required String titleField,
-      required String contentField,
+      String? contentField,
       String? colorSelection}) {
     this.titleField = titleField;
-    this.contentField = contentField;
+    this.contentField = contentField ?? this.contentField;
     this.colorSelection = colorSelection ?? item.color;
     if (newStatus == ItemStatus.draft) {
       emit(const ItemState.draft());
@@ -131,8 +131,15 @@ class ItemCubit extends Cubit<ItemState> {
     // todo: consider if we need an event emission here
   }
 
+  void insertChildAtTop(ItemCubit child) {
+    // todo: resort according to preferences
+    children.insert(0, child);
+    // todo: consider if we need an event emission here
+  }
+
   void removeChild(ItemCubit child) {
-    children = children.where((c) => c.id != child.id).toList();
+    children.remove(child);
+    itemsCubit.handleItemsChanged();
   }
 
   Future<void> changeParent(ItemCubit? newParent) async {

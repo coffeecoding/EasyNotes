@@ -1,6 +1,6 @@
 import 'package:easynotes/blocs/blocs.dart';
 import 'package:easynotes/cubits/cubits.dart';
-import 'package:easynotes/screens/items/components/notes_list.dart';
+import 'package:easynotes/screens/items/components/children_list.dart';
 import 'package:easynotes/screens/items/components/topics_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -54,7 +54,7 @@ class _ItemsScreenState extends State<ItemsScreen> {
                     endIndent: 0,
                     width: 1,
                   ),
-                  Expanded(flex: 2, child: NotesList()),
+                  Expanded(flex: 2, child: ChildrenList()),
                 ]),
                 state.status == ItemsStatus.busy
                     ? Positioned.fill(
