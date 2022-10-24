@@ -27,11 +27,12 @@ class _TopicScreenState extends State<TopicScreen> {
         final titleText =
             state.status == ItemStatus.newDraft || state.status == null
                 ? 'Create Topic'
-                : 'Edit Topic "${topicCubit.title}"';
+                : 'Edit Topic';
 
         FocusNode titleFN = FocusNode();
         titleFN.requestFocus();
-        TextEditingController titleCtr = TextEditingController();
+        TextEditingController titleCtr =
+            TextEditingController(text: topicCubit.titleField);
         selectedColor = topicCubit.color;
         return SizedBox(
           height: 400,

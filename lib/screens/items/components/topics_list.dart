@@ -2,6 +2,7 @@ import 'package:easynotes/cubits/cubits.dart';
 import 'package:easynotes/extensions/color_ext.dart';
 import 'package:easynotes/screens/common/inline_button.dart';
 import 'package:easynotes/screens/common/toolbar_button.dart';
+import 'package:easynotes/screens/common/topic_dialog.dart';
 import 'package:easynotes/screens/topic/topic_screen.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
@@ -29,10 +30,7 @@ class TopicsList extends StatelessWidget {
                     await ic
                         .createItem(null, 0)
                         .then((cubit) => tc.select(cubit));
-                    Dialog dlg = const Dialog(
-                        insetPadding:
-                            EdgeInsets.symmetric(horizontal: 8, vertical: 32),
-                        child: TopicScreen());
+                    Dialog dlg = const TopicDialog(child: TopicScreen());
                     final created = await showDialog(
                         context: context, builder: (context) => dlg);
                     if (created != null && created == true) {
@@ -171,7 +169,17 @@ class _RootItemRowState extends State<RootItemRow> {
                   children: [
                     InlineButton(
                       iconData: FluentIcons.edit_16_regular,
-                      onPressed: () {},
+                      onPressed: () async {
+                        ItemsCubit ic = BlocProvider.of<ItemsCubit>(context);
+                        TopicCubit tc = BlocProvider.of<TopicCubit>(context);
+                        tc.select(widget.item);
+                        Dialog dlg = const TopicDialog(child: TopicScreen());
+                        final changes = await showDialog(
+                            context: context, builder: (context) => dlg);
+                        if (changes == true) {
+                          ic.handleItemsChanged();
+                        }
+                      },
                     ),
                   ],
                 )
