@@ -109,11 +109,20 @@ class ItemCubit extends Cubit<ItemState> {
   }
 
   void resetState() {
-    titleField = title;
-    contentField = content;
-    colorSelection = color;
-    emit(const ItemState.persisted());
-    itemsCubit.handleSelectedNoteChanged(this);
+    if (status == ItemStatus.draft) {
+      titleField = title;
+      contentField = content;
+      colorSelection = color;
+      emit(const ItemState.persisted());
+      itemsCubit.handleSelectedNoteChanged(this);
+    } else if (status == ItemStatus.newDraft) {
+      if (parent == null) {
+        itemsCubit.removeTopic(this);
+      } else {
+        parent?.removeChild(this);
+      }
+      itemsCubit.handleSelectedNoteChanged(null);
+    }
   }
 
   void addChild(ItemCubit child) {

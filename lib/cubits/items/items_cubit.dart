@@ -47,6 +47,11 @@ class ItemsCubit extends Cubit<ItemsState> {
     topicCubits.add(topicCubit);
   }
 
+  void removeTopic(ItemCubit topicCubit) {
+    // todo : apply preferred sorting
+    topicCubits.remove(topicCubit);
+  }
+
   void insertTopicInTop(ItemCubit topicCubit) {
     topicCubits.insert(0, topicCubit);
     handleRootItemsChanged();
