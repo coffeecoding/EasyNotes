@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:easynotes/cubits/cubits.dart';
 import 'package:easynotes/extensions/color_ext.dart';
 import 'package:easynotes/screens/common/inline_button.dart';
+import 'package:easynotes/screens/common/progress_indicators.dart';
 import 'package:easynotes/screens/common/toolbar_button.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
@@ -256,14 +257,7 @@ class EditableItemRow extends StatelessWidget {
               iconData: FluentIcons.dismiss_12_regular, onPressed: onDiscard),
           StatefulBuilder(builder: ((context, setState) {
             return isSaving == true
-                ? const Center(
-                    child: SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 1,
-                    ),
-                  ))
+                ? const Center(child: InlineCircularProgressIndicator())
                 : InlineButton(
                     iconData: FluentIcons.save_16_regular,
                     onPressed: () async {
@@ -293,6 +287,7 @@ class ItemRow extends StatefulWidget {
 
 class _ItemRowState extends State<ItemRow> {
   bool? hovering;
+  bool? isSaving;
 
   @override
   Widget build(BuildContext context) {
@@ -336,11 +331,20 @@ class _ItemRowState extends State<ItemRow> {
                   widget.item.itemsCubit.handleItemsChanged();
                 },
               ),
-            if (hovering == true)
+            if ((hovering == true || widget.item.pinned) && isSaving != true)
               InlineButton(
                 iconData: FluentIcons.pin_16_regular,
-                onPressed: () {},
-              )
+                onPressed: () async {
+                  setState(() {
+                    isSaving = true;
+                  });
+                  await widget.item.togglePinned();
+                  setState(() {
+                    isSaving = false;
+                  });
+                },
+              ),
+            if (isSaving == true) const InlineCircularProgressIndicator()
           ],
         ),
       ),

@@ -45,6 +45,7 @@ class ItemCubit extends Cubit<ItemState> {
   String get content => item.content;
   int get item_type => item.item_type;
   bool get isTopic => item.isTopic;
+  bool get pinned => item.pinned;
   ItemStatus get status => state.status;
 
   // Local UI state
@@ -93,6 +94,41 @@ class ItemCubit extends Cubit<ItemState> {
       error = 'failed to save item: $e';
       emit(const ItemState.error());
       return false;
+    }
+  }
+
+  Future<void> togglePinned() async {
+    if (status == ItemStatus.newDraft) return;
+    try {
+      // technically gotta emit busy state, but we're not listening to it
+      bool newValue = !pinned;
+      final updated = await itemRepo.updateItemPinned(id, newValue ? 1 : 0);
+      item = updated;
+      emit(const ItemState.persisted());
+      final bla = children;
+      parent!.sortChildren();
+      itemsCubit.handleItemsChanged();
+    } catch (e) {
+      print("error saving item: $e");
+      error = 'failed to save item: $e';
+      emit(const ItemState.error());
+    }
+  }
+
+  void sortChildren() {
+    if (children.isEmpty) {
+      return;
+    } else {
+      children.sort((a, b) => a.isTopic && !b.isTopic
+          ? -1
+          : !a.pinned && b.pinned
+              ? 1
+              : 0);
+      children.sort((a, b) => a.pinned && !b.pinned
+          ? -1
+          : !a.pinned && b.pinned
+              ? 1
+              : 0);
     }
   }
 
