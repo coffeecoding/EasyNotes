@@ -233,6 +233,7 @@ class EditableItemRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       onTap: () {},
+      contentPadding: const EdgeInsets.only(left: 16, right: 4),
       leading: Icon(
           item.item_type == 0
               ? FluentIcons.folder_20_filled
@@ -240,9 +241,11 @@ class EditableItemRow extends StatelessWidget {
           color: color),
       horizontalTitleGap: 0,
       title: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Expanded(
             child: TextField(
+              decoration: null,
               onChanged: (v) => item.saveLocalState(titleField: v),
               selectionHeightStyle: BoxHeightStyle.tight,
               controller: titleCtr,
@@ -254,15 +257,19 @@ class EditableItemRow extends StatelessWidget {
             ),
           ),
           InlineButton(
-              iconData: FluentIcons.dismiss_12_regular,
-              enabledColor: Colors.white70,
-              onPressed: onDiscard),
+              iconData: FluentIcons.dismiss_12_regular, onPressed: onDiscard),
           StatefulBuilder(builder: ((context, setState) {
             return isSaving == true
-                ? const Center(child: CircularProgressIndicator())
+                ? const Center(
+                    child: SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 1,
+                    ),
+                  ))
                 : InlineButton(
                     iconData: FluentIcons.save_16_regular,
-                    enabledColor: Colors.white70,
                     onPressed: () async {
                       setState(() => isSaving = true);
                       await item.save(titleField: titleCtr.text);
