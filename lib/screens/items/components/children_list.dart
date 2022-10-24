@@ -227,6 +227,8 @@ class EditableItemRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    FocusNode titleFN = FocusNode();
+    titleFN.requestFocus();
     return ListTile(
       onTap: () {},
       contentPadding: const EdgeInsets.only(left: 16, right: 4),
@@ -242,6 +244,7 @@ class EditableItemRow extends StatelessWidget {
           Expanded(
             child: TextField(
               decoration: null,
+              focusNode: titleFN,
               onChanged: (v) => item.saveLocalState(titleField: v),
               selectionHeightStyle: BoxHeightStyle.tight,
               controller: titleCtr,
