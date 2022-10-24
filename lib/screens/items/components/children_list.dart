@@ -80,7 +80,7 @@ class ExpandableItemContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     final itemContainerView = DragTarget<ItemCubit>(
       onWillAccept: (itemCubit) {
-        //print('testing will ${item.title} accept ${itemCubit?.title}');
+        print('testing will ${item.title} accept ${itemCubit?.title}');
         return item.isTopic &&
             itemCubit != null &&
             itemCubit.parent != item &&
