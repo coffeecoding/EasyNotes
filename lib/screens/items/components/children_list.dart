@@ -43,11 +43,12 @@ class ChildrenList extends StatelessWidget {
                           iconData: FluentIcons.folder_add_20_regular,
                           title: 'Subtopic',
                           onPressed: () => BlocProvider.of<ItemsCubit>(context)
-                              .createSubTopic()),
+                              .createSubTopic(null)),
                       ToolbarButton(
                           iconData: FluentIcons.note_add_20_regular,
                           title: 'Note',
-                          onPressed: () {}),
+                          onPressed: () => BlocProvider.of<ItemsCubit>(context)
+                              .createNote(null)),
                     ],
                   )),
               body: Container(
@@ -96,8 +97,9 @@ class ExpandableItemContainer extends StatelessWidget {
               child: ItemRow(color: color, item: item),
             ),
           ),
-          child: item.status == ItemStatus.draft ||
-                  item.status == ItemStatus.newDraft
+          child: item.isTopic &&
+                  (item.status == ItemStatus.draft ||
+                      item.status == ItemStatus.newDraft)
               ? EditableItemContainer(
                   color: color,
                   item: item,
@@ -160,8 +162,7 @@ class ItemContainer extends StatelessWidget {
         return Container(
             padding: EdgeInsets.only(left: (item.getAncestorCount() - 1) * 20),
             decoration: BoxDecoration(
-              color: (state.selectedNote != null &&
-                      item.id == state.selectedNote!.id)
+              color: (state.selectedNote != null && item == state.selectedNote)
                   ? Theme.of(context).cardColor
                   : Colors.transparent,
               border: Border(

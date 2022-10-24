@@ -57,9 +57,23 @@ class ItemsCubit extends Cubit<ItemsState> {
     handleRootItemsChanged();
   }
 
-  void createSubTopic() async {
-    ItemCubit newTopic = await createItem(selectedTopic, 0);
-    selectedTopic!.insertChildAtTop(newTopic);
+  void createSubTopic(ItemCubit? parent) async {
+    ItemCubit newTopic = await createItem(parent ?? selectedTopic, 0);
+    if (parent == null) {
+      selectedTopic!.insertChildAtTop(newTopic);
+    } else {
+      parent.insertChildAtTop(newTopic);
+    }
+    handleItemsChanged();
+  }
+
+  void createNote(ItemCubit? parent) async {
+    ItemCubit newNote = await createItem(parent ?? selectedTopic, 1);
+    if (parent == null) {
+      selectedTopic!.insertChildAtTop(newNote);
+    } else {
+      parent.insertChildAtTop(newNote);
+    }
     handleItemsChanged();
   }
 
