@@ -78,7 +78,45 @@ class ExpandableItemContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final itemContainerView = DragTarget<ItemCubit>(
+    final itemContainerView = DragDropContainer(item: item, color: color);
+    return item.isTopic && item.expanded
+        ? Column(children: [
+            itemContainerView,
+            item.children.isEmpty
+                ? Container(
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: Colors.transparent,
+                      border: Border(
+                          bottom: BorderSide(
+                              color: Theme.of(context).cardColor, width: 1)),
+                    ),
+                  )
+                : ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: item.children.length,
+                    itemBuilder: (context, j) {
+                      return item.children[j].isTopic &&
+                              item.children[j].expanded
+                          ? ExpandableItemContainer(
+                              item: item.children[j], color: color)
+                          : DragDropContainer(
+                              color: color, item: item.children[j]);
+                    })
+          ])
+        : itemContainerView;
+  }
+}
+
+class DragDropContainer extends StatelessWidget {
+  const DragDropContainer({super.key, required this.item, required this.color});
+
+  final ItemCubit item;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return DragTarget<ItemCubit>(
       onWillAccept: (itemCubit) {
         print('testing will ${item.title} accept ${itemCubit?.title}');
         return item.isTopic &&
@@ -110,47 +148,6 @@ class ExpandableItemContainer extends StatelessWidget {
                   item: item,
                   onTap: () => context.read<ItemsCubit>().selectChild(item))),
     );
-    return item.isTopic && item.expanded
-        ? Column(children: [
-            itemContainerView,
-            item.children.isEmpty
-                ? Container(
-                    height: 20,
-                    decoration: BoxDecoration(
-                      color: Colors.transparent,
-                      border: Border(
-                          bottom: BorderSide(
-                              color: Theme.of(context).cardColor, width: 1)),
-                    ),
-                  )
-                : ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: item.children.length,
-                    itemBuilder: (context, j) {
-                      return item.children[j].isTopic &&
-                              item.children[j].expanded
-                          ? ExpandableItemContainer(
-                              item: item.children[j], color: color)
-                          : Draggable(
-                              data: item.children[j],
-                              feedback: Material(
-                                child: Container(
-                                  color: Colors.transparent,
-                                  width: 300,
-                                  height: 50,
-                                  child: ItemRow(
-                                      color: color, item: item.children[j]),
-                                ),
-                              ),
-                              child: ItemContainer(
-                                  color: color,
-                                  item: item.children[j],
-                                  onTap: () => context
-                                      .read<ItemsCubit>()
-                                      .selectChild(item.children[j])));
-                    })
-          ])
-        : itemContainerView;
   }
 }
 
