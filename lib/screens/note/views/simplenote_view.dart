@@ -35,7 +35,6 @@ class SimpleNoteView extends StatefulWidget implements NoteView {
         newStatus: ItemVMStatus.draft,
         titleField: titleCtr.text,
         contentField: contentCtr.text);
-    BlocProvider.of<RootItemsCubit>(context).handleSelectionChanged(note);
     if (focussedElement == FocussedElement.title) {
       titleFN.requestFocus();
     } else {
