@@ -10,12 +10,11 @@ part 'children_items_state.dart';
 
 class ChildrenItemsCubit extends Cubit<ChildrenItemsState>
     with ListWithSelectionCubit {
-  ChildrenItemsCubit({required this.itemRepo, required this.rootItemsCubit})
+  ChildrenItemsCubit({required this.itemRepo})
       : super(const ChildrenItemsState.initial());
 
   final ItemRepository itemRepo;
 
-  final RootItemsCubit rootItemsCubit;
   List<ItemVM> get childrenCubits => state.childrenCubits;
   ItemVM? get selectedNote => state.selectedNote;
 

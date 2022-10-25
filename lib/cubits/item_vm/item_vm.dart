@@ -28,7 +28,7 @@ class ItemVM {
   void initChildren(List<Item> childrenItems) {
     if (item.isTopic) {
       children =
-          createChildrenCubitsForParent(parentListCubit!, this, childrenItems);
+          ChildCubitCreator.createChildrenCubitsForParent(this, childrenItems);
     }
   }
 
@@ -222,15 +222,26 @@ class ItemVM {
     }
     return result;
   }
+}
+
+class ChildCubitCreator {
+  static ListWithSelectionCubit? rootItemsCubit;
+  static ListWithSelectionCubit? childrenItemsCubit;
+
+  static init(
+      {required ListWithSelectionCubit rootItemsCubit,
+      required ListWithSelectionCubit childrenItemsCubit}) {
+    ChildCubitCreator.rootItemsCubit = rootItemsCubit;
+    ChildCubitCreator.childrenItemsCubit = childrenItemsCubit;
+  }
 
   static List<ItemVM> createChildrenCubitsForParent(
-      ListWithSelectionCubit parentListCubit,
-      ItemVM? parent,
-      List<Item> items) {
+      ItemVM? parent, List<Item> items) {
     return items
         .where((i) => i.parent_id == parent?.id)
         .map((i) => ItemVM(
-            parentListCubit: parentListCubit,
+            parentListCubit:
+                parent == null ? rootItemsCubit! : childrenItemsCubit!,
             parent: parent,
             status: ItemVMStatus.persisted,
             item: i,

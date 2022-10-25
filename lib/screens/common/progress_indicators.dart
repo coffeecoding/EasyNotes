@@ -5,10 +5,11 @@ class InlineCircularProgressIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SizedBox(
+    return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
         height: 20,
-        width: 20,
-        child: CircularProgressIndicator(
+        width: 36,
+        child: const CircularProgressIndicator(
           strokeWidth: 1,
         ));
   }

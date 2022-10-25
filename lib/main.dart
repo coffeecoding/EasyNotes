@@ -35,17 +35,18 @@ class EasyNotesApp extends StatelessWidget {
                   authRepository: locator.get<AuthRepository>(),
                   preferenceRepository: locator.get<PreferenceRepository>(),
                   itemRepository: locator.get<ItemRepository>())),
+          BlocProvider<ChildrenItemsCubit>(
+            lazy: false,
+            create: (context) =>
+                ChildrenItemsCubit(itemRepo: locator.get<ItemRepository>()),
+          ),
           BlocProvider<RootItemsCubit>(
               lazy: false,
               create: (context) => RootItemsCubit(
                     itemRepo: locator.get<ItemRepository>(),
+                    childrenItemsCubit:
+                        BlocProvider.of<ChildrenItemsCubit>(context),
                   )),
-          BlocProvider<ChildrenItemsCubit>(
-            lazy: false,
-            create: (context) => ChildrenItemsCubit(
-                itemRepo: locator.get<ItemRepository>(),
-                rootItemsCubit: BlocProvider.of<RootItemsCubit>(context)),
-          ),
           BlocProvider<SelectedNoteCubit>(
               lazy: false,
               create: (context) => SelectedNoteCubit(

@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:easynotes/config/constants.dart';
+import 'package:easynotes/cubits/children_items/children_items_cubit.dart';
 import 'package:easynotes/cubits/item_vm/item_vm.dart';
 import 'package:easynotes/models/item.dart';
 import 'package:easynotes/repositories/item_repository.dart';
@@ -19,10 +20,12 @@ abstract class ListWithSelectionCubit {
 }
 
 class RootItemsCubit extends Cubit<RootItemsState> with ListWithSelectionCubit {
-  RootItemsCubit({required this.itemRepo})
+  RootItemsCubit({required this.itemRepo, required this.childrenItemsCubit})
       : super(const RootItemsState.initial());
 
   final ItemRepository itemRepo;
+
+  final ChildrenItemsCubit childrenItemsCubit;
 
   List<ItemVM> get topicCubits => state.topicCubits;
   ItemVM? get selectedTopic => state.selectedTopic;
@@ -83,8 +86,10 @@ class RootItemsCubit extends Cubit<RootItemsState> with ListWithSelectionCubit {
     try {
       emit(RootItemsState.busy(prev: state));
       final items = await itemRepo.fetchItems();
+      ChildCubitCreator.init(
+          rootItemsCubit: this, childrenItemsCubit: childrenItemsCubit);
       final topicCubits =
-          ItemVM.createChildrenCubitsForParent(this, null, items);
+          ChildCubitCreator.createChildrenCubitsForParent(null, items);
       emit(RootItemsState.ready(prev: state, topicCubits: topicCubits));
     } catch (e) {
       print("error in items_cubit fetchTopics: $e");
