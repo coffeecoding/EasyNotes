@@ -161,7 +161,7 @@ class RootItemContainer extends StatelessWidget {
         final ric = context.read<RootItemsCubit>();
         final refreshChildren =
             itemCubit.parent != null || item == ric.selectedTopic;
-        final refreshRootItems = !refreshChildren;
+        final refreshRootItems = itemCubit.parent == null;
         if (refreshChildren) {
           cic.handleItemsChanging();
         }
