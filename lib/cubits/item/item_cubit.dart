@@ -1,5 +1,4 @@
 import 'package:bloc/bloc.dart';
-import 'package:easynotes/config/constants.dart';
 import 'package:easynotes/config/locator.dart';
 import 'package:easynotes/cubits/items/items_cubit.dart';
 import 'package:easynotes/models/item.dart';
