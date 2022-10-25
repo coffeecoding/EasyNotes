@@ -27,7 +27,7 @@ class AuthLoginRequested extends AuthEvent {
   // the login state is just the state of the *login form*
   final String username;
   final String password;
-  final ItemsCubit topicsCubit;
+  final RootItemsCubit topicsCubit;
 
   @override
   List<Object> get props => [username, password, topicsCubit];

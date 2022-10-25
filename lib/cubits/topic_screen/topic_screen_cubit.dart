@@ -1,37 +1,37 @@
 import 'package:bloc/bloc.dart';
-import 'package:easynotes/cubits/item/item_cubit.dart';
+import 'package:easynotes/cubits/item_vm/item_vm.dart';
 import 'package:equatable/equatable.dart';
 
-part 'topic_state.dart';
+part 'topic_screen_state.dart';
 
 class TopicCubit extends Cubit<TopicState> {
-  TopicCubit(ItemCubit? topicCubit) : super(const TopicState.empty());
+  TopicCubit(ItemVM? topicCubit) : super(const TopicState.empty());
 
-  ItemCubit? get topicCubit => state.topicCubit;
+  ItemVM? get topicCubit => state.topicCubit;
 
   void handleChanged() {
     select(topicCubit!);
   }
 
   void selectColor(int color) {
-    if (state.status == ItemStatus.newDraft) {
+    if (state.status == ItemVMStatus.newDraft) {
       emit(TopicState.newDraft(topicCubit!));
     } else {
       emit(TopicState.draft(topicCubit!));
     }
   }
 
-  void select(ItemCubit topic) {
+  void select(ItemVM topic) {
     switch (topic.status) {
-      case ItemStatus.busy:
+      case ItemVMStatus.busy:
         return emit(TopicState.busy(topic));
-      case ItemStatus.draft:
+      case ItemVMStatus.draft:
         return emit(TopicState.draft(topic));
-      case ItemStatus.error:
+      case ItemVMStatus.error:
         return emit(TopicState.error(topic));
-      case ItemStatus.newDraft:
+      case ItemVMStatus.newDraft:
         return emit(TopicState.newDraft(topic));
-      case ItemStatus.persisted:
+      case ItemVMStatus.persisted:
         return emit(TopicState.persisted(topic));
     }
   }

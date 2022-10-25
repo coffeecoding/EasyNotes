@@ -1,4 +1,5 @@
 import 'package:easynotes/cubits/cubits.dart';
+import 'package:easynotes/cubits/item_vm/item_vm.dart';
 import 'package:easynotes/screens/common/toolbar_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -35,7 +36,7 @@ class NoteScreen extends StatelessWidget {
       // the point is to not keep overflowing memory by only ever adding
       // view items here
       // Todo: just remove this view whenever a save is successful
-      draftNoteViews.removeWhere((v) => v.note.status != ItemStatus.draft);
+      draftNoteViews.removeWhere((v) => v.note.status != ItemVMStatus.draft);
       final drafts =
           draftNoteViews.where((v) => v.note.id == noteCubit.id).toList();
       if (drafts.isNotEmpty) {
@@ -45,7 +46,7 @@ class NoteScreen extends StatelessWidget {
           default:
             noteView = SimpleNoteView(note: noteCubit);
         }
-        if (noteCubit.status == ItemStatus.draft) {
+        if (noteCubit.status == ItemVMStatus.draft) {
           draftNoteViews.add(noteView!);
         }
       }
@@ -91,7 +92,7 @@ class DiscardButton extends StatelessWidget {
           return ToolbarButton(
               iconData: FluentIcons.dismiss_16_regular,
               onPressed: () => state.selectedNote!.resetState(),
-              enabled: state.status != ItemStatus.persisted,
+              enabled: state.status != ItemVMStatus.persisted,
               title: 'Discard');
         });
   }
@@ -108,7 +109,7 @@ class SaveButton extends StatelessWidget {
         buildWhen: (p, n) => p.status != n.status,
         builder: (context, state) {
           switch (state.status) {
-            case ItemStatus.busy:
+            case ItemVMStatus.busy:
               return const Center(child: CircularProgressIndicator());
             default:
               return ToolbarButton(
@@ -121,7 +122,7 @@ class SaveButton extends StatelessWidget {
                           contentField: noteView.contentField,
                         );
                   },
-                  enabled: state.status != ItemStatus.persisted,
+                  enabled: state.status != ItemVMStatus.persisted,
                   title: 'Save');
           }
         });

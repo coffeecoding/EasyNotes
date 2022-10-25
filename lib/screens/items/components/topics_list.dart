@@ -1,5 +1,5 @@
 import 'package:easynotes/cubits/cubits.dart';
-import 'package:easynotes/cubits/trash/trash_cubit.dart';
+import 'package:easynotes/cubits/item_vm/item_vm.dart';
 import 'package:easynotes/extensions/color_ext.dart';
 import 'package:easynotes/screens/common/inline_button.dart';
 import 'package:easynotes/screens/common/toolbar_button.dart';
@@ -26,53 +26,72 @@ class TopicsList extends StatelessWidget {
                   iconData: FluentIcons.folder_add_20_filled,
                   title: 'Topic',
                   onPressed: () async {
-                    ItemsCubit ic = BlocProvider.of<ItemsCubit>(context);
+                    RootItemsCubit ic =
+                        BlocProvider.of<RootItemsCubit>(context);
                     TopicCubit tc = BlocProvider.of<TopicCubit>(context);
                     await ic
-                        .createItem(null, 0)
+                        .createRootItem(0)
                         .then((cubit) => tc.select(cubit));
                     Dialog dlg = const TopicDialog(child: TopicScreen());
                     final created = await showDialog(
                         context: context, builder: (context) => dlg);
                     if (created != null && created == true) {
-                      ic.insertTopicInTop(tc.topicCubit!);
+                      ic.insertItem(tc.topicCubit!);
                     }
                   }),
             ],
           )),
-      body: BlocBuilder<ItemsCubit, ItemsState>(
+      body: BlocBuilder<RootItemsCubit, RootItemsState>(
           buildWhen: (prev, next) =>
               prev.status != next.status ||
-              prev.differentialRebuildNoteToggle !=
-                  next.differentialRebuildNoteToggle ||
               prev.selectedTopic != next.selectedTopic ||
               prev.topicCubits != next.topicCubits,
           builder: (context, state) {
             final topics = state.topicCubits;
-            return SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: topics.length,
-                      itemBuilder: (context, idx) {
-                        final topic = topics[idx];
-                        final clr = HexColor.fromHex(topic.color);
-                        return RootItemContainer(
-                            key: UniqueKey(),
-                            item: topic,
-                            selectedTopic: state.selectedTopic,
-                            color: clr);
-                      }),
-                  DragTarget<ItemCubit>(
-                      onWillAccept: (itemCubit) =>
-                          itemCubit != null && itemCubit.isTopic,
-                      onAccept: (itemCubit) => itemCubit.changeParent(null),
-                      builder: (context, __, ___) => Container()),
-                  TrashContainer(key: UniqueKey())
-                ],
-              ),
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: topics.length,
+                            itemBuilder: (context, idx) {
+                              final topic = topics[idx];
+                              final clr = HexColor.fromHex(topic.color);
+                              return RootItemContainer(
+                                  key: UniqueKey(),
+                                  item: topic,
+                                  selectedTopic: state.selectedTopic,
+                                  color: clr);
+                            }),
+                        Container(
+                          color: Colors.transparent,
+                          height: 128,
+                          child: DragTarget<ItemVM>(
+                              onWillAccept: (itemCubit) =>
+                                  itemCubit != null &&
+                                  itemCubit.isTopic &&
+                                  itemCubit.parent != null,
+                              onAccept: (itemCubit) async {
+                                final cic = context.read<ChildrenItemsCubit>();
+                                final ric = context.read<RootItemsCubit>();
+                                cic.handleItemsChanging();
+                                ric.handleItemsChanging();
+                                await itemCubit.changeParent(null);
+                                cic.handleItemsChanged();
+                                ric.handleItemsChanged();
+                              },
+                              builder: (context, __, ___) => Container()),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                TrashContainer(key: UniqueKey())
+              ],
             );
           }),
     );
@@ -86,11 +105,11 @@ class TrashContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DragTarget<ItemCubit>(
+    return DragTarget<ItemVM>(
         onWillAccept: (itemCubit) => itemCubit != null,
         onAccept: (itemCubit) {},
         builder: (context, __, ___) {
-          ItemsCubit ic = context.read<ItemsCubit>();
+          RootItemsCubit ic = context.read<RootItemsCubit>();
           return Container(
             decoration: BoxDecoration(
                 color: true ? Colors.white10 : Colors.transparent,
@@ -101,7 +120,7 @@ class TrashContainer extends StatelessWidget {
             child: ListTile(
               contentPadding: EdgeInsets.zero,
               trailing: null,
-              onTap: () => ic.selectTrashBin(),
+              onTap: () {},
               title: Stack(
                 alignment: Alignment.center,
                 children: [
@@ -128,16 +147,35 @@ class RootItemContainer extends StatelessWidget {
     required this.color,
   });
 
-  final ItemCubit item;
-  final ItemCubit? selectedTopic;
+  final ItemVM item;
+  final ItemVM? selectedTopic;
   final Color color;
 
   @override
   Widget build(BuildContext context) {
-    return DragTarget<ItemCubit>(
+    return DragTarget<ItemVM>(
       onWillAccept: (itemCubit) =>
           itemCubit != null && itemCubit.parent != item && itemCubit != item,
-      onAccept: (itemCubit) => itemCubit.changeParent(item),
+      onAccept: (itemCubit) async {
+        final cic = context.read<ChildrenItemsCubit>();
+        final ric = context.read<RootItemsCubit>();
+        final refreshChildren =
+            itemCubit.parent != null || item == ric.selectedTopic;
+        final refreshRootItems = !refreshChildren;
+        if (refreshChildren) {
+          cic.handleItemsChanging();
+        }
+        if (refreshRootItems) {
+          ric.handleItemsChanging();
+        }
+        await itemCubit.changeParent(item);
+        if (refreshChildren) {
+          cic.handleItemsChanged();
+        }
+        if (refreshRootItems) {
+          ric.handleItemsChanged();
+        }
+      },
       builder: (context, __, ___) => Draggable(
         data: item,
         feedback: Material(
@@ -163,8 +201,8 @@ class RootItemRow extends StatefulWidget {
       required this.selectedTopic,
       required this.color});
 
-  final ItemCubit item;
-  final ItemCubit? selectedTopic;
+  final ItemVM item;
+  final ItemVM? selectedTopic;
   final Color color;
 
   @override
@@ -196,8 +234,12 @@ class _RootItemRowState extends State<RootItemRow> {
         child: ListTile(
           contentPadding: EdgeInsets.zero,
           trailing: null,
-          onTap: () =>
-              context.read<ItemsCubit>().selectTopicDirectly(widget.item),
+          onTap: () {
+            context.read<RootItemsCubit>().handleSelectionChanged(widget.item);
+            context
+                .read<ChildrenItemsCubit>()
+                .handleRootItemSelectionChanged(widget.item);
+          },
           title: Stack(
             alignment: Alignment.center,
             children: [
@@ -214,7 +256,8 @@ class _RootItemRowState extends State<RootItemRow> {
                     InlineButton(
                       iconData: FluentIcons.edit_16_regular,
                       onPressed: () async {
-                        ItemsCubit ic = BlocProvider.of<ItemsCubit>(context);
+                        RootItemsCubit ic =
+                            BlocProvider.of<RootItemsCubit>(context);
                         TopicCubit tc = BlocProvider.of<TopicCubit>(context);
                         tc.select(widget.item);
                         Dialog dlg = const TopicDialog(child: TopicScreen());

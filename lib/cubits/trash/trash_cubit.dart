@@ -1,6 +1,6 @@
 import 'package:bloc/bloc.dart';
-import 'package:easynotes/cubits/item/item_cubit.dart';
-import 'package:easynotes/cubits/items/items_cubit.dart';
+import 'package:easynotes/cubits/item_vm/item_vm.dart';
+import 'package:easynotes/cubits/root_items/root_items_cubit.dart';
 import 'package:easynotes/repositories/item_repository.dart';
 import 'package:equatable/equatable.dart';
 
@@ -9,16 +9,16 @@ part 'trash_state.dart';
 class TrashCubit extends Cubit<TrashState> {
   TrashCubit({
     required this.itemRepo,
-    required this.itemsCubit,
-    this.itemCubits = const <ItemCubit>[],
+    required this.rootItemsCubit,
+    this.itemVMs = const <ItemVM>[],
   }) : super(const TrashState.busy());
 
   final ItemRepository itemRepo;
-  final ItemsCubit itemsCubit;
-  List<ItemCubit> itemCubits;
+  final RootItemsCubit rootItemsCubit;
+  List<ItemVM> itemVMs;
 
   void sort() {
-    itemCubits.sort((a, b) => a.item.trashed!.compareTo(b.item.trashed!));
+    itemVMs.sort((a, b) => a.item.trashed!.compareTo(b.item.trashed!));
   }
 
   void initialize() {
@@ -29,7 +29,7 @@ class TrashCubit extends Cubit<TrashState> {
         .toList();
     items.removeWhere((i) => topLevelItems.contains(i));
     items.forEach((i) {});
-    //itemCubits =
-    //    ItemCubit.createChildrenCubitsForParent(itemsCubit, parent, items);
+    //ItemVMs =
+    //    ItemVM.createChildrenCubitsForParent(RootItemsCubit, parent, items);
   }
 }

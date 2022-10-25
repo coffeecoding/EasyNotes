@@ -59,7 +59,7 @@ class LoginForm extends StatelessWidget {
                               AuthLoginRequested(
                                   usernameController.text,
                                   passwordController.text,
-                                  context.read<ItemsCubit>())),
+                                  context.read<RootItemsCubit>())),
                           child: Container(
                               width: double.infinity,
                               height: 40,

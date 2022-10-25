@@ -1,5 +1,6 @@
 import 'package:easynotes/app_theme.dart';
 import 'package:easynotes/cubits/cubits.dart';
+import 'package:easynotes/cubits/item_vm/item_vm.dart';
 import 'package:easynotes/extensions/color_ext.dart';
 import 'package:easynotes/screens/common/input_label.dart';
 import 'package:easynotes/screens/common/title_textfield.dart';
@@ -23,9 +24,9 @@ class _TopicScreenState extends State<TopicScreen> {
     return BlocBuilder<TopicCubit, TopicState>(
       buildWhen: (p, n) => p.status != n.status,
       builder: (context, state) {
-        ItemCubit topicCubit = state.topicCubit!;
+        ItemVM topicCubit = state.topicCubit!;
         final titleText =
-            state.status == ItemStatus.newDraft || state.status == null
+            state.status == ItemVMStatus.newDraft || state.status == null
                 ? 'Create Topic'
                 : 'Edit Topic';
 
@@ -50,7 +51,7 @@ class _TopicScreenState extends State<TopicScreen> {
                         onPressed: () => Navigator.of(context).pop(false)),
                     title: Text(titleText),
                     actions: [
-                      if (topicCubit.status != ItemStatus.newDraft)
+                      if (topicCubit.status != ItemVMStatus.newDraft)
                         ToolbarButton(
                             iconData: FluentIcons.delete_20_regular,
                             title: 'Trash',
@@ -64,6 +65,9 @@ class _TopicScreenState extends State<TopicScreen> {
                                 titleField: titleCtr.text,
                                 contentField: '',
                                 colorSelection: selectedColor);
+                            context
+                                .read<RootItemsCubit>()
+                                .handleItemsChanging();
                             bool s = await context.read<TopicCubit>().save(
                                 title: titleCtr.text, color: selectedColor);
                             if (s && mounted) {
@@ -106,7 +110,7 @@ class _TopicScreenState extends State<TopicScreen> {
                   ),
                 ),
               ),
-              state.status == ItemStatus.busy
+              state.status == ItemVMStatus.busy
                   ? Positioned.fill(
                       child: Container(
                           color: Colors.black54,

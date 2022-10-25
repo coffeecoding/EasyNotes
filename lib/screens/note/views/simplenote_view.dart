@@ -1,4 +1,5 @@
 import 'package:easynotes/cubits/cubits.dart';
+import 'package:easynotes/cubits/item_vm/item_vm.dart';
 import 'package:easynotes/screens/common/title_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -12,7 +13,7 @@ class SimpleNoteView extends StatefulWidget implements NoteView {
             TextEditingController(text: note.contentField ?? note.content);
 
   @override
-  ItemCubit note;
+  ItemVM note;
   final TextEditingController titleCtr;
   final TextEditingController contentCtr;
   late FocusNode contentFN = FocusNode();
@@ -31,10 +32,10 @@ class SimpleNoteView extends StatefulWidget implements NoteView {
   @override
   void saveLocalState(BuildContext context) {
     BlocProvider.of<SelectedNoteCubit>(context).saveLocalState(
-        newStatus: ItemStatus.draft,
+        newStatus: ItemVMStatus.draft,
         titleField: titleCtr.text,
         contentField: contentCtr.text);
-    BlocProvider.of<ItemsCubit>(context).handleSelectedNoteChanged(note);
+    BlocProvider.of<RootItemsCubit>(context).handleSelectionChanged(note);
     if (focussedElement == FocussedElement.title) {
       titleFN.requestFocus();
     } else {
@@ -96,8 +97,9 @@ class _SimpleNoteViewState extends State<SimpleNoteView> {
 
   // Todo: Add everything else too, like options etc, once they are implemented
   void ensureStateIsDraft(BuildContext context) {
-    if (widget.note.status == ItemStatus.newDraft) return;
-    if (widget.note.status != ItemStatus.draft) widget.saveLocalState(context);
+    if (widget.note.status == ItemVMStatus.newDraft) return;
+    if (widget.note.status != ItemVMStatus.draft)
+      widget.saveLocalState(context);
   }
 
   @override

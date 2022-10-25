@@ -1,11 +1,15 @@
+// ignore_for_file: avoid_print
+
 import 'package:bloc/bloc.dart';
-import 'package:easynotes/cubits/item/item_cubit.dart';
+import 'package:easynotes/cubits/children_items/children_items_cubit.dart';
+import 'package:easynotes/cubits/item_vm/item_vm.dart';
 import 'package:equatable/equatable.dart';
 
 part 'selected_note_state.dart';
 
 class SelectedNoteCubit extends Cubit<SelectedNoteState> {
-  SelectedNoteCubit() : super(const SelectedNoteState.empty());
+  SelectedNoteCubit({required this.childrenItemsCubit})
+      : super(const SelectedNoteState.empty());
 
   // Todo: add QoL feature:
   // - add dependency on preferences
@@ -13,7 +17,9 @@ class SelectedNoteCubit extends Cubit<SelectedNoteState> {
   // - restore that selection from prefs and initialize this cubit
   //   with the last selection
 
-  ItemCubit? get note => state.selectedNote;
+  final ChildrenItemsCubit childrenItemsCubit;
+
+  ItemVM? get note => state.selectedNote;
 
   Future<void> save({
     String? titleField,
@@ -30,8 +36,8 @@ class SelectedNoteCubit extends Cubit<SelectedNoteState> {
         print("error saving item (no success)");
         emit(SelectedNoteState.error(note!));
       } else {
-        handleChanged();
-        note!.itemsCubit.handleSelectedNoteChanged(note);
+        handleNoteChanged(note);
+        childrenItemsCubit.handleSelectionChanged(note);
       }
     } catch (e) {
       print("error saving item: $e");
@@ -41,36 +47,32 @@ class SelectedNoteCubit extends Cubit<SelectedNoteState> {
 
   void resetState() {
     note!.resetState();
-    handleChanged();
+    handleNoteChanged(note);
   }
 
   void saveLocalState(
-      {ItemStatus? newStatus,
+      {ItemVMStatus? newStatus,
       required String titleField,
       required String contentField}) {
     note!.saveLocalState(
         newStatus: newStatus,
         titleField: titleField,
         contentField: contentField);
-    handleChanged();
+    handleNoteChanged(note);
   }
 
-  void handleChanged() {
-    update(note);
-  }
-
-  void update(ItemCubit? note) {
+  void handleNoteChanged(ItemVM? note) {
     if (note == null) return emit(const SelectedNoteState.empty());
     switch (note.status) {
-      case ItemStatus.busy:
+      case ItemVMStatus.busy:
         return emit(SelectedNoteState.busy(note));
-      case ItemStatus.draft:
+      case ItemVMStatus.draft:
         return emit(SelectedNoteState.draft(note));
-      case ItemStatus.error:
+      case ItemVMStatus.error:
         return emit(SelectedNoteState.error(note));
-      case ItemStatus.newDraft:
+      case ItemVMStatus.newDraft:
         return emit(SelectedNoteState.newDraft(note));
-      case ItemStatus.persisted:
+      case ItemVMStatus.persisted:
         return emit(SelectedNoteState.persisted(note));
     }
   }

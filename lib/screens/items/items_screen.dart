@@ -29,20 +29,17 @@ class _ItemsScreenState extends State<ItemsScreen> {
     super.initState();
     if (BlocProvider.of<AuthBloc>(context).state.status ==
         AuthStatus.authenticated) {
-      BlocProvider.of<ItemsCubit>(context).fetchItems();
+      BlocProvider.of<RootItemsCubit>(context).fetchItems();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ItemsCubit, ItemsState>(
+    return BlocBuilder<RootItemsCubit, RootItemsState>(
         buildWhen: (p, n) => p.status != n.status,
         builder: (context, state) {
           switch (state.status) {
-            case ItemsStatus.loading:
-              // todo: here add placeholder views
-              return const Center(child: CircularProgressIndicator());
-            case ItemsStatus.error:
+            case RootItemsStatus.error:
               return const Center(
                   child: Text('Failed to retrieve notes ... :('));
             default:
@@ -56,7 +53,7 @@ class _ItemsScreenState extends State<ItemsScreen> {
                   ),
                   Expanded(flex: 2, child: ChildrenList()),
                 ]),
-                state.status == ItemsStatus.busy
+                state.status == RootItemsStatus.busy
                     ? Positioned.fill(
                         child: Container(
                             color: Colors.black26,

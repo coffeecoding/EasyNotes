@@ -35,23 +35,29 @@ class EasyNotesApp extends StatelessWidget {
                   authRepository: locator.get<AuthRepository>(),
                   preferenceRepository: locator.get<PreferenceRepository>(),
                   itemRepository: locator.get<ItemRepository>())),
+          BlocProvider<RootItemsCubit>(
+              lazy: false,
+              create: (context) => RootItemsCubit(
+                    itemRepo: locator.get<ItemRepository>(),
+                  )),
+          BlocProvider<ChildrenItemsCubit>(
+            lazy: false,
+            create: (context) => ChildrenItemsCubit(
+                itemRepo: locator.get<ItemRepository>(),
+                rootItemsCubit: BlocProvider.of<RootItemsCubit>(context)),
+          ),
           BlocProvider<SelectedNoteCubit>(
-              lazy: false, create: (context) => SelectedNoteCubit()),
+              lazy: false,
+              create: (context) => SelectedNoteCubit(
+                  childrenItemsCubit:
+                      BlocProvider.of<ChildrenItemsCubit>(context))),
           BlocProvider<TopicCubit>(
               lazy: false, create: (context) => TopicCubit(null)),
-          BlocProvider<ItemsCubit>(
-              lazy: false,
-              create: (context) => ItemsCubit(
-                    itemRepo: locator.get<ItemRepository>(),
-                    topicScreenCubit: BlocProvider.of<TopicCubit>(context),
-                    selectedNoteCubit:
-                        BlocProvider.of<SelectedNoteCubit>(context),
-                  )),
           BlocProvider<TrashCubit>(
               lazy: false,
               create: (context) => TrashCubit(
                   itemRepo: locator.get<ItemRepository>(),
-                  itemsCubit: BlocProvider.of<ItemsCubit>(context))),
+                  rootItemsCubit: BlocProvider.of<RootItemsCubit>(context))),
         ],
         child: MaterialApp(
           title: 'EasyNotes',

@@ -1,18 +1,19 @@
-import 'package:bloc/bloc.dart';
+// ignore_for_file: non_constant_identifier_names, avoid_print
+
 import 'package:easynotes/config/locator.dart';
-import 'package:easynotes/cubits/items/items_cubit.dart';
+import 'package:easynotes/cubits/root_items/root_items_cubit.dart';
 import 'package:easynotes/models/item.dart';
 import 'package:easynotes/repositories/item_repository.dart';
-import 'package:equatable/equatable.dart';
-
-part 'item_state.dart';
 
 enum FocussedElement { title, content }
 
-class ItemCubit extends Cubit<ItemState> {
-  ItemCubit(
+enum ItemVMStatus { persisted, newDraft, draft, busy, error }
+
+class ItemVM {
+  ItemVM(
       {required this.item,
-      required this.itemsCubit,
+      this.status = ItemVMStatus.newDraft,
+      required this.parentListCubit,
       required this.parent,
       required List<Item> items,
       this.expanded = false})
@@ -20,22 +21,22 @@ class ItemCubit extends Cubit<ItemState> {
         titleField = item.title,
         contentField = item.content,
         colorSelection = item.color,
-        error = '',
-        super(item.id.isEmpty
-            ? const ItemState.newDraft()
-            : const ItemState.persisted()) {
+        error = '' {
     initChildren(items);
   }
 
   void initChildren(List<Item> childrenItems) {
-    children = createChildrenCubitsForParent(itemsCubit, this, childrenItems);
+    if (item.isTopic) {
+      children =
+          createChildrenCubitsForParent(parentListCubit!, this, childrenItems);
+    }
   }
 
-  final ItemRepository itemRepo;
-  final ItemsCubit itemsCubit;
-  late List<ItemCubit> children;
-  ItemCubit? parent;
   Item item;
+  final ItemRepository itemRepo;
+  final ListWithSelectionCubit parentListCubit;
+  late List<ItemVM> children;
+  ItemVM? parent;
 
   String get id => item.id;
   String get color => item.color;
@@ -45,9 +46,9 @@ class ItemCubit extends Cubit<ItemState> {
   int get item_type => item.item_type;
   bool get isTopic => item.isTopic;
   bool get pinned => item.pinned;
-  ItemStatus get status => state.status;
 
   // Local UI state
+  ItemVMStatus status;
   bool expanded;
   String? titleField;
   String? contentField;
@@ -56,7 +57,7 @@ class ItemCubit extends Cubit<ItemState> {
 
   ItemUpdateAction getWriteAction(
       String titleField, String contentField, String colorSelection) {
-    if (status == ItemStatus.newDraft) {
+    if (status == ItemVMStatus.newDraft) {
       return ItemUpdateAction.insert;
     } else if (titleField == title &&
         contentField == content &&
@@ -86,30 +87,26 @@ class ItemCubit extends Cubit<ItemState> {
           modified: ts,
           modified_header: ts);
       item = await itemRepo.insertOrUpdateItem(updated, iua);
-      emit(const ItemState.persisted());
       return true;
     } catch (e) {
       print("error saving item: $e");
       error = 'failed to save item: $e';
-      emit(const ItemState.error());
       return false;
     }
   }
 
   Future<void> togglePinned() async {
-    if (status == ItemStatus.newDraft) return;
+    if (status == ItemVMStatus.newDraft) return;
     try {
-      // technically gotta emit busy state, but we're not listening to it
+      parentListCubit.handleItemsChanging();
       bool newValue = !pinned;
       final updated = await itemRepo.updateItemPinned(id, newValue ? 1 : 0);
       item = updated;
-      emit(const ItemState.persisted());
       parent!.sortChildren();
-      itemsCubit.handleItemsChanged();
+      parentListCubit.handleItemsChanged();
     } catch (e) {
       print("error saving item: $e");
       error = 'failed to save item: $e';
-      emit(const ItemState.error());
     }
   }
 
@@ -131,105 +128,84 @@ class ItemCubit extends Cubit<ItemState> {
   }
 
   void saveLocalState(
-      {ItemStatus? newStatus,
+      {ItemVMStatus? newStatus,
       String? titleField,
       String? contentField,
       String? colorSelection}) {
     this.titleField = titleField ?? this.titleField;
     this.contentField = contentField ?? this.contentField;
     this.colorSelection = colorSelection ?? item.color;
-    if (newStatus == ItemStatus.draft) {
-      emit(const ItemState.draft());
-    } else if (newStatus == ItemStatus.newDraft) {
-      emit(const ItemState.newDraft());
-    }
+    status = newStatus ?? status;
   }
 
   void resetState() {
-    if (status == ItemStatus.draft) {
+    if (status == ItemVMStatus.draft) {
       titleField = title;
       contentField = content;
       colorSelection = color;
-      emit(const ItemState.persisted());
-      if (isTopic) {
-        itemsCubit.handleItemsChanged();
-      } else {
-        itemsCubit.handleSelectedNoteChanged(this);
-      }
-    } else if (status == ItemStatus.newDraft) {
+      parentListCubit.handleItemsChanging();
+    } else if (status == ItemVMStatus.newDraft) {
       if (parent == null) {
-        itemsCubit.removeTopic(this);
+        parentListCubit.removeItem(this);
       } else {
         parent?.removeChild(this);
       }
-      if (isTopic) {
-        itemsCubit.handleItemsChanged();
-      } else {
-        itemsCubit.handleSelectedNoteChanged(null);
-      }
+      parentListCubit.handleItemsChanged();
     }
   }
 
-  void addChild(ItemCubit child) {
+  void addChild(ItemVM child) {
     children.add(child);
     sortChildren();
     // todo: consider if we need an event emission here
   }
 
-  void insertChildAtTop(ItemCubit child) {
+  void insertChildAtTop(ItemVM child) {
     // todo: resort according to preferences
     children.insert(0, child);
     // todo: consider if we need an event emission here
   }
 
-  void removeChild(ItemCubit child) {
+  void removeChild(ItemVM child) {
     children.remove(child);
-    itemsCubit.handleItemsChanged();
+    parentListCubit.handleItemsChanged();
   }
 
-  void discardSubtopicChanges(ItemCubit child) {
-    if (child.status == ItemStatus.newDraft) {
+  void discardSubtopicChanges(ItemVM child) {
+    if (child.status == ItemVMStatus.newDraft) {
       removeChild(child);
     } else {
       child.resetState();
     }
   }
 
-  Future<void> changeParent(ItemCubit? newParent) async {
+  Future<void> changeParent(ItemVM? newParent) async {
     try {
-      itemsCubit.emit(ItemsState.busy(prev: itemsCubit.state));
       Item updated = item.copyWith(parent_id: newParent?.id);
       await itemRepo.updateItemParent(updated.id, newParent?.id);
       if (parent != null) {
         parent!.removeChild(this);
       } else {
-        itemsCubit.topicCubits.remove(this);
-        // if the new item is a new topic, select that one,
-        // else if it's null (i.e. a child topic became a root topic),
-        // then don't reselect the topic
+        parentListCubit.removeItem(this);
         if (newParent != null) {
-          itemsCubit.selectTopicDirectly(newParent);
+          parentListCubit.handleSelectionChanged(newParent);
         }
       }
       parent = newParent;
       if (newParent == null) {
-        itemsCubit.addTopic(this);
+        parentListCubit.addItem(this);
       } else {
         newParent.addChild(this);
       }
-      itemsCubit.handleItemsChanged();
-      itemsCubit.handleRootItemsChanged();
     } catch (e) {
       print("error changing item parent: $e");
-      // Reconsider: trigger error state in the item itself instead?
-      itemsCubit
-          .emit(ItemsState.error(errorMsg: 'Failed to change parent: $e'));
+      parentListCubit.handleError(e);
     }
   }
 
-  List<ItemCubit> getAncestors() {
-    final result = <ItemCubit>[];
-    ItemCubit? cursor = parent;
+  List<ItemVM> getAncestors() {
+    final result = <ItemVM>[];
+    ItemVM? cursor = parent;
     while (cursor != null) {
       result.add(cursor.parent!);
       cursor = cursor.parent;
@@ -239,7 +215,7 @@ class ItemCubit extends Cubit<ItemState> {
 
   int getAncestorCount() {
     int result = 0;
-    ItemCubit? cursor = parent;
+    ItemVM? cursor = parent;
     while (cursor != null) {
       result += 1;
       cursor = cursor.parent;
@@ -247,12 +223,18 @@ class ItemCubit extends Cubit<ItemState> {
     return result;
   }
 
-  static List<ItemCubit> createChildrenCubitsForParent(
-      ItemsCubit itemsCubit, ItemCubit? parent, List<Item> items) {
+  static List<ItemVM> createChildrenCubitsForParent(
+      ListWithSelectionCubit parentListCubit,
+      ItemVM? parent,
+      List<Item> items) {
     return items
         .where((i) => i.parent_id == parent?.id)
-        .map((i) => ItemCubit(
-            itemsCubit: itemsCubit, parent: parent, item: i, items: items))
+        .map((i) => ItemVM(
+            parentListCubit: parentListCubit,
+            parent: parent,
+            status: ItemVMStatus.persisted,
+            item: i,
+            items: items))
         .toList();
   }
 }
