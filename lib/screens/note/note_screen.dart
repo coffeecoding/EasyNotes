@@ -91,7 +91,7 @@ class DiscardButton extends StatelessWidget {
         builder: (context, state) {
           return ToolbarButton(
               iconData: FluentIcons.dismiss_16_regular,
-              onPressed: () => state.selectedNote!.resetState(),
+              onPressed: () => context.read<SelectedNoteCubit>().resetState(),
               enabled: state.status != ItemVMStatus.persisted,
               title: 'Discard');
         });
@@ -115,12 +115,16 @@ class SaveButton extends StatelessWidget {
               return ToolbarButton(
                   key: UniqueKey(),
                   iconData: FluentIcons.save_16_regular,
-                  onPressed: () {
+                  onPressed: () async {
                     noteView.saveLocalState(context);
-                    context.read<SelectedNoteCubit>().save(
-                          titleField: noteView.titleField,
-                          contentField: noteView.contentField,
-                        );
+                    final cic = context.read<ChildrenItemsCubit>();
+                    final snc = context.read<SelectedNoteCubit>();
+                    cic.handleItemsChanging();
+                    await snc.save(
+                      titleField: noteView.titleField,
+                      contentField: noteView.contentField,
+                    );
+                    cic.handleItemsChanged();
                   },
                   enabled: state.status != ItemVMStatus.persisted,
                   title: 'Save');

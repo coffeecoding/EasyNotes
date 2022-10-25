@@ -221,6 +221,7 @@ class ItemContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<SelectedNoteCubit, SelectedNoteState>(
+      buildWhen: (p, n) => p != n,
       builder: (context, state) {
         return Container(
             padding: EdgeInsets.only(left: (item.getAncestorCount() - 1) * 28),

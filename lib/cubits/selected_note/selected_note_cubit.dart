@@ -36,8 +36,7 @@ class SelectedNoteCubit extends Cubit<SelectedNoteState> {
         print("error saving item (no success)");
         emit(SelectedNoteState.error(note!));
       } else {
-        handleNoteChanged(note);
-        childrenItemsCubit.handleSelectionChanged(note);
+        emit(SelectedNoteState.persisted(note!));
       }
     } catch (e) {
       print("error saving item: $e");

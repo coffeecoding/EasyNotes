@@ -7,6 +7,7 @@ import 'package:easynotes/repositories/item_repository.dart';
 
 enum FocussedElement { title, content }
 
+// Todo: remove "busy" state; it is not needed at all.
 enum ItemVMStatus { persisted, newDraft, draft, busy, error }
 
 class ItemVM {
@@ -87,10 +88,12 @@ class ItemVM {
           modified: ts,
           modified_header: ts);
       item = await itemRepo.insertOrUpdateItem(updated, iua);
+      status = ItemVMStatus.persisted;
       return true;
     } catch (e) {
       print("error saving item: $e");
       error = 'failed to save item: $e';
+      status = ItemVMStatus.error;
       return false;
     }
   }
@@ -143,15 +146,15 @@ class ItemVM {
       titleField = title;
       contentField = content;
       colorSelection = color;
-      parentListCubit.handleItemsChanging();
+      status = ItemVMStatus.persisted;
     } else if (status == ItemVMStatus.newDraft) {
       if (parent == null) {
         parentListCubit.removeItem(this);
       } else {
         parent?.removeChild(this);
       }
-      parentListCubit.handleItemsChanged();
     }
+    status = ItemVMStatus.persisted;
   }
 
   void addChild(ItemVM child) {
