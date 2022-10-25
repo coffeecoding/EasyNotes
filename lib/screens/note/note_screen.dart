@@ -119,7 +119,6 @@ class SaveButton extends StatelessWidget {
                     noteView.saveLocalState(context);
                     final cic = context.read<ChildrenItemsCubit>();
                     final snc = context.read<SelectedNoteCubit>();
-                    cic.handleItemsChanging();
                     await snc.save(
                       titleField: noteView.titleField,
                       contentField: noteView.contentField,
