@@ -54,15 +54,14 @@ class ItemsState extends Equatable {
       bool? didChildExpansionToggle,
       bool? differentialRebuildNoteToggle})
       : this._(
-          status: ItemsStatus.changed,
-          topicCubits: topicCubits ?? prev.topicCubits,
-          selectedTopic: selectedTopic ?? prev.selectedTopic,
-          selectedNote: selectedNote ?? prev.selectedNote,
-          didChildExpansionToggle:
-              didChildExpansionToggle ?? prev.didChildExpansionToggle,
-          differentialRebuildNoteToggle: differentialRebuildNoteToggle ??
-              prev.differentialRebuildNoteToggle,
-        );
+            status: ItemsStatus.changed,
+            topicCubits: topicCubits ?? prev.topicCubits,
+            selectedTopic: selectedTopic,
+            selectedNote: selectedNote ?? prev.selectedNote,
+            didChildExpansionToggle:
+                didChildExpansionToggle ?? prev.didChildExpansionToggle,
+            differentialRebuildNoteToggle: differentialRebuildNoteToggle ??
+                prev.differentialRebuildNoteToggle);
 
   // potentially pass previous state as well, to keep the UI state
   const ItemsState.error({required String errorMsg})

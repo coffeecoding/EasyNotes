@@ -22,6 +22,9 @@ class ItemsCubit extends Cubit<ItemsState> {
   SelectedNoteCubit selectedNoteCubit;
   TopicCubit topicScreenCubit;
 
+  void selectTrashBin() =>
+      emit(ItemsState.changed(prev: state, selectedTopic: null));
+
   void selectTopic(int? i) => emit(ItemsState.changed(
       prev: state, selectedTopic: i == null ? null : topicCubits[i]));
 
@@ -34,6 +37,7 @@ class ItemsCubit extends Cubit<ItemsState> {
       item.expanded = !item.expanded;
       emit(ItemsState.changed(
           prev: state,
+          selectedTopic: state.selectedTopic,
           didChildExpansionToggle: !state.didChildExpansionToggle,
           differentialRebuildNoteToggle: state.differentialRebuildNoteToggle));
     } else {
@@ -95,6 +99,7 @@ class ItemsCubit extends Cubit<ItemsState> {
     emit(ItemsState.changed(
         prev: state,
         topicCubits: state.topicCubits,
+        selectedTopic: state.selectedTopic,
         didChildExpansionToggle: state.didChildExpansionToggle,
         differentialRebuildNoteToggle: !state.differentialRebuildNoteToggle));
   }
@@ -103,6 +108,7 @@ class ItemsCubit extends Cubit<ItemsState> {
     emit(ItemsState.changed(
         prev: state,
         selectedNote: selectedNote,
+        selectedTopic: state.selectedTopic,
         didChildExpansionToggle: state.didChildExpansionToggle,
         differentialRebuildNoteToggle: !state.differentialRebuildNoteToggle));
   }
@@ -111,6 +117,7 @@ class ItemsCubit extends Cubit<ItemsState> {
     emit(ItemsState.changed(
         prev: state,
         selectedNote: note,
+        selectedTopic: state.selectedTopic,
         didChildExpansionToggle: state.didChildExpansionToggle,
         differentialRebuildNoteToggle: !state.differentialRebuildNoteToggle));
     selectedNoteCubit.update(null);

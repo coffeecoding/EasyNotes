@@ -1,4 +1,5 @@
 import 'package:easynotes/cubits/cubits.dart';
+import 'package:easynotes/cubits/trash/trash_cubit.dart';
 import 'package:easynotes/extensions/color_ext.dart';
 import 'package:easynotes/screens/common/inline_button.dart';
 import 'package:easynotes/screens/common/toolbar_button.dart';
@@ -50,6 +51,7 @@ class TopicsList extends StatelessWidget {
             final topics = state.topicCubits;
             return SingleChildScrollView(
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   ListView.builder(
                       shrinkWrap: true,
@@ -68,11 +70,53 @@ class TopicsList extends StatelessWidget {
                           itemCubit != null && itemCubit.isTopic,
                       onAccept: (itemCubit) => itemCubit.changeParent(null),
                       builder: (context, __, ___) => Container()),
+                  TrashContainer(key: UniqueKey())
                 ],
               ),
             );
           }),
     );
+  }
+}
+
+class TrashContainer extends StatelessWidget {
+  const TrashContainer({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return DragTarget<ItemCubit>(
+        onWillAccept: (itemCubit) => itemCubit != null,
+        onAccept: (itemCubit) {},
+        builder: (context, __, ___) {
+          ItemsCubit ic = context.read<ItemsCubit>();
+          return Container(
+            decoration: BoxDecoration(
+                color: true ? Colors.white10 : Colors.transparent,
+                border: true
+                    ? const Border(
+                        right: BorderSide(color: Colors.white70, width: 2))
+                    : null),
+            child: ListTile(
+              contentPadding: EdgeInsets.zero,
+              trailing: null,
+              onTap: () => ic.selectTrashBin(),
+              title: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Column(children: const [
+                    Icon(FluentIcons.delete_24_filled, color: Colors.white70),
+                    Text('Trash',
+                        style: TextStyle(
+                            fontWeight: FontWeight.w400,
+                            color: Colors.white70)),
+                  ]),
+                ],
+              ),
+            ),
+          );
+        });
   }
 }
 

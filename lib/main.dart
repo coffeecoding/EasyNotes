@@ -1,5 +1,6 @@
 import 'package:easynotes/config/locator.dart';
 import 'package:easynotes/cubits/cubits.dart';
+import 'package:easynotes/cubits/trash/trash_cubit.dart';
 import 'package:easynotes/repositories/auth_repository.dart';
 import 'package:easynotes/repositories/item_repository.dart';
 import 'package:easynotes/repositories/preference_repository.dart';
@@ -46,6 +47,11 @@ class EasyNotesApp extends StatelessWidget {
                     selectedNoteCubit:
                         BlocProvider.of<SelectedNoteCubit>(context),
                   )),
+          BlocProvider<TrashCubit>(
+              lazy: false,
+              create: (context) => TrashCubit(
+                  itemRepo: locator.get<ItemRepository>(),
+                  itemsCubit: BlocProvider.of<ItemsCubit>(context))),
         ],
         child: MaterialApp(
           title: 'EasyNotes',
