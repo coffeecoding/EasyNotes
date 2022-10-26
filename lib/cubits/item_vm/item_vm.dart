@@ -1,6 +1,7 @@
 // ignore_for_file: non_constant_identifier_names, avoid_print
 
 import 'package:easynotes/config/locator.dart';
+import 'package:easynotes/cubits/cubits.dart';
 import 'package:easynotes/cubits/root_items/root_items_cubit.dart';
 import 'package:easynotes/models/item.dart';
 import 'package:easynotes/repositories/item_repository.dart';
@@ -14,6 +15,8 @@ enum FocussedElement { title, content }
 //    - this class should only be concerned with mutating it's *own* state,
 //      not the state of it's parenting list.
 enum ItemVMStatus { persisted, newDraft, draft, busy, error }
+
+enum ItemLevel { root, childOfRoot, grandChild }
 
 class ItemVM {
   ItemVM(
@@ -49,6 +52,12 @@ class ItemVM {
   int get item_type => item.item_type;
   bool get isTopic => item.isTopic;
   bool get pinned => item.pinned;
+
+  ItemLevel get level => parent == null
+      ? ItemLevel.root
+      : parent != null && parent!.parent == null
+          ? ItemLevel.childOfRoot
+          : ItemLevel.grandChild;
 
   // Local UI state
   ItemVMStatus status;
@@ -176,19 +185,54 @@ class ItemVM {
     }
   }
 
-  Future<void> changeParent(ItemVM? newParent) async {
+  Future<void> changeParent(
+      {ItemVM? newParent,
+      required RootItemsCubit ric,
+      required ChildrenItemsCubit cic}) async {
     try {
+      // This logic was carefully created according the documentation
+      // in parent_changing.txt
+      bool affectsRic = newParent == null || level == ItemLevel.root;
+      if (affectsRic) {
+        ric.handleItemsChanging();
+      }
+      cic.handleItemsChanging(silent: affectsRic);
+
       Item updated = item.copyWith(parent_id: newParent?.id);
       await itemRepo.updateItemParent(updated.id, newParent?.id);
-      if (parent != null) {
-        parent!.removeChild(this);
+
+      parent?.removeChild(this);
+      newParent?.addChild(this);
+
+      if (level == ItemLevel.root) {
+        ric.removeItem(this);
+        ric.handleItemsChanged();
+      }
+      if (newParent != null && newParent == ric.selectedItem) {
+        cic.handleRootItemSelectionChanged(newParent);
+      } else {
+        if (level == ItemLevel.childOfRoot) {
+          if (newParent == null) {
+            ric.addItem(this);
+            ric.handleItemsChanged();
+          }
+          cic.removeItem(this);
+        } else if (level == ItemLevel.grandChild && newParent == null) {
+          ric.addItem(this);
+          ric.handleItemsChanged();
+        }
+        cic.handleItemsChanged();
+      }
+      // special case (1st in the text doc)
+      if (level == ItemLevel.root &&
+          newParent != null &&
+          newParent.level == ItemLevel.root) {
+        ric.handleItemsChanged();
       }
       parent = newParent;
-      if (newParent != null) {
-        newParent.addChild(this);
-      }
     } catch (e) {
       print("error changing item parent: $e");
+      ric.handleError(e);
       rethrow;
     }
   }

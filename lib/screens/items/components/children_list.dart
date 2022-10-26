@@ -173,26 +173,7 @@ class DragDropContainer extends StatelessWidget {
       onAccept: (incomingItem) async {
         final ric = context.read<RootItemsCubit>();
         final cic = context.read<ChildrenItemsCubit>();
-        cic.handleItemsChanging();
-        final incomingItemIsRootItem = incomingItem.parent == null;
-        final incomingItemIs1stLevel = incomingItem.parent!.parent == null;
-        if (item.parent == null) {
-          ric.handleItemsChanging();
-        }
-        try {
-          await incomingItem.changeParent(item);
-        } catch (e) {
-          cic.handleError(e);
-        }
-        if (incomingItemIsRootItem) {
-          ric.removeItem(incomingItem);
-        } else if (incomingItemIs1stLevel) {
-          cic.removeItem(incomingItem);
-        }
-        cic.handleItemsChanged();
-        if (item.parent == null) {
-          ric.handleItemsChanged();
-        }
+        await incomingItem.changeParent(newParent: item, ric: ric, cic: cic);
       },
       builder: (context, __, ___) => Draggable(
           data: item,

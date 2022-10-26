@@ -79,26 +79,8 @@ class TopicsList extends StatelessWidget {
                                 // ! This is root drag target (not root item) !
                                 final cic = context.read<ChildrenItemsCubit>();
                                 final ric = context.read<RootItemsCubit>();
-                                final incomingIsRootItem =
-                                    incomingItem.parent == null;
-                                final incomingItemIs1stLevel =
-                                    !incomingIsRootItem &&
-                                        incomingItem.parent!.parent == null;
-                                cic.handleItemsChanging(silent: true);
-                                ric.handleItemsChanging();
-                                try {
-                                  await incomingItem.changeParent(null);
-                                  if (incomingIsRootItem) {
-                                    ric.removeItem(incomingItem);
-                                  } else if (incomingItemIs1stLevel) {
-                                    cic.removeItem(incomingItem);
-                                  }
-                                  ric.addItem(incomingItem);
-                                  cic.handleItemsChanged();
-                                  ric.handleItemsChanged();
-                                } catch (e) {
-                                  ric.handleError(e);
-                                }
+                                await incomingItem.changeParent(
+                                    newParent: null, ric: ric, cic: cic);
                               },
                               builder: (context, __, ___) => Container()),
                         ),
@@ -175,33 +157,7 @@ class RootItemContainer extends StatelessWidget {
       onAccept: (incomingItem) async {
         final cic = context.read<ChildrenItemsCubit>();
         final ric = context.read<RootItemsCubit>();
-        final incomingIsRootItem = incomingItem.parent == null;
-        final incomingItemIs1stLevel =
-            !incomingIsRootItem && incomingItem.parent!.parent == null;
-        if (!incomingIsRootItem || item == ric.selectedItem) {
-          cic.handleItemsChanging(silent: true);
-        }
-        if (incomingIsRootItem) {
-          ric.handleItemsChanging();
-        }
-        try {
-          await incomingItem.changeParent(item);
-          if (incomingIsRootItem) {
-            ric.removeItem(incomingItem);
-          } else if (incomingItemIs1stLevel) {
-            cic.removeItem(incomingItem);
-          }
-          if (!incomingIsRootItem ||
-              item == ric.selectedItem ||
-              incomingItem == ric.selectedItem) {
-            cic.handleItemsChanged();
-          }
-          if (incomingIsRootItem) {
-            ric.handleItemsChanged();
-          }
-        } catch (e) {
-          ric.handleError(e);
-        }
+        await incomingItem.changeParent(newParent: item, ric: ric, cic: cic);
       },
       builder: (context, __, ___) => Draggable(
         data: item,
