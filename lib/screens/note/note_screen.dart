@@ -37,8 +37,7 @@ class NoteScreen extends StatelessWidget {
       // view items here
       // Todo: just remove this view whenever a save is successful
       draftNoteViews.removeWhere((v) => v.note.status != ItemVMStatus.draft);
-      final drafts =
-          draftNoteViews.where((v) => v.note.id == noteCubit.id).toList();
+      final drafts = draftNoteViews.where((v) => v.note == noteCubit).toList();
       if (drafts.isNotEmpty) {
         noteView = drafts[0];
       } else {

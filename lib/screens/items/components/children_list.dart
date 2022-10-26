@@ -171,14 +171,13 @@ class DragDropContainer extends StatelessWidget {
             itemCubit != item;
       },
       onAccept: (itemCubit) async {
-        final cic = context.read<ChildrenItemsCubit>();
         final ric = context.read<RootItemsCubit>();
-        cic.handleItemsChanged();
+        item.parentListCubit.handleItemsChanging();
         if (item.parent == null) {
           ric.handleItemsChanging();
         }
         await itemCubit.changeParent(item);
-        cic.handleItemsChanged();
+        item.parentListCubit.handleItemsChanged();
         if (item.parent == null) {
           ric.handleItemsChanged();
         }
@@ -199,8 +198,11 @@ class DragDropContainer extends StatelessWidget {
               ? EditableItemContainer(
                   color: color,
                   item: item,
-                  onDiscard: () => item.parent!.discardSubtopicChanges(item),
-                )
+                  onDiscard: () {
+                    item.parentListCubit.handleItemsChanging();
+                    item.parent!.discardSubtopicChanges(item);
+                    item.parentListCubit.handleItemsChanged();
+                  })
               : ItemContainer(color: color, item: item, onTap: onTap)),
     );
   }
@@ -258,8 +260,7 @@ class EditableItemContainer extends StatelessWidget {
         return Container(
             padding: EdgeInsets.only(left: (item.getAncestorCount() - 1) * 28),
             decoration: BoxDecoration(
-              color: (state.selectedNote != null &&
-                      item.id == state.selectedNote!.id)
+              color: (state.selectedNote != null && item == state.selectedNote)
                   ? Theme.of(context).cardColor
                   : Colors.transparent,
             ),
@@ -318,6 +319,7 @@ class EditableItemRow extends StatelessWidget {
                     iconData: FluentIcons.save_16_regular,
                     onPressed: () async {
                       setState(() => isSaving = true);
+                      item.parentListCubit.handleItemsChanging();
                       await item.save(titleField: titleCtr.text);
                       item.parentListCubit.handleItemsChanged();
                       setState(() => isSaving = false);
@@ -393,6 +395,8 @@ class _ItemRowState extends State<ItemRow> {
                         return <PopupMenuItem<InlineButton>>[
                           PopupMenuItem<InlineButton>(
                               onTap: () {
+                                widget.item.parentListCubit
+                                    .handleItemsChanging();
                                 widget.item.saveLocalState(
                                     newStatus: ItemVMStatus.draft);
                                 widget.item.parentListCubit

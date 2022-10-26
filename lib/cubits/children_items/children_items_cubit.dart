@@ -63,16 +63,20 @@ class ChildrenItemsCubit extends Cubit<ChildrenItemsState>
   }
 
   Future<void> createNote(ItemVM parent) async {
+    handleItemsChanging();
     ItemVM newNote = await _createItem(parent, 1);
     parent.expanded = true;
     parent.insertChildAtTop(newNote);
+    handleItemsChanged();
     //return newNote;
   }
 
   Future<void> createSubTopic(ItemVM parent) async {
+    handleItemsChanging();
     ItemVM newTopic = await _createItem(parent, 0);
     parent.expanded = true;
     parent.insertChildAtTop(newTopic);
+    handleItemsChanged();
     //return newTopic;
   }
 

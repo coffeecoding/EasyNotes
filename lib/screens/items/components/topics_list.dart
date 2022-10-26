@@ -126,10 +126,10 @@ class TrashContainer extends StatelessWidget {
                 children: [
                   Column(children: const [
                     Icon(FluentIcons.delete_24_filled, color: Colors.white70),
-                    Text('Trash',
+                    /*Text('Trash',
                         style: TextStyle(
                             fontWeight: FontWeight.w400,
-                            color: Colors.white70)),
+                            color: Colors.white70)),*/
                   ]),
                 ],
               ),
@@ -217,11 +217,11 @@ class _RootItemRowState extends State<RootItemRow> {
     return Container(
       decoration: BoxDecoration(
           color: (widget.selectedTopic != null &&
-                  widget.item.id == widget.selectedTopic!.id)
+                  widget.item == widget.selectedTopic)
               ? Colors.white10
               : Colors.transparent,
           border: (widget.selectedTopic != null &&
-                  widget.item.id == widget.selectedTopic!.id)
+                  widget.item == widget.selectedTopic!)
               ? Border(right: BorderSide(color: widget.color, width: 2))
               : null),
       child: MouseRegion(
