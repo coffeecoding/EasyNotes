@@ -239,15 +239,19 @@ class _RootItemRowState extends State<RootItemRow> {
                     InlineButton(
                       iconData: FluentIcons.edit_16_regular,
                       onPressed: () async {
-                        RootItemsCubit ic =
+                        RootItemsCubit ric =
                             BlocProvider.of<RootItemsCubit>(context);
+                        ChildrenItemsCubit cic =
+                            BlocProvider.of<ChildrenItemsCubit>(context);
                         TopicCubit tc = BlocProvider.of<TopicCubit>(context);
                         tc.select(widget.item);
                         Dialog dlg = const TopicDialog(child: TopicScreen());
                         final changes = await showDialog(
                             context: context, builder: (context) => dlg);
                         if (changes == true) {
-                          ic.handleItemsChanged();
+                          cic.handleItemsChanging(silent: true);
+                          cic.handleItemsChanged();
+                          ric.handleItemsChanged();
                         }
                       },
                     ),
