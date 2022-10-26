@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:easynotes/config/locator.dart';
 import 'package:easynotes/extensions/http_client_ext.dart';
 import 'package:easynotes/models/item.dart';
-import 'package:easynotes/config/sample_data.dart';
 import 'package:easynotes/services/crypto_service.dart';
 import 'package:http/http.dart';
 

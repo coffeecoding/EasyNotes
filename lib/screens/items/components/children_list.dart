@@ -170,14 +170,26 @@ class DragDropContainer extends StatelessWidget {
             itemCubit.parent != item &&
             itemCubit != item;
       },
-      onAccept: (itemCubit) async {
+      onAccept: (incomingItem) async {
         final ric = context.read<RootItemsCubit>();
-        item.parentListCubit.handleItemsChanging();
+        final cic = context.read<ChildrenItemsCubit>();
+        cic.handleItemsChanging();
+        final incomingItemIsRootItem = incomingItem.parent == null;
+        final incomingItemIs1stLevel = incomingItem.parent!.parent == null;
         if (item.parent == null) {
           ric.handleItemsChanging();
         }
-        await itemCubit.changeParent(item);
-        item.parentListCubit.handleItemsChanged();
+        try {
+          await incomingItem.changeParent(item);
+        } catch (e) {
+          cic.handleError(e);
+        }
+        if (incomingItemIsRootItem) {
+          ric.removeItem(incomingItem);
+        } else if (incomingItemIs1stLevel) {
+          cic.removeItem(incomingItem);
+        }
+        cic.handleItemsChanged();
         if (item.parent == null) {
           ric.handleItemsChanged();
         }
@@ -199,9 +211,10 @@ class DragDropContainer extends StatelessWidget {
                   color: color,
                   item: item,
                   onDiscard: () {
-                    item.parentListCubit.handleItemsChanging();
+                    final cic = context.read<ChildrenItemsCubit>();
+                    cic.handleItemsChanging();
                     item.parent!.discardSubtopicChanges(item);
-                    item.parentListCubit.handleItemsChanged();
+                    cic.handleItemsChanged();
                   })
               : ItemContainer(color: color, item: item, onTap: onTap)),
     );
@@ -319,9 +332,10 @@ class EditableItemRow extends StatelessWidget {
                     iconData: FluentIcons.save_16_regular,
                     onPressed: () async {
                       setState(() => isSaving = true);
-                      item.parentListCubit.handleItemsChanging();
+                      final cic = context.read<ChildrenItemsCubit>();
+                      cic.handleItemsChanging();
                       await item.save(titleField: titleCtr.text);
-                      item.parentListCubit.handleItemsChanged();
+                      cic.handleItemsChanged();
                       setState(() => isSaving = false);
                     });
           })),
@@ -401,12 +415,11 @@ class _ItemRowState extends State<ItemRow> {
                         return <PopupMenuItem<InlineButton>>[
                           PopupMenuItem<InlineButton>(
                               onTap: () {
-                                widget.item.parentListCubit
-                                    .handleItemsChanging();
+                                final cic = context.read<ChildrenItemsCubit>();
+                                cic.handleItemsChanging();
                                 widget.item.saveLocalState(
                                     newStatus: ItemVMStatus.draft);
-                                widget.item.parentListCubit
-                                    .handleItemsChanged();
+                                cic.handleItemsChanged();
                               },
                               padding: const EdgeInsets.only(left: 8),
                               key: UniqueKey(),
@@ -438,12 +451,14 @@ class _ItemRowState extends State<ItemRow> {
                 iconData: FluentIcons.dismiss_16_regular,
                 onPressed: () {
                   final snc = context.read<SelectedNoteCubit>();
-                  widget.item.parentListCubit.handleItemsChanging();
+                  final cic = context.read<ChildrenItemsCubit>();
+                  cic.handleItemsChanging();
                   if (snc.note == widget.item) {
                     snc.handleNoteChanged(null);
                   }
                   widget.item.resetState();
-                  widget.item.parentListCubit.handleItemsChanged();
+                  cic.removeItem(widget.item);
+                  cic.handleItemsChanged();
                 },
               ),
             if ((hovering == true || widget.item.pinned) &&
@@ -455,7 +470,10 @@ class _ItemRowState extends State<ItemRow> {
                   setState(() {
                     isSaving = true;
                   });
+                  final cic = context.read<ChildrenItemsCubit>();
+                  cic.handleItemsChanging(silent: true);
                   await widget.item.togglePinned();
+                  cic.handleItemsChanged();
                   setState(() {
                     isSaving = false;
                   });

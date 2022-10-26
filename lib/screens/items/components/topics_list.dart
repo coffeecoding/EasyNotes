@@ -75,14 +75,30 @@ class TopicsList extends StatelessWidget {
                                   itemCubit != null &&
                                   itemCubit.isTopic &&
                                   itemCubit.parent != null,
-                              onAccept: (itemCubit) async {
+                              onAccept: (incomingItem) async {
+                                // ! This is root drag target (not root item) !
                                 final cic = context.read<ChildrenItemsCubit>();
                                 final ric = context.read<RootItemsCubit>();
-                                cic.handleItemsChanging();
+                                final incomingIsRootItem =
+                                    incomingItem.parent == null;
+                                final incomingItemIs1stLevel =
+                                    !incomingIsRootItem &&
+                                        incomingItem.parent!.parent == null;
+                                cic.handleItemsChanging(silent: true);
                                 ric.handleItemsChanging();
-                                await itemCubit.changeParent(null);
-                                cic.handleItemsChanged();
-                                ric.handleItemsChanged();
+                                try {
+                                  await incomingItem.changeParent(null);
+                                  if (incomingIsRootItem) {
+                                    ric.removeItem(incomingItem);
+                                  } else if (incomingItemIs1stLevel) {
+                                    cic.removeItem(incomingItem);
+                                  }
+                                  ric.addItem(incomingItem);
+                                  cic.handleItemsChanged();
+                                  ric.handleItemsChanged();
+                                } catch (e) {
+                                  ric.handleError(e);
+                                }
                               },
                               builder: (context, __, ___) => Container()),
                         ),
@@ -156,24 +172,35 @@ class RootItemContainer extends StatelessWidget {
     return DragTarget<ItemVM>(
       onWillAccept: (itemCubit) =>
           itemCubit != null && itemCubit.parent != item && itemCubit != item,
-      onAccept: (itemCubit) async {
+      onAccept: (incomingItem) async {
         final cic = context.read<ChildrenItemsCubit>();
         final ric = context.read<RootItemsCubit>();
-        final refreshChildren =
-            itemCubit.parent != null || item == ric.selectedItem;
-        final refreshRootItems = itemCubit.parent == null;
-        if (refreshChildren) {
-          cic.handleItemsChanging();
+        final incomingIsRootItem = incomingItem.parent == null;
+        final incomingItemIs1stLevel =
+            !incomingIsRootItem && incomingItem.parent!.parent == null;
+        if (!incomingIsRootItem || item == ric.selectedItem) {
+          cic.handleItemsChanging(silent: true);
         }
-        if (refreshRootItems) {
+        if (incomingIsRootItem) {
           ric.handleItemsChanging();
         }
-        await itemCubit.changeParent(item);
-        if (refreshChildren) {
-          cic.handleItemsChanged();
-        }
-        if (refreshRootItems) {
-          ric.handleItemsChanged();
+        try {
+          await incomingItem.changeParent(item);
+          if (incomingIsRootItem) {
+            ric.removeItem(incomingItem);
+          } else if (incomingItemIs1stLevel) {
+            cic.removeItem(incomingItem);
+          }
+          if (!incomingIsRootItem ||
+              item == ric.selectedItem ||
+              incomingItem == ric.selectedItem) {
+            cic.handleItemsChanged();
+          }
+          if (incomingIsRootItem) {
+            ric.handleItemsChanged();
+          }
+        } catch (e) {
+          ric.handleError(e);
         }
       },
       builder: (context, __, ___) => Draggable(

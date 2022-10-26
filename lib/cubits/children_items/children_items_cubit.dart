@@ -21,7 +21,7 @@ class ChildrenItemsCubit extends Cubit<ChildrenItemsState>
   @override
   void addItem(ItemVM item) {
     childrenCubits.add(item);
-    handleItemsChanged();
+    handleItemsChanged(); // todo: move these handle callers OUT AND INTO THE UI CODE !!!
   }
 
   @override
@@ -93,12 +93,8 @@ class ChildrenItemsCubit extends Cubit<ChildrenItemsState>
         parent_id: parent?.id,
         color: parent?.color ?? defaultItemColor,
         type: type);
-    ItemVM newCubit = ItemVM(
-        item: newItem,
-        items: [],
-        parentListCubit: this,
-        parent: parent,
-        expanded: false);
+    ItemVM newCubit =
+        ItemVM(item: newItem, items: [], parent: parent, expanded: false);
     return newCubit;
   }
 

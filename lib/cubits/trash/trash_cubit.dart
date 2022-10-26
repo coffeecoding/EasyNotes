@@ -6,7 +6,7 @@ import 'package:equatable/equatable.dart';
 
 part 'trash_state.dart';
 
-class TrashCubit extends Cubit<TrashState> {
+class TrashCubit extends Cubit<TrashState> with ListWithSelectionCubit {
   TrashCubit({
     required this.itemRepo,
     required this.rootItemsCubit,
@@ -31,5 +31,46 @@ class TrashCubit extends Cubit<TrashState> {
     items.forEach((i) {});
     //ItemVMs =
     //    ItemVM.createChildrenCubitsForParent(RootItemsCubit, parent, items);
+  }
+
+  @override
+  void addItem(ItemVM item) {
+    // TODO: implement addItem
+  }
+
+  @override
+  Future<void> fetchItems() {
+    // TODO: implement fetchItems
+    throw UnimplementedError();
+  }
+
+  @override
+  void handleError(Object e) {
+    // TODO: implement handleError
+  }
+
+  @override
+  void handleItemsChanged() {
+    // TODO: implement handleItemsChanged
+  }
+
+  @override
+  void handleItemsChanging({bool silent = false}) {
+    // TODO: implement handleItemsChanging
+  }
+
+  @override
+  void handleSelectionChanged(ItemVM? selected) {
+    // TODO: implement handleSelectionChanged
+  }
+
+  @override
+  void insertItem(ItemVM item) {
+    // TODO: implement insertItem
+  }
+
+  @override
+  void removeItem(ItemVM item) {
+    // TODO: implement removeItem
   }
 }

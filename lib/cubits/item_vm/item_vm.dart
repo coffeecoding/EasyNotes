@@ -8,13 +8,17 @@ import 'package:easynotes/repositories/item_repository.dart';
 enum FocussedElement { title, content }
 
 // Todo: remove "busy" state; it is not needed at all.
+// Todo: get rid of the dependency on parentListCubit:
+//    - all invocations of parentListCubit should be done outside (e.g.)
+//      in the UI code
+//    - this class should only be concerned with mutating it's *own* state,
+//      not the state of it's parenting list.
 enum ItemVMStatus { persisted, newDraft, draft, busy, error }
 
 class ItemVM {
   ItemVM(
       {required this.item,
       this.status = ItemVMStatus.newDraft,
-      required this.parentListCubit,
       required this.parent,
       required List<Item> items,
       this.expanded = false})
@@ -28,14 +32,12 @@ class ItemVM {
 
   void initChildren(List<Item> childrenItems) {
     if (item.isTopic) {
-      children =
-          ChildCubitCreator.createChildrenCubitsForParent(this, childrenItems);
+      children = ItemVM.createChildrenCubitsForParent(this, childrenItems);
     }
   }
 
   Item item;
   final ItemRepository itemRepo;
-  final ListWithSelectionCubit parentListCubit;
   late List<ItemVM> children;
   ItemVM? parent;
 
@@ -101,12 +103,10 @@ class ItemVM {
   Future<void> togglePinned() async {
     if (status == ItemVMStatus.newDraft) return;
     try {
-      parentListCubit.handleItemsChanging(silent: true);
       bool newValue = !pinned;
       final updated = await itemRepo.updateItemPinned(id, newValue ? 1 : 0);
       item = updated;
       parent!.sortChildren();
-      parentListCubit.handleItemsChanged();
     } catch (e) {
       print("error saving item: $e");
       error = 'failed to save item: $e';
@@ -148,11 +148,7 @@ class ItemVM {
       colorSelection = color;
       status = ItemVMStatus.persisted;
     } else if (status == ItemVMStatus.newDraft) {
-      if (parent == null) {
-        parentListCubit.removeItem(this);
-      } else {
-        parent?.removeChild(this);
-      }
+      parent?.removeChild(this);
     }
   }
 
@@ -170,7 +166,6 @@ class ItemVM {
 
   void removeChild(ItemVM child) {
     children.remove(child);
-    parentListCubit.handleItemsChanged();
   }
 
   void discardSubtopicChanges(ItemVM child) {
@@ -187,21 +182,14 @@ class ItemVM {
       await itemRepo.updateItemParent(updated.id, newParent?.id);
       if (parent != null) {
         parent!.removeChild(this);
-      } else {
-        parentListCubit.removeItem(this);
-        if (newParent != null) {
-          parentListCubit.handleSelectionChanged(newParent);
-        }
       }
       parent = newParent;
-      if (newParent == null) {
-        parentListCubit.addItem(this);
-      } else {
+      if (newParent != null) {
         newParent.addChild(this);
       }
     } catch (e) {
       print("error changing item parent: $e");
-      parentListCubit.handleError(e);
+      rethrow;
     }
   }
 
@@ -224,26 +212,12 @@ class ItemVM {
     }
     return result;
   }
-}
-
-class ChildCubitCreator {
-  static ListWithSelectionCubit? rootItemsCubit;
-  static ListWithSelectionCubit? childrenItemsCubit;
-
-  static init(
-      {required ListWithSelectionCubit rootItemsCubit,
-      required ListWithSelectionCubit childrenItemsCubit}) {
-    ChildCubitCreator.rootItemsCubit = rootItemsCubit;
-    ChildCubitCreator.childrenItemsCubit = childrenItemsCubit;
-  }
 
   static List<ItemVM> createChildrenCubitsForParent(
       ItemVM? parent, List<Item> items) {
     return items
         .where((i) => i.parent_id == parent?.id)
         .map((i) => ItemVM(
-            parentListCubit:
-                parent == null ? rootItemsCubit! : childrenItemsCubit!,
             parent: parent,
             status: ItemVMStatus.persisted,
             item: i,

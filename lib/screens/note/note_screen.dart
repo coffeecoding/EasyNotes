@@ -90,7 +90,10 @@ class DiscardButton extends StatelessWidget {
         builder: (context, state) {
           return ToolbarButton(
               iconData: FluentIcons.dismiss_16_regular,
-              onPressed: () => context.read<SelectedNoteCubit>().resetState(),
+              onPressed: () {
+                context.read<SelectedNoteCubit>().resetState();
+                context.read<ChildrenItemsCubit>().handleItemsChanged();
+              },
               enabled: state.status != ItemVMStatus.persisted,
               title: 'Discard');
         });

@@ -56,12 +56,8 @@ class RootItemsCubit extends Cubit<RootItemsState> with ListWithSelectionCubit {
   Future<ItemVM> createRootItem(int type) async {
     Item newItem = await itemRepo.createNewItem(
         parent_id: null, color: defaultItemColor, type: type);
-    ItemVM newCubit = ItemVM(
-        item: newItem,
-        items: [],
-        parentListCubit: this,
-        parent: null,
-        expanded: false);
+    ItemVM newCubit =
+        ItemVM(item: newItem, items: [], parent: null, expanded: false);
     return newCubit;
   }
 
@@ -90,10 +86,7 @@ class RootItemsCubit extends Cubit<RootItemsState> with ListWithSelectionCubit {
     try {
       emit(RootItemsState.busy(prev: state));
       final items = await itemRepo.fetchItems();
-      ChildCubitCreator.init(
-          rootItemsCubit: this, childrenItemsCubit: childrenItemsCubit);
-      final topicCubits =
-          ChildCubitCreator.createChildrenCubitsForParent(null, items);
+      final topicCubits = ItemVM.createChildrenCubitsForParent(null, items);
       emit(RootItemsState.ready(prev: state, topicCubits: topicCubits));
     } catch (e) {
       print("error in items_cubit fetchTopics: $e");
