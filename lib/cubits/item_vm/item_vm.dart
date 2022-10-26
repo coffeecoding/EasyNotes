@@ -241,7 +241,7 @@ class ItemVM {
     final result = <ItemVM>[];
     ItemVM? cursor = parent;
     while (cursor != null) {
-      result.add(cursor.parent!);
+      result.add(cursor);
       cursor = cursor.parent;
     }
     return result;

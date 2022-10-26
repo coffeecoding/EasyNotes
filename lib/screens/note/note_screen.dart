@@ -50,7 +50,30 @@ class NoteScreen extends StatelessWidget {
         }
       }
       return Scaffold(
-          key: UniqueKey(), appBar: buildActionPanel(context), body: noteView);
+          key: UniqueKey(),
+          appBar: buildActionPanel(context),
+          body: Column(
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: Text(
+                      noteCubit
+                          .getAncestors()
+                          .reversed
+                          .map((e) => e.title)
+                          .join(' > '),
+                      textAlign: TextAlign.start,
+                      style: const TextStyle(color: Colors.white70),
+                    ),
+                  ),
+                ],
+              ),
+              Expanded(child: noteView!),
+            ],
+          ));
     });
   }
 
