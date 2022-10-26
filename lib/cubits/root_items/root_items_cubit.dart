@@ -67,7 +67,11 @@ class RootItemsCubit extends Cubit<RootItemsState> with ListWithSelectionCubit {
 
   @override
   void handleItemsChanging({bool silent = false}) {
-    emit(RootItemsState.busy(prev: state));
+    if (silent) {
+      emit(RootItemsState.busySilent(prev: state));
+    } else {
+      emit(RootItemsState.busy(prev: state));
+    }
   }
 
   @override

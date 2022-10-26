@@ -67,7 +67,7 @@ class _TopicScreenState extends State<TopicScreen> {
                                 colorSelection: selectedColor);
                             context
                                 .read<RootItemsCubit>()
-                                .handleItemsChanging();
+                                .handleItemsChanging(silent: true);
                             bool s = await context.read<TopicCubit>().save(
                                 title: titleCtr.text, color: selectedColor);
                             if (s && mounted) {

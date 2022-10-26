@@ -1,6 +1,17 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 part of 'children_items_cubit.dart';
 
+// busySilent: Sometimes we want to be in a busy state but not display it
+// over this view as it the busy state may already be shown in an overlaying
+// view. Example: when pinning item, the individual item is showing busy state,
+// so no need to view busy state on the whole children items list as well, but
+// we still need busy state because otherwise the children list won't update;
+// The only way to avoid the need for this extra status would be if we could
+// switch from ready(originalList) -> ready(changedList) and it would still
+// update, but it's not working. So the current solution to update the list
+// view on change of items in the list is to do the state change as follows:
+// ready(list) -> busy(list) -> ready(list)  // when we want to diplay busy, or
+// ready(list) -> busySilent(list) -> ready(list)
 enum ChildrenItemsStatus { unselected, busy, busySilent, ready, error }
 
 class ChildrenItemsState extends Equatable {

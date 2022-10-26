@@ -3,10 +3,9 @@ part of 'root_items_cubit.dart';
 
 // two ready states to toggle between for minor state changes like
 // pinning / unpinning an item actions like
-enum RootItemsStatus { busy, ready, error }
-// other idea: separate status of children and root items
-// enum RootItemVMStatus { busy, ready, error }
-// enum ChildrenStatus { busy, ready, error }
+// again, busySilent is needed when showing busy in the topic screen / modal
+// already, which overlays the root items list view.
+enum RootItemsStatus { busy, busySilent, ready, error }
 
 class RootItemsState extends Equatable {
   const RootItemsState._(
@@ -16,6 +15,13 @@ class RootItemsState extends Equatable {
       this.errorMsg = ''});
 
   const RootItemsState.initial() : this._();
+
+  RootItemsState.busySilent({required RootItemsState prev})
+      : this._(
+          status: RootItemsStatus.busySilent,
+          topicCubits: prev.topicCubits,
+          selectedItem: prev.selectedItem,
+        );
 
   RootItemsState.busy({required RootItemsState prev})
       : this._(
