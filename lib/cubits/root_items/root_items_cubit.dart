@@ -12,7 +12,7 @@ abstract class ListWithSelectionCubit {
   void addItem(ItemVM item);
   void insertItem(ItemVM item);
   void removeItem(ItemVM item);
-  void handleItemsChanging();
+  void handleItemsChanging({bool silent = false});
   void handleItemsChanged();
   void handleSelectionChanged(ItemVM? selected);
   void handleError(Object e);
@@ -66,7 +66,7 @@ class RootItemsCubit extends Cubit<RootItemsState> with ListWithSelectionCubit {
   }
 
   @override
-  void handleItemsChanging() {
+  void handleItemsChanging({bool silent = false}) {
     emit(RootItemsState.busy(prev: state));
   }
 

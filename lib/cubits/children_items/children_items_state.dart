@@ -1,7 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 part of 'children_items_cubit.dart';
 
-enum ChildrenItemsStatus { unselected, busy, ready, error }
+enum ChildrenItemsStatus { unselected, busy, busySilent, ready, error }
 
 class ChildrenItemsState extends Equatable {
   const ChildrenItemsState._(
@@ -15,6 +15,13 @@ class ChildrenItemsState extends Equatable {
   ChildrenItemsState.busy({required ChildrenItemsState prev})
       : this._(
           status: ChildrenItemsStatus.busy,
+          childrenCubits: prev.childrenCubits,
+          selectedNote: prev.selectedNote,
+        );
+
+  ChildrenItemsState.busySilent({required ChildrenItemsState prev})
+      : this._(
+          status: ChildrenItemsStatus.busySilent,
           childrenCubits: prev.childrenCubits,
           selectedNote: prev.selectedNote,
         );

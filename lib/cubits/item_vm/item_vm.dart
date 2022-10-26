@@ -101,7 +101,7 @@ class ItemVM {
   Future<void> togglePinned() async {
     if (status == ItemVMStatus.newDraft) return;
     try {
-      parentListCubit.handleItemsChanging();
+      parentListCubit.handleItemsChanging(silent: true);
       bool newValue = !pinned;
       final updated = await itemRepo.updateItemPinned(id, newValue ? 1 : 0);
       item = updated;

@@ -47,8 +47,16 @@ class ChildrenItemsCubit extends Cubit<ChildrenItemsState>
   }
 
   @override
-  void handleItemsChanging() {
-    emit(ChildrenItemsState.busy(prev: state));
+  void handleItemsChanging({bool silent = false}) {
+    // silent is to avoid showing loading indicator if it is already shown
+    // on an overlaying view (e.g. when pinning, it's already showing
+    // progress indicator on the item itself, no need to show it over the
+    // whole list as well)
+    if (silent) {
+      emit(ChildrenItemsState.busySilent(prev: state));
+    } else {
+      emit(ChildrenItemsState.busy(prev: state));
+    }
   }
 
   @override
