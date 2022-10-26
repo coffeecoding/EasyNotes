@@ -44,7 +44,7 @@ class TopicsList extends StatelessWidget {
       body: BlocBuilder<RootItemsCubit, RootItemsState>(
           buildWhen: (prev, next) =>
               prev.status != next.status ||
-              prev.selectedTopic != next.selectedTopic ||
+              prev.selectedItem != next.selectedItem ||
               prev.topicCubits != next.topicCubits,
           builder: (context, state) {
             final topics = state.topicCubits;
@@ -64,7 +64,7 @@ class TopicsList extends StatelessWidget {
                               return RootItemContainer(
                                   key: UniqueKey(),
                                   item: topic,
-                                  selectedTopic: state.selectedTopic,
+                                  selectedItem: state.selectedItem,
                                   color: clr);
                             }),
                         Container(
@@ -143,12 +143,12 @@ class RootItemContainer extends StatelessWidget {
   const RootItemContainer({
     super.key,
     required this.item,
-    required this.selectedTopic,
+    required this.selectedItem,
     required this.color,
   });
 
   final ItemVM item;
-  final ItemVM? selectedTopic;
+  final ItemVM? selectedItem;
   final Color color;
 
   @override
@@ -160,7 +160,7 @@ class RootItemContainer extends StatelessWidget {
         final cic = context.read<ChildrenItemsCubit>();
         final ric = context.read<RootItemsCubit>();
         final refreshChildren =
-            itemCubit.parent != null || item == ric.selectedTopic;
+            itemCubit.parent != null || item == ric.selectedItem;
         final refreshRootItems = itemCubit.parent == null;
         if (refreshChildren) {
           cic.handleItemsChanging();
@@ -184,11 +184,11 @@ class RootItemContainer extends StatelessWidget {
             width: 100,
             height: 50,
             child: RootItemRow(
-                selectedTopic: selectedTopic, item: item, color: color),
+                selectedItem: selectedItem, item: item, color: color),
           ),
         ),
         child:
-            RootItemRow(selectedTopic: selectedTopic, item: item, color: color),
+            RootItemRow(selectedItem: selectedItem, item: item, color: color),
       ),
     );
   }
@@ -198,11 +198,11 @@ class RootItemRow extends StatefulWidget {
   const RootItemRow(
       {super.key,
       required this.item,
-      required this.selectedTopic,
+      required this.selectedItem,
       required this.color});
 
   final ItemVM item;
-  final ItemVM? selectedTopic;
+  final ItemVM? selectedItem;
   final Color color;
 
   @override
@@ -216,12 +216,12 @@ class _RootItemRowState extends State<RootItemRow> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-          color: (widget.selectedTopic != null &&
-                  widget.item == widget.selectedTopic)
+          color: (widget.selectedItem != null &&
+                  widget.item == widget.selectedItem)
               ? Colors.white10
               : Colors.transparent,
-          border: (widget.selectedTopic != null &&
-                  widget.item == widget.selectedTopic!)
+          border: (widget.selectedItem != null &&
+                  widget.item == widget.selectedItem!)
               ? Border(right: BorderSide(color: widget.color, width: 2))
               : null),
       child: MouseRegion(

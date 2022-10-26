@@ -154,7 +154,6 @@ class ItemVM {
         parent?.removeChild(this);
       }
     }
-    status = ItemVMStatus.persisted;
   }
 
   void addChild(ItemVM child) {

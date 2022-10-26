@@ -12,7 +12,7 @@ class RootItemsState extends Equatable {
   const RootItemsState._(
       {this.status = RootItemsStatus.busy,
       this.topicCubits = const <ItemVM>[],
-      this.selectedTopic,
+      this.selectedItem,
       this.errorMsg = ''});
 
   const RootItemsState.initial() : this._();
@@ -21,17 +21,17 @@ class RootItemsState extends Equatable {
       : this._(
           status: RootItemsStatus.busy,
           topicCubits: prev.topicCubits,
-          selectedTopic: prev.selectedTopic,
+          selectedItem: prev.selectedItem,
         );
 
   RootItemsState.ready({
     required RootItemsState prev,
     List<ItemVM>? topicCubits,
-    ItemVM? selectedTopic,
+    ItemVM? selectedItem,
   }) : this._(
           status: RootItemsStatus.ready,
           topicCubits: topicCubits ?? prev.topicCubits,
-          selectedTopic: selectedTopic,
+          selectedItem: selectedItem,
         );
 
   RootItemsState.error({
@@ -40,14 +40,14 @@ class RootItemsState extends Equatable {
   }) : this._(
             status: RootItemsStatus.error,
             topicCubits: prev.topicCubits,
-            selectedTopic: prev.selectedTopic,
+            selectedItem: prev.selectedItem,
             errorMsg: errorMsg);
 
   final RootItemsStatus status;
   final List<ItemVM> topicCubits;
-  final ItemVM? selectedTopic;
+  final ItemVM? selectedItem;
   final String errorMsg;
 
   @override
-  List<Object?> get props => [status, selectedTopic, topicCubits];
+  List<Object?> get props => [status, selectedItem, topicCubits];
 }

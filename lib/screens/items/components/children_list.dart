@@ -17,14 +17,14 @@ class ChildrenList extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<ChildrenItemsCubit, ChildrenItemsState>(
         builder: (context, state) {
-      final selectedTopic = context.read<RootItemsCubit>().selectedTopic;
+      final selectedItem = context.read<RootItemsCubit>().selectedItem;
       //if (state.status == ChildrenItemsStatus.unselected) {
-      if (selectedTopic == null) {
+      if (selectedItem == null) {
         return const Center(child: Text('No Topic selected'));
       }
       final childrenItemsCubit = context.read<ChildrenItemsCubit>();
       final itemCubits = state.childrenCubits;
-      final clr = HexColor.fromHex(selectedTopic.color);
+      final clr = HexColor.fromHex(selectedItem.color);
       return Scaffold(
           appBar: AppBar(
               titleSpacing: 8,
@@ -38,12 +38,12 @@ class ChildrenList extends StatelessWidget {
                       iconData: FluentIcons.folder_add_20_regular,
                       title: 'Subtopic',
                       onPressed: () =>
-                          childrenItemsCubit.createSubTopic(selectedTopic)),
+                          childrenItemsCubit.createSubTopic(selectedItem)),
                   ToolbarButton(
                       iconData: FluentIcons.note_add_20_regular,
                       title: 'Note',
                       onPressed: () =>
-                          childrenItemsCubit.createNote(selectedTopic)),
+                          childrenItemsCubit.createNote(selectedItem)),
                 ],
               )),
           body: Container(
@@ -367,6 +367,12 @@ class _ItemRowState extends State<ItemRow> {
         horizontalTitleGap: 0,
         title: Row(
           children: [
+            if (widget.item.status == ItemVMStatus.draft ||
+                widget.item.status == ItemVMStatus.newDraft)
+              const Icon(
+                FluentIcons.circle_small_20_filled,
+                color: Colors.white,
+              ),
             Expanded(
               child: Text(
                 widget.item.title,
@@ -426,7 +432,23 @@ class _ItemRowState extends State<ItemRow> {
                                   onPressed: () {})),
                         ];
                       })),
-            if ((hovering == true || widget.item.pinned) && isSaving != true)
+            if ((hovering == true &&
+                widget.item.status == ItemVMStatus.newDraft))
+              InlineButton(
+                iconData: FluentIcons.dismiss_16_regular,
+                onPressed: () {
+                  final snc = context.read<SelectedNoteCubit>();
+                  widget.item.parentListCubit.handleItemsChanging();
+                  if (snc.note == widget.item) {
+                    snc.handleNoteChanged(null);
+                  }
+                  widget.item.resetState();
+                  widget.item.parentListCubit.handleItemsChanged();
+                },
+              ),
+            if ((hovering == true || widget.item.pinned) &&
+                isSaving != true &&
+                widget.item.status != ItemVMStatus.newDraft)
               InlineButton(
                 iconData: FluentIcons.pin_16_regular,
                 onPressed: () async {

@@ -28,11 +28,11 @@ class RootItemsCubit extends Cubit<RootItemsState> with ListWithSelectionCubit {
   final ChildrenItemsCubit childrenItemsCubit;
 
   List<ItemVM> get topicCubits => state.topicCubits;
-  ItemVM? get selectedTopic => state.selectedTopic;
+  ItemVM? get selectedItem => state.selectedItem;
 
   @override
   void handleSelectionChanged(ItemVM? selected) =>
-      emit(RootItemsState.ready(prev: state, selectedTopic: selected));
+      emit(RootItemsState.ready(prev: state, selectedItem: selected));
 
   @override
   void addItem(ItemVM item) {
@@ -72,7 +72,7 @@ class RootItemsCubit extends Cubit<RootItemsState> with ListWithSelectionCubit {
 
   @override
   void handleItemsChanged() {
-    emit(RootItemsState.ready(prev: state, selectedTopic: selectedTopic));
+    emit(RootItemsState.ready(prev: state, selectedItem: selectedItem));
   }
 
   @override

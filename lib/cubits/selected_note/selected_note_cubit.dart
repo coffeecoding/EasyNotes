@@ -46,7 +46,11 @@ class SelectedNoteCubit extends Cubit<SelectedNoteState> {
 
   void resetState() {
     note!.resetState();
-    handleNoteChanged(note);
+    if (note?.status == ItemVMStatus.newDraft) {
+      handleNoteChanged(null);
+    } else {
+      handleNoteChanged(note);
+    }
     childrenItemsCubit.handleItemsChanged();
   }
 

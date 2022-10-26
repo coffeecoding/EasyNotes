@@ -16,7 +16,7 @@ class ChildrenItemsCubit extends Cubit<ChildrenItemsState>
   final ItemRepository itemRepo;
 
   List<ItemVM> get childrenCubits => state.childrenCubits;
-  ItemVM? get selectedNote => state.selectedNote;
+  ItemVM? get selectedItem => state.selectedNote;
 
   @override
   void addItem(ItemVM item) {
