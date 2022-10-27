@@ -85,7 +85,10 @@ class TrashList extends StatelessWidget {
                           }),
                       state.status == TrashedItemsStatus.busy
                           ? Positioned.fill(
-                              child: Container(color: Colors.black26))
+                              child: Container(
+                                  color: Colors.black26,
+                                  child: const Center(
+                                      child: CircularProgressIndicator())))
                           : Container(),
                     ],
                   ),

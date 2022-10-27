@@ -131,6 +131,7 @@ class ItemVM {
     try {
       if (updateParent) {
         item = await itemRepo.updateItemParent(id, newParent?.id, true);
+        parent = newParent;
       }
       item = await itemRepo.updateItemTrashed(id, null);
     } catch (e) {

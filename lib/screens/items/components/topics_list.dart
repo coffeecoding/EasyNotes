@@ -209,7 +209,18 @@ class RootItemContainer extends StatelessWidget {
       onAccept: (incomingItem) async {
         final cic = context.read<ChildrenItemsCubit>();
         final ric = context.read<RootItemsCubit>();
-        await incomingItem.changeParent(newParent: item, ric: ric, cic: cic);
+        if (incomingItem.trashed == null) {
+          await incomingItem.changeParent(newParent: item, ric: ric, cic: cic);
+        } else {
+          final tic = context.read<TrashedItemsCubit>();
+          final oldParent = incomingItem.parent;
+          tic.handleItemsChanging();
+          await incomingItem.restoreFromTrash(item, true);
+          oldParent?.removeChild(incomingItem);
+          item.addChild(incomingItem);
+          tic.removeItem(incomingItem);
+          tic.handleItemsChanged();
+        }
       },
       builder: (context, __, ___) => Draggable(
         data: item,
