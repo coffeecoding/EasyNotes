@@ -52,6 +52,7 @@ class ItemVM {
   int get item_type => item.item_type;
   bool get isTopic => item.isTopic;
   bool get pinned => item.pinned;
+  int? get trashed => item.trashed;
 
   ItemLevel get level => parent == null
       ? ItemLevel.root
@@ -122,6 +123,34 @@ class ItemVM {
     }
   }
 
+  /// Restores item from trash and updates its parent if updateParent is true;
+  /// updateParent parameter is needed becausee newParent being null could
+  /// either mean a) don't update parent or b) update parent to null.
+  Future<void> restoreFromTrash(ItemVM? newParent,
+      [bool updateParent = false]) async {
+    try {
+      if (updateParent) {
+        item = await itemRepo.updateItemParent(id, newParent?.id, true);
+      }
+      item = await itemRepo.updateItemTrashed(id, null);
+    } catch (e) {
+      print("error restoring item from trash: $e");
+      error = 'failed to restore item from item: $e';
+    }
+  }
+
+  Future<void> trash() async {
+    if (status == ItemVMStatus.newDraft) return;
+    try {
+      int time = DateTime.now().toUtc().millisecondsSinceEpoch;
+      Item updated = await itemRepo.updateItemTrashed(id, time);
+      item = updated;
+    } catch (e) {
+      print("error trashing item: $e");
+      error = 'failed to trash it item: $e';
+    }
+  }
+
   void sortChildren() {
     if (children.isEmpty) {
       return;
@@ -185,6 +214,14 @@ class ItemVM {
     }
   }
 
+  Future<void> delete() async {
+    try {
+      await itemRepo.delete(id);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> changeParent(
       {ItemVM? newParent,
       required RootItemsCubit ric,
@@ -235,6 +272,11 @@ class ItemVM {
       ric.handleError(e);
       rethrow;
     }
+  }
+
+  ItemVM? getRootAncestor() {
+    final ancestors = getAncestors();
+    return ancestors.isEmpty ? null : ancestors.last;
   }
 
   List<ItemVM> getAncestors() {

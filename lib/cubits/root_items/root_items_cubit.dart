@@ -2,6 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:easynotes/config/constants.dart';
 import 'package:easynotes/cubits/children_items/children_items_cubit.dart';
 import 'package:easynotes/cubits/item_vm/item_vm.dart';
+import 'package:easynotes/cubits/trashed_items/trashed_items_cubit.dart';
 import 'package:easynotes/models/item.dart';
 import 'package:easynotes/repositories/item_repository.dart';
 import 'package:equatable/equatable.dart';
@@ -14,25 +15,31 @@ abstract class ListWithSelectionCubit {
   void removeItem(ItemVM item);
   void handleItemsChanging({bool silent = false});
   void handleItemsChanged();
-  void handleSelectionChanged(ItemVM? selected);
+  void handleSelectionChanged(ItemVM? selected, [bool selectTrash = false]);
   void handleError(Object e);
   Future<void> fetchItems();
 }
 
 class RootItemsCubit extends Cubit<RootItemsState> with ListWithSelectionCubit {
-  RootItemsCubit({required this.itemRepo, required this.childrenItemsCubit})
+  RootItemsCubit(
+      {required this.itemRepo,
+      required this.childrenItemsCubit,
+      required this.trashedItemsCubit})
       : super(const RootItemsState.initial());
 
   final ItemRepository itemRepo;
 
   final ChildrenItemsCubit childrenItemsCubit;
+  final TrashedItemsCubit trashedItemsCubit;
 
-  List<ItemVM> get topicCubits => state.topicCubits;
+  List<ItemVM> get topicCubits =>
+      state.topicCubits.where((t) => t.trashed == null).toList();
   ItemVM? get selectedItem => state.selectedItem;
 
   @override
-  void handleSelectionChanged(ItemVM? selected) =>
-      emit(RootItemsState.ready(prev: state, selectedItem: selected));
+  void handleSelectionChanged(ItemVM? selected, [bool selectTrash = false]) =>
+      emit(RootItemsState.ready(
+          prev: state, selectedItem: selected, isTrashSelected: selectTrash));
 
   @override
   void addItem(ItemVM item) {
@@ -86,7 +93,27 @@ class RootItemsCubit extends Cubit<RootItemsState> with ListWithSelectionCubit {
     try {
       emit(RootItemsState.busy(prev: state));
       final items = await itemRepo.fetchItems();
-      final topicCubits = ItemVM.createChildrenCubitsForParent(null, items);
+      final nonTrashedItems = items.where((i) => i.trashed == null).toList();
+      final topicCubits =
+          ItemVM.createChildrenCubitsForParent(null, nonTrashedItems);
+
+      // trashed items
+      final trashedItems = items.where((i) => i.trashed != null).toList();
+      trashedItemsCubit.handleItemsChanging();
+      final topLevelTrashedItems = trashedItems
+          .where((i) =>
+              i.parent_id == null ||
+              !trashedItems.any((p) => p.id == i.parent_id))
+          .toList();
+      final trashedItemVMs = topLevelTrashedItems
+          .map((i) => ItemVM(
+              item: i,
+              items: trashedItems,
+              parent: null,
+              status: ItemVMStatus.persisted))
+          .toList();
+      trashedItemsCubit.handleItemsChanged(items: trashedItemVMs);
+
       emit(RootItemsState.ready(prev: state, topicCubits: topicCubits));
     } catch (e) {
       print("error in items_cubit fetchTopics: $e");

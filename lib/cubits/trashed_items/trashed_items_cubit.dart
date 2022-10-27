@@ -4,21 +4,21 @@ import 'package:easynotes/cubits/root_items/root_items_cubit.dart';
 import 'package:easynotes/repositories/item_repository.dart';
 import 'package:equatable/equatable.dart';
 
-part 'trash_state.dart';
+part 'trashed_items_state.dart';
 
-class TrashCubit extends Cubit<TrashState> with ListWithSelectionCubit {
-  TrashCubit({
+class TrashedItemsCubit extends Cubit<TrashedItemsState>
+    with ListWithSelectionCubit {
+  TrashedItemsCubit({
     required this.itemRepo,
-    required this.rootItemsCubit,
-    this.itemVMs = const <ItemVM>[],
-  }) : super(const TrashState.busy());
+  }) : super(const TrashedItemsState.initial());
 
   final ItemRepository itemRepo;
-  final RootItemsCubit rootItemsCubit;
-  List<ItemVM> itemVMs;
+
+  List<ItemVM> get items => state.items;
+  String? errorMsg;
 
   void sort() {
-    itemVMs.sort((a, b) => a.item.trashed!.compareTo(b.item.trashed!));
+    items.sort((a, b) => a.item.trashed!.compareTo(b.item.trashed!));
   }
 
   void initialize() {
@@ -28,14 +28,12 @@ class TrashCubit extends Cubit<TrashState> with ListWithSelectionCubit {
             i.parent_id == null || !items.any((p) => p.id == i.parent_id))
         .toList();
     items.removeWhere((i) => topLevelItems.contains(i));
-    items.forEach((i) {});
-    //ItemVMs =
-    //    ItemVM.createChildrenCubitsForParent(RootItemsCubit, parent, items);
   }
 
   @override
   void addItem(ItemVM item) {
-    // TODO: implement addItem
+    items.add(item);
+    // todo: sort by preference (date trashed)
   }
 
   @override
@@ -46,31 +44,37 @@ class TrashCubit extends Cubit<TrashState> with ListWithSelectionCubit {
 
   @override
   void handleError(Object e) {
-    // TODO: implement handleError
+    errorMsg = e.toString();
+    emit(TrashedItemsState.error(prev: state));
   }
 
   @override
-  void handleItemsChanged() {
-    // TODO: implement handleItemsChanged
+  void handleItemsChanged({List<ItemVM>? items}) {
+    emit(TrashedItemsState.ready(prev: state, items: items));
   }
 
   @override
   void handleItemsChanging({bool silent = false}) {
-    // TODO: implement handleItemsChanging
+    if (silent) {
+      emit(TrashedItemsState.busySilent(prev: state));
+    } else {
+      emit(TrashedItemsState.busy(prev: state));
+    }
   }
 
   @override
-  void handleSelectionChanged(ItemVM? selected) {
-    // TODO: implement handleSelectionChanged
+  void handleSelectionChanged(ItemVM? selected, [bool selectTrash = false]) {
+    emit(TrashedItemsState.ready(prev: state));
   }
 
   @override
   void insertItem(ItemVM item) {
-    // TODO: implement insertItem
+    items.insert(0, item);
+    // todo: sort by preference (date trashed)
   }
 
   @override
   void removeItem(ItemVM item) {
-    // TODO: implement removeItem
+    items.remove(item);
   }
 }

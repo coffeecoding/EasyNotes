@@ -1,3 +1,5 @@
+// ignore_for_file: non_constant_identifier_names
+
 import 'package:easynotes/models/models.dart';
 import 'package:easynotes/config/sample_data.dart';
 
@@ -44,6 +46,12 @@ class MockItemRepo implements ItemRepository {
   Future<List<Item>> fetchRootItems() async {
     await Future.delayed(const Duration(seconds: 1));
     return items.where((element) => element.parent_id == null).toList();
+  }
+
+  @override
+  Future<List<Item>> fetchUntrashedItems() async {
+    // TODO: implement fetchTrashedItems
+    throw UnimplementedError();
   }
 
   @override
@@ -101,10 +109,12 @@ class MockItemRepo implements ItemRepository {
   }
 
   @override
-  Future<Item> updateItemParent(String id, String? parent_id) async {
+  Future<Item> updateItemParent(String id, String? parent_id,
+      [bool? untrash]) async {
     await Future.delayed(const Duration(milliseconds: 200));
     int i = items.indexWhere((i) => i.id == id);
     items[i].parent_id = parent_id;
+    items[i] = items[i].copyWith(trashed: null);
     return items[i];
   }
 

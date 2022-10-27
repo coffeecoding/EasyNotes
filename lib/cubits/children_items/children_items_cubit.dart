@@ -15,7 +15,8 @@ class ChildrenItemsCubit extends Cubit<ChildrenItemsState>
 
   final ItemRepository itemRepo;
 
-  List<ItemVM> get childrenCubits => state.childrenCubits;
+  List<ItemVM> get childrenCubits =>
+      state.childrenCubits.where((c) => c.trashed == null).toList();
   ItemVM? get selectedItem => state.selectedNote;
 
   @override
@@ -42,7 +43,7 @@ class ChildrenItemsCubit extends Cubit<ChildrenItemsState>
   }
 
   @override
-  void handleSelectionChanged(ItemVM? selected) {
+  void handleSelectionChanged(ItemVM? selected, [bool selectTrash = false]) {
     emit(ChildrenItemsState.ready(prev: state, selectedNote: selected));
   }
 

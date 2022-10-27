@@ -12,6 +12,7 @@ class RootItemsState extends Equatable {
       {this.status = RootItemsStatus.busy,
       this.topicCubits = const <ItemVM>[],
       this.selectedItem,
+      this.isTrashSelected = false,
       this.errorMsg = ''});
 
   const RootItemsState.initial() : this._();
@@ -21,6 +22,7 @@ class RootItemsState extends Equatable {
           status: RootItemsStatus.busySilent,
           topicCubits: prev.topicCubits,
           selectedItem: prev.selectedItem,
+          isTrashSelected: prev.isTrashSelected,
         );
 
   RootItemsState.busy({required RootItemsState prev})
@@ -28,16 +30,19 @@ class RootItemsState extends Equatable {
           status: RootItemsStatus.busy,
           topicCubits: prev.topicCubits,
           selectedItem: prev.selectedItem,
+          isTrashSelected: prev.isTrashSelected,
         );
 
   RootItemsState.ready({
     required RootItemsState prev,
     List<ItemVM>? topicCubits,
     ItemVM? selectedItem,
+    bool? isTrashSelected,
   }) : this._(
           status: RootItemsStatus.ready,
           topicCubits: topicCubits ?? prev.topicCubits,
           selectedItem: selectedItem,
+          isTrashSelected: isTrashSelected ?? prev.isTrashSelected,
         );
 
   RootItemsState.error({
@@ -47,13 +52,16 @@ class RootItemsState extends Equatable {
             status: RootItemsStatus.error,
             topicCubits: prev.topicCubits,
             selectedItem: prev.selectedItem,
+            isTrashSelected: prev.isTrashSelected,
             errorMsg: errorMsg);
 
   final RootItemsStatus status;
   final List<ItemVM> topicCubits;
   final ItemVM? selectedItem;
+  final bool isTrashSelected;
   final String errorMsg;
 
   @override
-  List<Object?> get props => [status, selectedItem, topicCubits];
+  List<Object?> get props =>
+      [status, selectedItem, isTrashSelected, topicCubits];
 }

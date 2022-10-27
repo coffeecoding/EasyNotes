@@ -1,3 +1,5 @@
+// ignore_for_file: non_constant_identifier_names
+
 import 'dart:convert';
 
 import 'package:easynotes/config/locator.dart';
@@ -19,12 +21,13 @@ abstract class ItemRepository {
   List<Item> getRootItems();
   List<Item> getTrashedItems();
   Future<List<Item>> fetchItems();
+  Future<List<Item>> fetchUntrashedItems();
   Future<List<Item>> fetchTrashedItems();
   Future<List<Item>> fetchRootItems();
   Future<Item> insertOrUpdateItem(Item item, ItemUpdateAction action);
   Future<List<Item>> insertOrUpdateItems(List<Item> items);
   Future<Item> updateItemHeader(ItemHeader header);
-  Future<Item> updateItemParent(String id, String? parent_id);
+  Future<Item> updateItemParent(String id, String? parent_id, [bool? untrash]);
   Future<Item> updateItemTrashed(String id, int? trashed);
   Future<Item> updateItemPinned(String id, int pin);
   Future<Item> updateItemGloballyPinned(String id, int pin);
@@ -92,6 +95,19 @@ class ItemRepo implements ItemRepository {
   }
 
   @override
+  Future<List<Item>> fetchUntrashedItems() async {
+    Response response = await netClient.get('/api/items?trashed=false');
+    if (!response.isSuccessStatusCode()) throw 'Unable to fetch data';
+    List<Item> encryptedItems = (jsonDecode(response.body) as List)
+        .map((i) => Item.fromJson(i))
+        .toList();
+    final untrashedItems = await cryptoService.decryptItems(encryptedItems);
+    //items.removeWhere((i) => i.trashed != null);
+    //items.addAll(trashedItems);
+    return untrashedItems;
+  }
+
+  @override
   Future<List<Item>> fetchTrashedItems() async {
     Response response = await netClient.get('/api/items?trashed=asdf');
     if (!response.isSuccessStatusCode()) throw 'Unable to fetch data';
@@ -101,7 +117,7 @@ class ItemRepo implements ItemRepository {
     final trashedItems = await cryptoService.decryptItems(encryptedItems);
     //items.removeWhere((i) => i.trashed != null);
     //items.addAll(trashedItems);
-    return getTrashedItems();
+    return trashedItems;
   }
 
   @override
@@ -152,9 +168,11 @@ class ItemRepo implements ItemRepository {
   }
 
   @override
-  Future<Item> updateItemParent(String id, String? parent_id) async {
-    Response? response =
-        await netClient.put('/api/item/$id?parent_id=$parent_id', "");
+  Future<Item> updateItemParent(String id, String? parent_id,
+      [bool? untrash]) async {
+    Response? response = await netClient.put(
+        '/api/item/$id?parent_id=$parent_id${untrash == true ? '?untrash=$untrash' : ''}',
+        "");
     if (!response.isSuccessStatusCode()) throw 'Error updating item parent';
     int timestamp = int.parse(response.body);
     int i = items.indexWhere((i) => i.id == id);

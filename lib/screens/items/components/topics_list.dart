@@ -1,5 +1,6 @@
 import 'package:easynotes/cubits/cubits.dart';
 import 'package:easynotes/cubits/item_vm/item_vm.dart';
+import 'package:easynotes/cubits/trashed_items/trashed_items_cubit.dart';
 import 'package:easynotes/extensions/color_ext.dart';
 import 'package:easynotes/screens/common/inline_button.dart';
 import 'package:easynotes/screens/common/toolbar_button.dart';
@@ -105,20 +106,55 @@ class TrashContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     return DragTarget<ItemVM>(
         onWillAccept: (itemCubit) => itemCubit != null,
-        onAccept: (itemCubit) {},
+        onAccept: (itemCubit) async {
+          final ric = context.read<RootItemsCubit>();
+          final cic = context.read<ChildrenItemsCubit>();
+          final tic = context.read<TrashedItemsCubit>();
+          if (itemCubit.level == ItemLevel.root) {
+            ric.handleItemsChanging();
+          } else if (!ric.state.isTrashSelected) {
+            cic.handleItemsChanging();
+          }
+          tic.handleItemsChanging(silent: true);
+          await itemCubit.trash();
+          tic.addItem(itemCubit);
+          tic.handleItemsChanged();
+          if (itemCubit.level == ItemLevel.root) {
+            ric.removeItem(itemCubit);
+            if (itemCubit == ric.selectedItem) {
+              ric.handleSelectionChanged(null);
+            } else {
+              ric.handleItemsChanged();
+            }
+          } else {
+            itemCubit.parent!.removeChild(itemCubit);
+            if (itemCubit.level == ItemLevel.childOfRoot) {
+              cic.removeItem(itemCubit);
+            }
+            if (!ric.state.isTrashSelected) {
+              cic.handleItemsChanged();
+            }
+          }
+        },
         builder: (context, __, ___) {
           RootItemsCubit ic = context.read<RootItemsCubit>();
           return Container(
             decoration: BoxDecoration(
-                color: true ? Colors.white10 : Colors.transparent,
-                border: true
+                color: ic.state.isTrashSelected
+                    ? Colors.white10
+                    : Colors.transparent,
+                border: ic.state.isTrashSelected
                     ? const Border(
                         right: BorderSide(color: Colors.white70, width: 2))
                     : null),
             child: ListTile(
               contentPadding: EdgeInsets.zero,
               trailing: null,
-              onTap: () {},
+              onTap: () {
+                context
+                    .read<RootItemsCubit>()
+                    .handleSelectionChanged(null, true);
+              },
               title: Stack(
                 alignment: Alignment.center,
                 children: [
