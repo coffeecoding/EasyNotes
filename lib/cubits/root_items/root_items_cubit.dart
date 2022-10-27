@@ -32,12 +32,11 @@ class RootItemsCubit extends Cubit<RootItemsState> with ListWithSelectionCubit {
   final ChildrenItemsCubit childrenItemsCubit;
   final TrashedItemsCubit trashedItemsCubit;
 
-  List<ItemVM> get topicCubits =>
-      state.topicCubits.where((t) => t.trashed == null).toList();
+  List<ItemVM> get topicCubits => state.topicCubits;
   ItemVM? get selectedItem => state.selectedItem;
 
   @override
-  void handleSelectionChanged(ItemVM? selected, [bool selectTrash = false]) =>
+  void handleSelectionChanged(ItemVM? selected, [bool? selectTrash]) =>
       emit(RootItemsState.ready(
           prev: state, selectedItem: selected, isTrashSelected: selectTrash));
 
@@ -45,19 +44,16 @@ class RootItemsCubit extends Cubit<RootItemsState> with ListWithSelectionCubit {
   void addItem(ItemVM item) {
     // todo : apply preferred sorting
     topicCubits.add(item);
-    handleItemsChanged();
   }
 
   @override
   void removeItem(ItemVM item) {
     topicCubits.remove(item);
-    handleItemsChanged();
   }
 
   @override
   void insertItem(ItemVM item) {
     topicCubits.insert(0, item);
-    handleItemsChanged();
   }
 
   Future<ItemVM> createRootItem(int type) async {

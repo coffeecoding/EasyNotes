@@ -31,8 +31,9 @@ class MockItemRepo implements ItemRepository {
 
   @override
   Future<bool> deleteItems(List<String> ids) async {
-    // TODO: implement deleteItems
-    throw UnimplementedError();
+    await Future.delayed(const Duration(milliseconds: 1500));
+    items.removeWhere((element) => ids.any((i) => element.id == i));
+    return true;
   }
 
   @override

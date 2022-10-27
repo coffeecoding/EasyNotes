@@ -30,6 +30,15 @@ class TrashedItemsCubit extends Cubit<TrashedItemsState>
     items.removeWhere((i) => topLevelItems.contains(i));
   }
 
+  Future<void> deleteAll() async {
+    try {
+      await itemRepo.deleteItems(items.map((e) => e.id).toList());
+    } catch (e) {
+      print('failed to delete all items: $e');
+      emit(TrashedItemsState.error(prev: state));
+    }
+  }
+
   @override
   void addItem(ItemVM item) {
     items.add(item);

@@ -45,8 +45,7 @@ class TopicsList extends StatelessWidget {
       body: BlocBuilder<RootItemsCubit, RootItemsState>(
           buildWhen: (prev, next) =>
               prev.status != next.status ||
-              prev.selectedItem != next.selectedItem ||
-              prev.topicCubits != next.topicCubits,
+              prev.selectedItem != next.selectedItem,
           builder: (context, state) {
             final topics = state.topicCubits;
             return Column(
@@ -73,15 +72,27 @@ class TopicsList extends StatelessWidget {
                           height: 128,
                           child: DragTarget<ItemVM>(
                               onWillAccept: (itemCubit) =>
-                                  itemCubit != null &&
-                                  itemCubit.isTopic &&
-                                  itemCubit.parent != null,
+                                  itemCubit != null && itemCubit.isTopic,
                               onAccept: (incomingItem) async {
                                 // ! This is root drag target (not root item) !
                                 final cic = context.read<ChildrenItemsCubit>();
                                 final ric = context.read<RootItemsCubit>();
-                                await incomingItem.changeParent(
-                                    newParent: null, ric: ric, cic: cic);
+                                if (incomingItem.trashed == null) {
+                                  await incomingItem.changeParent(
+                                      newParent: null, ric: ric, cic: cic);
+                                } else {
+                                  final tic = context.read<TrashedItemsCubit>();
+                                  final oldParent = incomingItem.parent;
+                                  ric.handleItemsChanging();
+                                  tic.handleItemsChanging();
+                                  await incomingItem.restoreFromTrash(
+                                      null, true);
+                                  oldParent?.removeChild(incomingItem);
+                                  ric.addItem(incomingItem);
+                                  tic.removeItem(incomingItem);
+                                  ric.handleItemsChanged();
+                                  tic.handleItemsChanged();
+                                }
                               },
                               builder: (context, __, ___) => Container()),
                         ),
@@ -110,22 +121,27 @@ class TrashContainer extends StatelessWidget {
           final ric = context.read<RootItemsCubit>();
           final cic = context.read<ChildrenItemsCubit>();
           final tic = context.read<TrashedItemsCubit>();
+          final snc = context.read<SelectedNoteCubit>();
+          bool isSelectedNote = itemCubit == snc.note;
           if (itemCubit.level == ItemLevel.root) {
             ric.handleItemsChanging();
-          } else if (!ric.state.isTrashSelected) {
-            cic.handleItemsChanging();
+          }
+          if (!ric.state.isTrashSelected || itemCubit == ric.selectedItem) {
+            cic.handleItemsChanging(silent: itemCubit.level == ItemLevel.root);
           }
           tic.handleItemsChanging(silent: true);
           await itemCubit.trash();
           tic.addItem(itemCubit);
           tic.handleItemsChanged();
-          if (itemCubit.level == ItemLevel.root) {
+          cic.handleItemsChanged();
+          if (isSelectedNote) {
+            snc.handleNoteChanged(null);
+          } else if (itemCubit.level == ItemLevel.root) {
             ric.removeItem(itemCubit);
             if (itemCubit == ric.selectedItem) {
               ric.handleSelectionChanged(null);
-            } else {
-              ric.handleItemsChanged();
             }
+            ric.handleItemsChanged();
           } else {
             itemCubit.parent!.removeChild(itemCubit);
             if (itemCubit.level == ItemLevel.childOfRoot) {
@@ -254,7 +270,9 @@ class _RootItemRowState extends State<RootItemRow> {
           contentPadding: EdgeInsets.zero,
           trailing: null,
           onTap: () {
-            context.read<RootItemsCubit>().handleSelectionChanged(widget.item);
+            context
+                .read<RootItemsCubit>()
+                .handleSelectionChanged(widget.item, false);
             context
                 .read<ChildrenItemsCubit>()
                 .handleRootItemSelectionChanged(widget.item);

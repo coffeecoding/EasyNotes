@@ -11,7 +11,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class TrashList extends StatelessWidget {
-  const TrashList({Key? key}) : super(key: key);
+  TrashList({Key? key})
+      : isDeleteingAll = false,
+        super(key: key);
+
+  bool isDeleteingAll;
 
   @override
   Widget build(BuildContext context) {
@@ -27,11 +31,36 @@ class TrashList extends StatelessWidget {
               title: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  ToolbarButton(
-                      iconData: FluentIcons.delete_20_regular,
-                      enabledColor: Colors.red,
-                      title: 'Delete All',
-                      onPressed: () {}),
+                  StatefulBuilder(builder: (context, setState) {
+                    return isDeleteingAll == true
+                        ? const SizedBox(
+                            width: 100,
+                            child: Center(
+                                child: InlineCircularProgressIndicator(
+                                    color: Colors.red)),
+                          )
+                        : ToolbarButton(
+                            iconData: FluentIcons.delete_20_regular,
+                            enabledColor: itemCubits.isEmpty
+                                ? Theme.of(context).disabledColor
+                                : Colors.red,
+                            title: 'Delete All',
+                            onPressed: itemCubits.isEmpty
+                                ? null
+                                : () async {
+                                    setState(() {
+                                      isDeleteingAll = true;
+                                    });
+                                    final tic =
+                                        context.read<TrashedItemsCubit>();
+                                    tic.handleItemsChanging();
+                                    await tic.deleteAll();
+                                    tic.handleItemsChanged(items: []);
+                                    setState(() {
+                                      isDeleteingAll = false;
+                                    });
+                                  });
+                  }),
                 ],
               )),
           body: itemCubits.isEmpty
@@ -56,10 +85,7 @@ class TrashList extends StatelessWidget {
                           }),
                       state.status == TrashedItemsStatus.busy
                           ? Positioned.fill(
-                              child: Container(
-                                  color: Colors.black26,
-                                  child: const Center(
-                                      child: CircularProgressIndicator())))
+                              child: Container(color: Colors.black26))
                           : Container(),
                     ],
                   ),
@@ -336,7 +362,7 @@ class ItemRow extends StatefulWidget {
 
 class _ItemRowState extends State<ItemRow> {
   bool? hovering;
-  bool? isSaving;
+  bool? isDeleteing;
 
   @override
   Widget build(BuildContext context) {
@@ -378,22 +404,35 @@ class _ItemRowState extends State<ItemRow> {
                 maxLines: 1, // remove this to line-break instead
               ),
             ),
-            if (hovering == true)
-              InlineButton(
-                iconData: FluentIcons.dismiss_16_regular,
-                onPressed: () async {
-                  final snc = context.read<SelectedNoteCubit>();
-                  final tic = context.read<TrashedItemsCubit>();
-                  tic.handleItemsChanging();
-                  await widget.item.delete();
-                  if (snc.note == widget.item) {
-                    snc.handleNoteChanged(null);
-                  }
-                  widget.item.parent?.removeChild(widget.item);
-                  tic.removeItem(widget.item);
-                  tic.handleItemsChanged();
-                },
-              ),
+            if (hovering == true || isDeleteing == true)
+              StatefulBuilder(builder: (context, setState) {
+                return isDeleteing == true
+                    ? const Center(
+                        child: InlineCircularProgressIndicator(
+                        color: Colors.red,
+                      ))
+                    : InlineButton(
+                        iconData: FluentIcons.dismiss_16_regular,
+                        onPressed: () async {
+                          setState(() {
+                            isDeleteing = true;
+                          });
+                          final snc = context.read<SelectedNoteCubit>();
+                          final tic = context.read<TrashedItemsCubit>();
+                          tic.handleItemsChanging();
+                          await widget.item.delete();
+                          if (snc.note == widget.item) {
+                            snc.handleNoteChanged(null);
+                          }
+                          widget.item.parent?.removeChild(widget.item);
+                          tic.removeItem(widget.item);
+                          tic.handleItemsChanged();
+                          setState(() {
+                            isDeleteing = false;
+                          });
+                        },
+                      );
+              }),
           ],
         ),
       ),

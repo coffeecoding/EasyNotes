@@ -53,7 +53,7 @@ class _ItemsScreenState extends State<ItemsScreen> {
               Expanded(
                   flex: 2,
                   child: state.isTrashSelected
-                      ? const TrashList()
+                      ? TrashList()
                       : const ChildrenList()),
             ]),
             state.status == RootItemsStatus.busy

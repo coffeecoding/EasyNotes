@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 
 class InlineCircularProgressIndicator extends StatelessWidget {
-  const InlineCircularProgressIndicator({super.key});
+  const InlineCircularProgressIndicator({
+    super.key,
+    this.color,
+  });
+
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
@@ -9,8 +14,9 @@ class InlineCircularProgressIndicator extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 8),
         height: 20,
         width: 36,
-        child: const CircularProgressIndicator(
+        child: CircularProgressIndicator(
           strokeWidth: 1,
+          color: color,
         ));
   }
 }
