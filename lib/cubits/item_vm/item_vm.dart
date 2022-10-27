@@ -168,6 +168,22 @@ class ItemVM {
     }
   }
 
+  List<ItemVM> search(String term, [List<ItemVM> acc = const []]) {
+    if (isTopic) {
+      return children.map((c) => c.search(term, [])).expand((l) => l).toList();
+    } else if (_matchesSearchTerm(term)) {
+      return [...acc, this];
+    } else {
+      return acc;
+    }
+  }
+
+  bool _matchesSearchTerm(String term) {
+    String upperTerm = term.toUpperCase();
+    return title.toUpperCase().contains(upperTerm) ||
+        content.toUpperCase().contains(upperTerm);
+  }
+
   void saveLocalState(
       {ItemVMStatus? newStatus,
       String? titleField,
