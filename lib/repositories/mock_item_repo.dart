@@ -2,6 +2,7 @@
 
 import 'package:easynotes/models/models.dart';
 import 'package:easynotes/config/sample_data.dart';
+import 'package:uuid/uuid.dart';
 
 import 'item_repository.dart';
 
@@ -15,6 +16,7 @@ class MockItemRepo implements ItemRepository {
       required String color,
       required int type}) async {
     return Item.empty(
+      id: const Uuid().v4(),
       color: color,
       parent_id: parent_id,
       receiver_id: 'a',

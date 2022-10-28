@@ -189,12 +189,13 @@ class Item extends Equatable with JsonData {
   }
 
   factory Item.empty(
-      {required String? parent_id,
+      {String? id,
+      required String? parent_id,
       required int type,
       required String receiver_id,
       String color = 'ffA9B852'}) {
     return Item(
-        id: '',
+        id: id ?? '',
         title: '',
         parent_id: parent_id,
         receiver_id: receiver_id,

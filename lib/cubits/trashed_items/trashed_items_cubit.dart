@@ -62,6 +62,11 @@ class TrashedItemsCubit extends Cubit<TrashedItemsState>
     emit(TrashedItemsState.ready(prev: state, items: items));
   }
 
+  void handleRootItemChanged({ItemVM? rootItem}) {
+    emit(TrashedItemsState.ready(
+        prev: state, items: rootItem == null ? [] : rootItem.children));
+  }
+
   @override
   void handleItemsChanging({bool silent = false}) {
     if (silent) {

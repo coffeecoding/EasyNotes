@@ -2,7 +2,6 @@
 
 import 'package:easynotes/config/locator.dart';
 import 'package:easynotes/cubits/cubits.dart';
-import 'package:easynotes/cubits/root_items/root_items_cubit.dart';
 import 'package:easynotes/models/item.dart';
 import 'package:easynotes/repositories/item_repository.dart';
 
@@ -116,6 +115,7 @@ class ItemVM {
       bool newValue = !pinned;
       final updated = await itemRepo.updateItemPinned(id, newValue ? 1 : 0);
       item = updated;
+      status = ItemVMStatus.persisted;
       parent!.sortChildren();
     } catch (e) {
       print("error saving item: $e");
@@ -228,6 +228,7 @@ class ItemVM {
       removeChild(child);
     } else {
       child.resetState();
+      status = ItemVMStatus.persisted;
     }
   }
 

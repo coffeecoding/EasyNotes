@@ -15,26 +15,22 @@ class ChildrenItemsCubit extends Cubit<ChildrenItemsState>
 
   final ItemRepository itemRepo;
 
-  List<ItemVM> get childrenCubits =>
-      state.childrenCubits.where((c) => c.trashed == null).toList();
+  List<ItemVM> get childrenCubits => state.childrenCubits;
   ItemVM? get selectedItem => state.selectedNote;
 
   @override
   void addItem(ItemVM item) {
     childrenCubits.add(item);
-    handleItemsChanged(); // todo: move these handle callers OUT AND INTO THE UI CODE !!!
   }
 
   @override
   void insertItem(ItemVM item) {
     childrenCubits.insert(0, item);
-    handleItemsChanged();
   }
 
   @override
   void removeItem(ItemVM item) {
     childrenCubits.remove(item);
-    handleItemsChanged();
   }
 
   void handleRootItemSelectionChanged(ItemVM? rootItem) {
@@ -71,22 +67,22 @@ class ChildrenItemsCubit extends Cubit<ChildrenItemsState>
         prev: state, errorMsg: 'Failed to retrieve data: $e'));
   }
 
-  Future<void> createNote(ItemVM parent) async {
+  Future<ItemVM> createNote(ItemVM parent) async {
     handleItemsChanging();
     ItemVM newNote = await _createItem(parent, 1);
     parent.expanded = true;
-    parent.insertChildAtTop(newNote);
+    final blabla = this;
+    parent.addChild(newNote);
     handleItemsChanged();
-    //return newNote;
+    return newNote;
   }
 
   Future<void> createSubTopic(ItemVM parent) async {
     handleItemsChanging();
     ItemVM newTopic = await _createItem(parent, 0);
     parent.expanded = true;
-    parent.insertChildAtTop(newTopic);
+    parent.addChild(newTopic);
     handleItemsChanged();
-    //return newTopic;
   }
 
   Future<ItemVM> _createItem(ItemVM? parent, int type) async {

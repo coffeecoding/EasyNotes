@@ -131,9 +131,8 @@ class TrashContainer extends StatelessWidget {
           }
           tic.handleItemsChanging(silent: true);
           await itemCubit.trash();
+          cic.removeItem(itemCubit);
           tic.addItem(itemCubit);
-          tic.handleItemsChanged();
-          cic.handleItemsChanged();
           if (isSelectedNote) {
             snc.handleNoteChanged(null);
           } else if (itemCubit.level == ItemLevel.root) {
@@ -151,6 +150,8 @@ class TrashContainer extends StatelessWidget {
               cic.handleItemsChanged();
             }
           }
+          tic.handleItemsChanged();
+          cic.handleItemsChanged();
         },
         builder: (context, __, ___) {
           RootItemsCubit ic = context.read<RootItemsCubit>();

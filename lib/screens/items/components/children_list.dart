@@ -42,8 +42,12 @@ class ChildrenList extends StatelessWidget {
                   ToolbarButton(
                       iconData: FluentIcons.note_add_20_regular,
                       title: 'Note',
-                      onPressed: () =>
-                          childrenItemsCubit.createNote(selectedItem)),
+                      onPressed: () async {
+                        final snc = context.read<SelectedNoteCubit>();
+                        ItemVM i =
+                            await childrenItemsCubit.createNote(selectedItem);
+                        snc.handleNoteChanged(i);
+                      }),
                 ],
               )),
           body: Container(
@@ -393,10 +397,11 @@ class _ItemRowState extends State<ItemRow> {
                       itemBuilder: (context) {
                         final cib =
                             BlocProvider.of<ChildrenItemsCubit>(context);
+                        final snc = context.read<SelectedNoteCubit>();
+                        final cic = context.read<ChildrenItemsCubit>();
                         return <PopupMenuItem<InlineButton>>[
                           PopupMenuItem<InlineButton>(
                               onTap: () {
-                                final cic = context.read<ChildrenItemsCubit>();
                                 cic.handleItemsChanging();
                                 widget.item.saveLocalState(
                                     newStatus: ItemVMStatus.draft);
@@ -417,7 +422,10 @@ class _ItemRowState extends State<ItemRow> {
                                   iconData: FluentIcons.folder_add_20_regular,
                                   onPressed: () {})),
                           PopupMenuItem<InlineButton>(
-                              onTap: () => cib.createNote(widget.item),
+                              onTap: () async {
+                                ItemVM n = await cib.createNote(widget.item);
+                                snc.handleNoteChanged(n);
+                              },
                               padding: const EdgeInsets.only(left: 8),
                               key: UniqueKey(),
                               child: InlineButton(
