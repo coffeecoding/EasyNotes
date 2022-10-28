@@ -10,8 +10,8 @@ import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class TrashList extends StatelessWidget {
-  TrashList({Key? key})
+class SearchList extends StatelessWidget {
+  SearchList({Key? key})
       : isDeleteingAll = false,
         super(key: key);
 
@@ -195,9 +195,8 @@ class DragDropContainer extends StatelessWidget {
       },
       onAccept: (incomingItem) async {
         final ric = context.read<RootItemsCubit>();
-        final tic = context.read<TrashedItemsCubit>();
-        await incomingItem.changeParent(newParent: item, ric: ric, cic: tic);
-        tic.removeItem(incomingItem);
+        final cic = context.read<ChildrenItemsCubit>();
+        await incomingItem.changeParent(newParent: item, ric: ric, cic: cic);
       },
       builder: (context, __, ___) => Draggable(
           data: item,

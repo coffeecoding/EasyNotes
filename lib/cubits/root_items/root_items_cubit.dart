@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:bloc/bloc.dart';
 import 'package:easynotes/config/constants.dart';
 import 'package:easynotes/cubits/children_items/children_items_cubit.dart';
@@ -93,6 +95,12 @@ class RootItemsCubit extends Cubit<RootItemsState> with ListWithSelectionCubit {
       final topicCubits =
           ItemVM.createChildrenCubitsForParent(null, nonTrashedItems);
 
+      final allItems = ItemVM.createChildrenCubitsForParent(null, items);
+      final allItemsCopy = [...allItems];
+      for (var t in allItemsCopy) {
+        t.getDescendants(allItems);
+      }
+
       // trashed items
       final trashedItems = items.where((i) => i.trashed != null).toList();
       trashedItemsCubit.handleItemsChanging();
@@ -101,13 +109,14 @@ class RootItemsCubit extends Cubit<RootItemsState> with ListWithSelectionCubit {
               i.parent_id == null ||
               !trashedItems.any((p) => p.id == i.parent_id))
           .toList();
-      final trashedItemVMs = topLevelTrashedItems
-          .map((i) => ItemVM(
-              item: i,
-              items: trashedItems,
-              parent: null,
-              status: ItemVMStatus.persisted))
-          .toList();
+      final trashedItemVMs = topLevelTrashedItems.map((i) {
+        final pIdx = allItemsCopy.indexWhere((j) => i.parent_id == j.id);
+        return ItemVM(
+            item: i,
+            items: trashedItems,
+            parent: pIdx == -1 ? null : allItemsCopy[pIdx],
+            status: ItemVMStatus.persisted);
+      }).toList();
       trashedItemsCubit.handleItemsChanged(items: trashedItemVMs);
 
       emit(RootItemsState.ready(prev: state, topicCubits: topicCubits));

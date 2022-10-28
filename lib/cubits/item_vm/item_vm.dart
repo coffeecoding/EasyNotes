@@ -169,6 +169,15 @@ class ItemVM {
     }
   }
 
+  void getDescendants(List<ItemVM> acc) {
+    if (isTopic) {
+      acc.addAll(children);
+      for (var c in children) {
+        c.getDescendants(acc);
+      }
+    }
+  }
+
   List<ItemVM> search(String term, [List<ItemVM> acc = const []]) {
     if (isTopic) {
       return children.map((c) => c.search(term, [])).expand((l) => l).toList();
@@ -243,7 +252,7 @@ class ItemVM {
   Future<void> changeParent(
       {ItemVM? newParent,
       required RootItemsCubit ric,
-      required ChildrenItemsCubit cic}) async {
+      required ListWithSelectionCubit cic}) async {
     try {
       // This logic was carefully created according the documentation
       // in parent_changing.txt
@@ -264,7 +273,9 @@ class ItemVM {
         ric.handleItemsChanged();
       }
       if (newParent != null && newParent == ric.selectedItem) {
-        cic.handleRootItemSelectionChanged(newParent);
+        if (cic is ChildrenItemsCubit) {
+          cic.handleRootItemSelectionChanged(newParent);
+        }
       } else {
         if (level == ItemLevel.childOfRoot) {
           if (newParent == null) {

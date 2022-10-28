@@ -31,13 +31,13 @@ class SampleData {
         DateTime.now().millisecondsSinceEpoch), // id 60
     Item.mock('62', '61', "Topic asdaas", 0, 'ff00acc1',
         DateTime.now().millisecondsSinceEpoch), // id 60
-    Item.mock('63', '61', "Topic asf0", 1, 'ff00acc1',
+    Item.mock('63', '61', "T 200000", 1, 'ff00acc1',
         DateTime.now().millisecondsSinceEpoch), // id 60
-    Item.mock('64', '62', "Note 123", 1, 'ff00acc1',
+    Item.mock('64', '62', "5555", 1, 'ff00acc1',
         DateTime.now().millisecondsSinceEpoch), // id 60
-    Item.mock('66', '1', "Note 233", 1, 'ff00acc1',
+    Item.mock('66', '1', "asdf", 1, 'ff00acc1',
         DateTime.now().millisecondsSinceEpoch), // id 60
-    Item.mock('65', null, "Topasfu", 0, 'ff00acc1',
+    Item.mock('65', null, "Topaco", 0, 'ff00acc1',
         DateTime.now().millisecondsSinceEpoch), // id 60
 
     Item.mock('15', '1', "Note 01", 1),
