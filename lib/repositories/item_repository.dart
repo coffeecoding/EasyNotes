@@ -141,7 +141,7 @@ class ItemRepo implements ItemRepository {
     if (!response.isSuccessStatusCode()) throw 'Error saving item';
     String newId = response.body;
     items.removeWhere((element) => element.id == item.id);
-    Item updated = item.copyWith(id: newId);
+    Item updated = item.copyWith(id: newId, trashed: item.trashed);
     items.add(updated);
     return updated;
   }
@@ -176,8 +176,10 @@ class ItemRepo implements ItemRepository {
     if (!response.isSuccessStatusCode()) throw 'Error updating item parent';
     int timestamp = int.parse(response.body);
     int i = items.indexWhere((i) => i.id == id);
-    items[i] =
-        items[i].copyWith(parent_id: parent_id, modified_header: timestamp);
+    items[i] = items[i].copyWith(
+        parent_id: parent_id,
+        modified_header: timestamp,
+        trashed: items[i].trashed);
     return items[i];
   }
 
@@ -199,7 +201,10 @@ class ItemRepo implements ItemRepository {
     if (!response.isSuccessStatusCode()) throw 'Error updating item pinned';
     int timestamp = int.parse(response.body);
     int i = items.indexWhere((i) => i.id == id);
-    items[i] = items[i].copyWith(pinned: pin != 0, modified_header: timestamp);
+    items[i] = items[i].copyWith(
+        pinned: pin != 0,
+        modified_header: timestamp,
+        trashed: items[i].trashed);
     return items[i];
   }
 
@@ -210,8 +215,10 @@ class ItemRepo implements ItemRepository {
     if (!response.isSuccessStatusCode()) throw 'Error updating item gl. pinned';
     int timestamp = int.parse(response.body);
     int i = items.indexWhere((i) => i.id == id);
-    items[i] = items[i]
-        .copyWith(pinned_globally: pin != 0, modified_header: timestamp);
+    items[i] = items[i].copyWith(
+        pinned_globally: pin != 0,
+        modified_header: timestamp,
+        trashed: items[i].trashed);
     return items[i];
   }
 
@@ -223,8 +230,10 @@ class ItemRepo implements ItemRepository {
     int timestamp = int.parse(response.body);
     for (int i = 0; i < ipd.itemIds.length; i++) {
       int idx = items.indexWhere((item) => item.id == ipd.itemIds[i]);
-      items[idx] = items[idx]
-          .copyWith(position: ipd.itemPositions[i], modified_header: timestamp);
+      items[idx] = items[idx].copyWith(
+          position: ipd.itemPositions[i],
+          modified_header: timestamp,
+          trashed: items[i].trashed);
     }
     return items.where((i) => ipd.itemIds.any((id) => id == i.id)).toList();
   }

@@ -28,7 +28,8 @@ class ItemVM {
         titleField = item.title,
         contentField = item.content,
         colorSelection = item.color,
-        error = '' {
+        error = '',
+        children = [] {
     initChildren(items);
   }
 
@@ -40,7 +41,7 @@ class ItemVM {
 
   Item item;
   final ItemRepository itemRepo;
-  late List<ItemVM> children;
+  List<ItemVM> children;
   ItemVM? parent;
 
   String get id => item.id;
@@ -97,7 +98,8 @@ class ItemVM {
           color: colorSelection ?? color,
           created: iua == ItemUpdateAction.insert ? ts : item.created,
           modified: ts,
-          modified_header: ts);
+          modified_header: ts,
+          trashed: item.trashed);
       item = await itemRepo.insertOrUpdateItem(updated, iua);
       status = ItemVMStatus.persisted;
       return true;
@@ -123,6 +125,13 @@ class ItemVM {
     }
   }
 
+  Future<void> restoreDescendantsFromTrash() async {
+    restoreFromTrash(null);
+    for (ItemVM c in children) {
+      await c.restoreDescendantsFromTrash();
+    }
+  }
+
   /// Restores item from trash and updates its parent if updateParent is true;
   /// updateParent parameter is needed becausee newParent being null could
   /// either mean a) don't update parent or b) update parent to null.
@@ -131,6 +140,7 @@ class ItemVM {
     try {
       if (updateParent) {
         item = await itemRepo.updateItemParent(id, newParent?.id, true);
+        await restoreDescendantsFromTrash();
         parent = newParent;
       }
       item = await itemRepo.updateItemTrashed(id, null);
@@ -146,6 +156,7 @@ class ItemVM {
       int time = DateTime.now().toUtc().millisecondsSinceEpoch;
       Item updated = await itemRepo.updateItemTrashed(id, time);
       item = updated;
+      parent?.removeChild(this);
     } catch (e) {
       print("error trashing item: $e");
       error = 'failed to trash it item: $e';
@@ -262,7 +273,8 @@ class ItemVM {
       }
       cic.handleItemsChanging(silent: affectsRic);
 
-      Item updated = item.copyWith(parent_id: newParent?.id);
+      Item updated =
+          item.copyWith(parent_id: newParent?.id, trashed: item.trashed);
       await itemRepo.updateItemParent(updated.id, newParent?.id);
 
       parent?.removeChild(this);
@@ -313,6 +325,16 @@ class ItemVM {
     ItemVM? cursor = parent;
     while (cursor != null) {
       result.add(cursor);
+      cursor = cursor.parent;
+    }
+    return result;
+  }
+
+  int getTrashedAncestorCount() {
+    int result = 0;
+    ItemVM? cursor = parent;
+    while (cursor != null && cursor.trashed != null) {
+      result += 1;
       cursor = cursor.parent;
     }
     return result;

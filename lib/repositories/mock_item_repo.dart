@@ -117,7 +117,9 @@ class MockItemRepo implements ItemRepository {
     await Future.delayed(const Duration(milliseconds: 200));
     int i = items.indexWhere((i) => i.id == id);
     items[i].parent_id = parent_id;
-    items[i] = items[i].copyWith(trashed: null);
+    if (untrash == true) {
+      items[i] = items[i].copyWith(trashed: null);
+    }
     return items[i];
   }
 
@@ -126,7 +128,10 @@ class MockItemRepo implements ItemRepository {
     await Future.delayed(const Duration(milliseconds: 500));
     int timestamp = DateTime.now().millisecondsSinceEpoch;
     int i = items.indexWhere((i) => i.id == id);
-    items[i] = items[i].copyWith(pinned: pin != 0, modified_header: timestamp);
+    items[i] = items[i].copyWith(
+        pinned: pin != 0,
+        modified_header: timestamp,
+        trashed: items[i].trashed);
     return items[i];
   }
 

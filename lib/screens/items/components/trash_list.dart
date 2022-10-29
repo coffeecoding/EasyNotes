@@ -134,7 +134,7 @@ class _ExpandableItemContainerState extends State<ExpandableItemContainer> {
             widget.item.children.isEmpty
                 ? Container(
                     padding: EdgeInsets.only(
-                        left: widget.item.getAncestorCount() * 28),
+                        left: widget.item.getTrashedAncestorCount() * 28),
                     height: 20,
                     child: Center(
                         child: Text('This topic is empty',
@@ -246,7 +246,7 @@ class ItemContainer extends StatelessWidget {
         return Container(
             padding: item.parent?.trashed == null
                 ? EdgeInsets.zero
-                : EdgeInsets.only(left: item.getAncestorCount() * 28),
+                : EdgeInsets.only(left: item.getTrashedAncestorCount() * 28),
             child: Container(
                 decoration: BoxDecoration(
                   color:
@@ -278,7 +278,7 @@ class EditableItemContainer extends StatelessWidget {
     return BlocBuilder<SelectedNoteCubit, SelectedNoteState>(
       builder: (context, state) {
         return Container(
-            padding: EdgeInsets.only(left: item.getAncestorCount() * 28),
+            padding: EdgeInsets.only(left: item.getTrashedAncestorCount() * 28),
             decoration: BoxDecoration(
               color: (state.selectedNote != null && item == state.selectedNote)
                   ? Theme.of(context).cardColor

@@ -67,7 +67,7 @@ class Item extends Equatable with JsonData {
     int? created,
     int? modified_header,
     int? modified,
-    int? trashed,
+    required int? trashed,
   }) {
     return Item(
       id: id ?? this.id,
@@ -88,7 +88,7 @@ class Item extends Equatable with JsonData {
       created: created ?? this.created,
       modified_header: modified_header ?? this.modified_header,
       modified: modified ?? this.modified,
-      trashed: trashed ?? this.trashed,
+      trashed: trashed,
     );
   }
 

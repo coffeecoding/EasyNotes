@@ -116,7 +116,8 @@ class TrashContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DragTarget<ItemVM>(
-        onWillAccept: (itemCubit) => itemCubit != null,
+        onWillAccept: (itemCubit) =>
+            itemCubit != null && itemCubit.trashed == null,
         onAccept: (itemCubit) async {
           final ric = context.read<RootItemsCubit>();
           final cic = context.read<ChildrenItemsCubit>();
@@ -206,7 +207,9 @@ class RootItemContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     return DragTarget<ItemVM>(
       onWillAccept: (itemCubit) =>
-          itemCubit != null && itemCubit.parent != item && itemCubit != item,
+          itemCubit != null &&
+          !item.children.contains(itemCubit) &&
+          itemCubit != item,
       onAccept: (incomingItem) async {
         final cic = context.read<ChildrenItemsCubit>();
         final ric = context.read<RootItemsCubit>();

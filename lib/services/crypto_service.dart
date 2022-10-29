@@ -21,7 +21,8 @@ class CryptoService {
         title: aes.encryptToBase64(item.title),
         content: item.content.isEmpty
             ? item.content
-            : aes.encryptToBase64(item.content));
+            : aes.encryptToBase64(item.content),
+        trashed: item.trashed);
     return encryptedItem;
   }
 
@@ -35,7 +36,8 @@ class CryptoService {
         title: aes.decryptFromBase64(item.title),
         content: item.content.isEmpty
             ? item.content
-            : aes.decryptFromBase64(item.content));
+            : aes.decryptFromBase64(item.content),
+        trashed: item.trashed);
   }
 
   Future<List<Item>> encryptItems(Iterable<Item> items) async {
