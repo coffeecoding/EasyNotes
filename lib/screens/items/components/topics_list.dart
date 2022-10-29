@@ -215,6 +215,10 @@ class RootItemContainer extends StatelessWidget {
         final ric = context.read<RootItemsCubit>();
         if (incomingItem.trashed == null) {
           await incomingItem.changeParent(newParent: item, ric: ric, cic: cic);
+          if (incomingItem == ric.selectedItem) {
+            ric.handleSelectionChanged(item);
+            cic.handleRootItemSelectionChanged(item);
+          }
         } else {
           final tic = context.read<TrashedItemsCubit>();
           final oldParent = incomingItem.parent;
