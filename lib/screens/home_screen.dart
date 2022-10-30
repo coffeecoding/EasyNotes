@@ -45,23 +45,6 @@ class HomeScreen extends StatelessWidget {
                 enabledColor: Colors.white70,
                 onPressed: () {},
               ),
-              ToolbarButton(
-                iconData: FluentIcons.text_edit_style_20_regular,
-                title: 'Tester',
-                enabledColor: Colors.pink,
-                onPressed: () {
-                  List<Item> items = SampleData.sampleItems;
-
-                  List<ItemVM> roots =
-                      ItemVM.createChildrenCubitsForParent(null, items);
-
-                  print('--recursive--');
-                  List<ItemVM> descendants = roots[1].getDescendantsRecursive();
-                  descendants.forEach((d) {
-                    print('${d.id}, ${d.parent?.id}, ${d.title}, ${d.trashed}');
-                  });
-                },
-              ),
             ],
           ),
           Container(

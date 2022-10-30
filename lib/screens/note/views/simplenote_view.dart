@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:easynotes/cubits/cubits.dart';
 import 'package:easynotes/cubits/item_vm/item_vm.dart';
 import 'package:easynotes/screens/common/title_textfield.dart';
@@ -12,7 +10,16 @@ class SimpleNoteView extends StatefulWidget implements NoteView {
   SimpleNoteView({super.key, required this.note})
       : titleCtr = TextEditingController(text: note.titleField ?? note.title),
         contentCtr =
-            TextEditingController(text: note.contentField ?? note.content);
+            TextEditingController(text: note.contentField ?? note.content),
+        contentFN = FocusNode(),
+        titleFN = FocusNode(),
+        focussedElement = note.focussedElement {
+    if (focussedElement == FocussedElement.title) {
+      titleFN.requestFocus();
+    } else if (focussedElement == FocussedElement.content) {
+      contentFN.requestFocus();
+    }
+  }
 
   @override
   ItemVM note;
@@ -36,7 +43,8 @@ class SimpleNoteView extends StatefulWidget implements NoteView {
     BlocProvider.of<SelectedNoteCubit>(context).saveLocalState(
         newStatus: ItemVMStatus.draft,
         titleField: titleCtr.text,
-        contentField: contentCtr.text);
+        contentField: contentCtr.text,
+        focussedElement: focussedElement);
     if (focussedElement == FocussedElement.title) {
       titleFN.requestFocus();
     } else {
@@ -52,7 +60,6 @@ class _SimpleNoteViewState extends State<SimpleNoteView> {
   @override
   void initState() {
     super.initState();
-    widget.contentFN.requestFocus();
   }
 
   @override
@@ -61,7 +68,10 @@ class _SimpleNoteViewState extends State<SimpleNoteView> {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(children: [
         TitleTextfield(
-            onChanged: (_) => ensureStateIsDraft(context),
+            onChanged: (_) {
+              ensureStateIsDraft(context);
+              widget.titleFN.requestFocus();
+            },
             onEditingComplete: () => widget.contentFN.requestFocus(),
             onTap: () {
               widget.contentFN.unfocus();
@@ -90,7 +100,7 @@ class _SimpleNoteViewState extends State<SimpleNoteView> {
     );
     if (widget.focussedElement == FocussedElement.title) {
       widget.titleFN.requestFocus();
-    } else {
+    } else if (widget.focussedElement == FocussedElement.content) {
       widget.contentFN.requestFocus();
     }
     return result;
@@ -99,8 +109,9 @@ class _SimpleNoteViewState extends State<SimpleNoteView> {
   // Todo: Add everything else too, like options etc, once they are implemented
   void ensureStateIsDraft(BuildContext context) {
     if (widget.note.status == ItemVMStatus.newDraft) return;
-    if (widget.note.status != ItemVMStatus.draft)
+    if (widget.note.status != ItemVMStatus.draft) {
       widget.saveLocalState(context);
+    }
   }
 
   @override

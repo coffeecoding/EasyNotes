@@ -57,11 +57,13 @@ class SelectedNoteCubit extends Cubit<SelectedNoteState> {
   void saveLocalState(
       {ItemVMStatus? newStatus,
       required String titleField,
-      required String contentField}) {
+      required String contentField,
+      FocussedElement? focussedElement}) {
     note!.saveLocalState(
         newStatus: newStatus,
         titleField: titleField,
-        contentField: contentField);
+        contentField: contentField,
+        focussedElement: focussedElement);
     handleNoteChanged(note);
   }
 

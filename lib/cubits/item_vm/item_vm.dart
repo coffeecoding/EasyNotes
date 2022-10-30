@@ -73,6 +73,7 @@ class ItemVM {
   String? titleField;
   String? contentField;
   String? colorSelection;
+  FocussedElement? focussedElement;
   String error;
 
   ItemUpdateAction getWriteAction(
@@ -231,10 +232,12 @@ class ItemVM {
       {ItemVMStatus? newStatus,
       String? titleField,
       String? contentField,
-      String? colorSelection}) {
+      String? colorSelection,
+      FocussedElement? focussedElement}) {
     this.titleField = titleField ?? this.titleField;
     this.contentField = contentField ?? this.contentField;
     this.colorSelection = colorSelection ?? item.color;
+    this.focussedElement = focussedElement ?? this.focussedElement;
     status = newStatus ?? status;
   }
 
