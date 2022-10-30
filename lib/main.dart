@@ -1,5 +1,6 @@
 import 'package:easynotes/config/locator.dart';
 import 'package:easynotes/cubits/cubits.dart';
+import 'package:easynotes/cubits/search/search_cubit.dart';
 import 'package:easynotes/cubits/trashed_items/trashed_items_cubit.dart';
 import 'package:easynotes/repositories/auth_repository.dart';
 import 'package:easynotes/repositories/item_repository.dart';
@@ -61,6 +62,8 @@ class EasyNotesApp extends StatelessWidget {
                       BlocProvider.of<ChildrenItemsCubit>(context))),
           BlocProvider<TopicCubit>(
               lazy: false, create: (context) => TopicCubit(null)),
+          BlocProvider<SearchCubit>(
+              lazy: false, create: (context) => SearchCubit()),
         ],
         child: MaterialApp(
           title: 'EasyNotes',

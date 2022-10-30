@@ -1,5 +1,6 @@
 import 'package:easynotes/cubits/cubits.dart';
 import 'package:easynotes/cubits/item_vm/item_vm.dart';
+import 'package:easynotes/cubits/search/search_cubit.dart';
 import 'package:easynotes/cubits/trashed_items/trashed_items_cubit.dart';
 import 'package:easynotes/extensions/color_ext.dart';
 import 'package:easynotes/screens/common/inline_button.dart';
@@ -122,11 +123,16 @@ class TrashContainer extends StatelessWidget {
           final ric = context.read<RootItemsCubit>();
           final cic = context.read<ChildrenItemsCubit>();
           final tic = context.read<TrashedItemsCubit>();
+          final sc = context.read<SearchCubit>();
           final snc = context.read<SelectedNoteCubit>();
           bool isSelectedNote = itemCubit == snc.note;
           ric.handleItemsChanging();
-          if (!ric.state.isTrashSelected || itemCubit == ric.selectedItem) {
+          if (ric.state.childListVisibility == ChildListVisibility.children ||
+              itemCubit == ric.selectedItem) {
             cic.handleItemsChanging(silent: true);
+          } else if (ric.state.childListVisibility ==
+              ChildListVisibility.search) {
+            sc.handleItemChanging();
           }
           tic.handleItemsChanging(silent: true);
           await itemCubit.trash();
@@ -144,8 +150,11 @@ class TrashContainer extends StatelessWidget {
             }
           }
           tic.handleItemsChanged(reload: true);
-          if (!ric.state.isTrashSelected) {
+          if (ric.state.childListVisibility == ChildListVisibility.children) {
             cic.handleRootItemSelectionChanged(ric.selectedItem);
+          } else if (ric.state.childListVisibility ==
+              ChildListVisibility.search) {
+            sc.handleItemRemoved(itemCubit);
           }
           ric.handleItemsChanged();
         },
@@ -153,20 +162,21 @@ class TrashContainer extends StatelessWidget {
           RootItemsCubit ic = context.read<RootItemsCubit>();
           return Container(
             decoration: BoxDecoration(
-                color: ic.state.isTrashSelected
+                color: ic.state.childListVisibility == ChildListVisibility.trash
                     ? Colors.white10
                     : Colors.transparent,
-                border: ic.state.isTrashSelected
-                    ? const Border(
-                        right: BorderSide(color: Colors.white70, width: 2))
-                    : null),
+                border:
+                    ic.state.childListVisibility == ChildListVisibility.trash
+                        ? const Border(
+                            right: BorderSide(color: Colors.white70, width: 2))
+                        : null),
             child: ListTile(
               contentPadding: EdgeInsets.zero,
               trailing: null,
               onTap: () {
                 context
                     .read<RootItemsCubit>()
-                    .handleSelectionChanged(null, true);
+                    .handleSelectionChanged(null, ChildListVisibility.trash);
               },
               title: Stack(
                 alignment: Alignment.center,
@@ -284,9 +294,7 @@ class _RootItemRowState extends State<RootItemRow> {
           contentPadding: EdgeInsets.zero,
           trailing: null,
           onTap: () {
-            context
-                .read<RootItemsCubit>()
-                .handleSelectionChanged(widget.item, false);
+            context.read<RootItemsCubit>().handleSelectionChanged(widget.item);
             context
                 .read<ChildrenItemsCubit>()
                 .handleRootItemSelectionChanged(widget.item);

@@ -210,20 +210,21 @@ class ItemVM {
     children = ItemVM.createChildrenCubitsForParent(this, items);
   }
 
-  List<ItemVM> search(String term, [List<ItemVM> acc = const []]) {
+  List<ItemVM> search(String term) {
     if (isTopic) {
-      return children.map((c) => c.search(term, [])).expand((l) => l).toList();
+      return children.map((c) => c.search(term)).expand((l) => l).toList();
     } else if (_matchesSearchTerm(term)) {
-      return [...acc, this];
+      return [this];
     } else {
-      return acc;
+      return [];
     }
   }
 
   bool _matchesSearchTerm(String term) {
     String upperTerm = term.toUpperCase();
-    return title.toUpperCase().contains(upperTerm) ||
-        content.toUpperCase().contains(upperTerm);
+    return status != ItemVMStatus.newDraft &&
+        (title.toUpperCase().contains(upperTerm) ||
+            content.toUpperCase().contains(upperTerm));
   }
 
   void saveLocalState(

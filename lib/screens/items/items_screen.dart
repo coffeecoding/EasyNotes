@@ -1,6 +1,7 @@
 import 'package:easynotes/blocs/blocs.dart';
 import 'package:easynotes/cubits/cubits.dart';
 import 'package:easynotes/screens/items/components/children_list.dart';
+import 'package:easynotes/screens/items/components/search_list.dart';
 import 'package:easynotes/screens/items/components/topics_list.dart';
 import 'package:easynotes/screens/items/components/trash_list.dart';
 import 'package:flutter/material.dart';
@@ -52,8 +53,11 @@ class _ItemsScreenState extends State<ItemsScreen> {
               ),
               Expanded(
                 flex: 2,
-                child:
-                    state.isTrashSelected ? TrashList() : const ChildrenList(),
+                child: state.childListVisibility == ChildListVisibility.trash
+                    ? TrashList()
+                    : state.childListVisibility == ChildListVisibility.search
+                        ? const SearchList()
+                        : const ChildrenList(),
               ),
             ]),
             state.status == RootItemsStatus.busy

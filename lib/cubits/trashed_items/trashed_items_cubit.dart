@@ -85,7 +85,9 @@ class TrashedItemsCubit extends Cubit<TrashedItemsState>
   }
 
   @override
-  void handleSelectionChanged(ItemVM? selected, [bool selectTrash = false]) {
+  void handleSelectionChanged(ItemVM? selected,
+      [ChildListVisibility childListVisibility =
+          ChildListVisibility.children]) {
     emit(TrashedItemsState.ready(prev: state));
   }
 

@@ -7,12 +7,14 @@ part of 'root_items_cubit.dart';
 // already, which overlays the root items list view.
 enum RootItemsStatus { busy, busySilent, ready, error }
 
+enum ChildListVisibility { children, trash, search }
+
 class RootItemsState extends Equatable {
   const RootItemsState._(
       {this.status = RootItemsStatus.busy,
       this.topicCubits = const <ItemVM>[],
       this.selectedItem,
-      this.isTrashSelected = false,
+      this.childListVisibility = ChildListVisibility.children,
       this.errorMsg = ''});
 
   const RootItemsState.initial() : this._();
@@ -22,7 +24,7 @@ class RootItemsState extends Equatable {
           status: RootItemsStatus.busySilent,
           topicCubits: prev.topicCubits,
           selectedItem: prev.selectedItem,
-          isTrashSelected: prev.isTrashSelected,
+          childListVisibility: prev.childListVisibility,
         );
 
   RootItemsState.busy({required RootItemsState prev})
@@ -30,19 +32,19 @@ class RootItemsState extends Equatable {
           status: RootItemsStatus.busy,
           topicCubits: prev.topicCubits,
           selectedItem: prev.selectedItem,
-          isTrashSelected: prev.isTrashSelected,
+          childListVisibility: prev.childListVisibility,
         );
 
   RootItemsState.ready({
     required RootItemsState prev,
     List<ItemVM>? topicCubits,
     ItemVM? selectedItem,
-    bool? isTrashSelected,
+    ChildListVisibility? childListVisibility,
   }) : this._(
           status: RootItemsStatus.ready,
           topicCubits: topicCubits ?? prev.topicCubits,
           selectedItem: selectedItem,
-          isTrashSelected: isTrashSelected ?? prev.isTrashSelected,
+          childListVisibility: childListVisibility ?? prev.childListVisibility,
         );
 
   RootItemsState.error({
@@ -52,16 +54,16 @@ class RootItemsState extends Equatable {
             status: RootItemsStatus.error,
             topicCubits: prev.topicCubits,
             selectedItem: prev.selectedItem,
-            isTrashSelected: prev.isTrashSelected,
+            childListVisibility: prev.childListVisibility,
             errorMsg: errorMsg);
 
   final RootItemsStatus status;
   final List<ItemVM> topicCubits;
   final ItemVM? selectedItem;
-  final bool isTrashSelected;
+  final ChildListVisibility childListVisibility;
   final String errorMsg;
 
   @override
   List<Object?> get props =>
-      [status, selectedItem, isTrashSelected, topicCubits];
+      [status, selectedItem, childListVisibility, topicCubits];
 }

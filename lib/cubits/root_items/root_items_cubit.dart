@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:bloc/bloc.dart';
 import 'package:easynotes/config/constants.dart';
 import 'package:easynotes/cubits/children_items/children_items_cubit.dart';
@@ -17,7 +15,8 @@ abstract class ListWithSelectionCubit {
   void removeItem(ItemVM item);
   void handleItemsChanging({bool silent = false});
   void handleItemsChanged();
-  void handleSelectionChanged(ItemVM? selected, [bool selectTrash = false]);
+  void handleSelectionChanged(ItemVM? selected,
+      [ChildListVisibility childListVisibility = ChildListVisibility.children]);
   void handleError(Object e);
   Future<void> fetchItems();
 }
@@ -38,9 +37,13 @@ class RootItemsCubit extends Cubit<RootItemsState> with ListWithSelectionCubit {
   ItemVM? get selectedItem => state.selectedItem;
 
   @override
-  void handleSelectionChanged(ItemVM? selected, [bool? selectTrash]) =>
+  void handleSelectionChanged(ItemVM? selected,
+          [ChildListVisibility childListVisibility =
+              ChildListVisibility.children]) =>
       emit(RootItemsState.ready(
-          prev: state, selectedItem: selected, isTrashSelected: selectTrash));
+          prev: state,
+          selectedItem: selected,
+          childListVisibility: childListVisibility));
 
   @override
   void addItem(ItemVM item) {

@@ -1,5 +1,6 @@
 import 'package:easynotes/cubits/cubits.dart';
 import 'package:easynotes/cubits/item_vm/item_vm.dart';
+import 'package:easynotes/cubits/search/search_cubit.dart';
 import 'package:easynotes/extensions/color_ext.dart';
 import 'package:easynotes/models/item.dart';
 import 'package:easynotes/config/sample_data.dart';
@@ -71,7 +72,8 @@ class HomeScreen extends StatelessWidget {
             child: Row(children: [
               Expanded(
                   child: TextField(
-                onChanged: (text) {},
+                onChanged: (text) =>
+                    context.read<SearchCubit>().handleSearchTermChanged(text),
                 decoration:
                     const InputDecoration.collapsed(hintText: 'Search for ...'),
                 controller: searchController,
@@ -79,12 +81,16 @@ class HomeScreen extends StatelessWidget {
               IconButton(
                 icon: const Icon(
                   FluentIcons.search_20_regular,
-                  size: 16,
+                  size: 18,
                 ),
-                onPressed: () {
+                splashRadius: 1,
+                onPressed: () async {
                   final ric = context.read<RootItemsCubit>();
                   final cic = context.read<ChildrenItemsCubit>();
-                  ric.handleSelectionChanged(null);
+                  final sl = context.read<SearchCubit>();
+                  await sl.search(rootItems: ric.topicCubits);
+                  ric.handleItemsChanging();
+                  ric.handleSelectionChanged(null, ChildListVisibility.search);
                   cic.handleRootItemSelectionChanged(null);
                 },
               ),
