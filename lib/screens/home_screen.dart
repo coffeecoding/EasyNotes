@@ -1,3 +1,4 @@
+import 'package:easynotes/cubits/item_vm/item_vm.dart';
 import 'package:easynotes/extensions/color_ext.dart';
 import 'package:easynotes/models/item.dart';
 import 'package:easynotes/config/sample_data.dart';
@@ -40,6 +41,23 @@ class HomeScreen extends StatelessWidget {
                 title: 'Settings',
                 enabledColor: Colors.white70,
                 onPressed: () {},
+              ),
+              ToolbarButton(
+                iconData: FluentIcons.text_edit_style_20_regular,
+                title: 'Tester',
+                enabledColor: Colors.pink,
+                onPressed: () {
+                  List<Item> items = SampleData.sampleItems;
+
+                  List<ItemVM> roots =
+                      ItemVM.createChildrenCubitsForParent(null, items);
+
+                  print('--recursive--');
+                  List<ItemVM> descendants = roots[1].getDescendantsRecursive();
+                  descendants.forEach((d) {
+                    print('${d.id}, ${d.parent?.id}, ${d.title}, ${d.trashed}');
+                  });
+                },
               ),
             ],
           ),

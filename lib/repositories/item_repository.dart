@@ -7,6 +7,8 @@ import 'package:easynotes/extensions/http_client_ext.dart';
 import 'package:easynotes/models/item.dart';
 import 'package:easynotes/services/crypto_service.dart';
 import 'package:http/http.dart';
+import 'package:easynotes/utils/list_extensions.dart';
+import 'package:uuid/uuid.dart';
 
 import '../models/item_header.dart';
 import '../models/item_position_data.dart';
@@ -16,10 +18,10 @@ import 'preference_repository.dart';
 enum ItemUpdateAction { none, insert, update, updateHeaderOnly }
 
 abstract class ItemRepository {
+  String getColorOfRoot(Item item);
   Future<List<Item>> setItems(List<Item> items);
+  List<Item> getItemAndChildren(String id);
   List<Item> getItems();
-  List<Item> getRootItems();
-  List<Item> getTrashedItems();
   Future<List<Item>> fetchItems();
   Future<List<Item>> fetchUntrashedItems();
   Future<List<Item>> fetchTrashedItems();
@@ -27,8 +29,9 @@ abstract class ItemRepository {
   Future<Item> insertOrUpdateItem(Item item, ItemUpdateAction action);
   Future<List<Item>> insertOrUpdateItems(List<Item> items);
   Future<Item> updateItemHeader(ItemHeader header);
-  Future<Item> updateItemParent(String id, String? parent_id, [bool? untrash]);
-  Future<Item> updateItemTrashed(String id, int? trashed);
+  Future<Item> updateItemParent(List<String> ids, String? parent_id,
+      [bool untrash = false]);
+  Future<Item> updateItemTrashed(List<String> ids, int? trashed);
   Future<Item> updateItemPinned(String id, int pin);
   Future<Item> updateItemGloballyPinned(String id, int pin);
   Future<List<Item>> updateItemPositions(ItemPositionData ipd);
@@ -49,8 +52,7 @@ class ItemRepo implements ItemRepository {
   late CryptoService cryptoService;
   late PreferenceRepository prefsRepo;
 
-  List<Item> items = <Item>[];
-  List<Item> trashedItems = <Item>[];
+  Map<String, Item> items = {};
 
   @override
   Future<Item> createNewItem(
@@ -65,6 +67,17 @@ class ItemRepo implements ItemRepository {
     );
   }
 
+  @override
+  String getColorOfRoot(Item item) {
+    String color = item.color;
+    Item? parent = items[item.parent_id];
+    while (parent != null) {
+      color = parent.color;
+      parent = items[parent.parent_id];
+    }
+    return color;
+  }
+
   // This function is used when initially getting the items from the auth_bloc
   // since they are already returned upon logging in
   @override
@@ -74,14 +87,9 @@ class ItemRepo implements ItemRepository {
   }
 
   @override
-  List<Item> getItems() => items.where((i) => i.trashed == null).toList();
-
-  @override
-  List<Item> getRootItems() => items.where((i) => i.parent_id == null).toList();
-
-  @override
-  List<Item> getTrashedItems() =>
-      items.where((i) => i.trashed != null).toList();
+  List<Item> getItems() {
+    return items.values.toList();
+  }
 
   @override
   Future<List<Item>> fetchItems() async {
@@ -90,7 +98,10 @@ class ItemRepo implements ItemRepository {
     List<Item> encryptedItems = (jsonDecode(response.body) as List)
         .map((i) => Item.fromJson(i))
         .toList();
-    items = await cryptoService.decryptItems(encryptedItems);
+    final decrypted = await cryptoService.decryptItems(encryptedItems);
+    for (var i in decrypted) {
+      items[i.id] = i;
+    }
     return getItems();
   }
 
@@ -127,9 +138,11 @@ class ItemRepo implements ItemRepository {
     List<Item> encryptedItems = (jsonDecode(response.body) as List)
         .map((i) => Item.fromJson(i))
         .toList();
-    items.removeWhere((i) => i.parent_id == null);
+    items.removeWhere((key, value) => value.parent_id == null);
     final rootItems = await cryptoService.decryptItems(encryptedItems);
-    items.addAll(rootItems);
+    for (var i in rootItems) {
+      items[i.id] = i;
+    }
     return rootItems;
   }
 
@@ -140,9 +153,9 @@ class ItemRepo implements ItemRepository {
         await netClient.post('/api/item', jsonEncode(encrypted));
     if (!response.isSuccessStatusCode()) throw 'Error saving item';
     String newId = response.body;
-    items.removeWhere((element) => element.id == item.id);
+    items.removeWhere((key, value) => key == item.id);
     Item updated = item.copyWith(id: newId, trashed: item.trashed);
-    items.add(updated);
+    items[newId] = updated;
     return updated;
   }
 
@@ -152,8 +165,10 @@ class ItemRepo implements ItemRepository {
     Response? response =
         await netClient.post('/api/items', jsonEncode(encryptedItems));
     if (!response.isSuccessStatusCode()) throw 'Error saving item';
-    // Improve this: 1) Return the inserted items from API, 2) only update
-    // those locally, not all
+    this.items.removeWhere((key, value) => items.any((j) => j.id == key));
+    for (var i in items) {
+      this.items[i.id] = i;
+    }
     return await fetchItems();
   }
 
@@ -162,37 +177,43 @@ class ItemRepo implements ItemRepository {
     Response? response =
         await netClient.put('/api/item/header', jsonEncode(header));
     if (!response.isSuccessStatusCode()) throw 'Error updating item header';
-    int i = items.indexWhere((i) => i.id == header.id);
-    items[i] = items[i].copyWithHeader(header);
-    return items[i];
+    items[header.id] = items[header.id]!.copyWithHeader(header);
+    return items[header.id]!;
   }
 
   @override
-  Future<Item> updateItemParent(String id, String? parent_id,
-      [bool? untrash]) async {
+  Future<Item> updateItemParent(List<String> ids, String? parent_id,
+      [bool untrash = false]) async {
+    String id = ids[0];
     Response? response = await netClient.put(
         '/api/item/$id?parent_id=$parent_id${untrash == true ? '?untrash=$untrash' : ''}',
-        "");
+        jsonEncode(ids));
     if (!response.isSuccessStatusCode()) throw 'Error updating item parent';
-    int timestamp = int.parse(response.body);
-    int i = items.indexWhere((i) => i.id == id);
-    items[i] = items[i].copyWith(
+    int time = int.parse(response.body);
+    items[id] = items[id]!.copyWith(
         parent_id: parent_id,
-        modified_header: timestamp,
-        trashed: items[i].trashed);
-    return items[i];
+        trashed: untrash ? null : items[id]!.trashed,
+        modified_header: time);
+    if (untrash == true) {
+      for (String idd in ids) {
+        items[idd] = items[idd]!.copyWith(trashed: null, modified_header: time);
+      }
+    }
+    return items[id]!;
   }
 
   @override
-  Future<Item> updateItemTrashed(String id, int? trashed) async {
+  Future<Item> updateItemTrashed(List<String> ids, int? trashed) async {
+    String id = ids[0];
     Response? response =
-        await netClient.put('/api/item/$id?trashed=$trashed', "");
+        await netClient.put('/api/item/$id?trashed=$trashed', jsonEncode(ids));
     if (!response.isSuccessStatusCode()) throw 'Error updating item trashed';
     int timestamp = int.parse(response.body);
-    int i = items.indexWhere((i) => i.id == id);
-    items[i] = items[i]
-        .copyWith(trashed: trashed, modified_header: trashed ?? timestamp);
-    return items[i];
+    for (String i in ids) {
+      items[i] =
+          items[i]!.copyWith(trashed: trashed, modified_header: timestamp);
+    }
+    return items[id]!;
   }
 
   @override
@@ -200,12 +221,11 @@ class ItemRepo implements ItemRepository {
     Response? response = await netClient.put('/api/item/$id?pin=$pin', "");
     if (!response.isSuccessStatusCode()) throw 'Error updating item pinned';
     int timestamp = int.parse(response.body);
-    int i = items.indexWhere((i) => i.id == id);
-    items[i] = items[i].copyWith(
+    items[id] = items[id]!.copyWith(
         pinned: pin != 0,
-        modified_header: timestamp,
-        trashed: items[i].trashed);
-    return items[i];
+        trashed: items[id]!.trashed,
+        modified_header: timestamp);
+    return items[id]!;
   }
 
   @override
@@ -214,12 +234,11 @@ class ItemRepo implements ItemRepository {
         await netClient.put('/api/item/$id?pin_globally=$pin', "");
     if (!response.isSuccessStatusCode()) throw 'Error updating item gl. pinned';
     int timestamp = int.parse(response.body);
-    int i = items.indexWhere((i) => i.id == id);
-    items[i] = items[i].copyWith(
+    items[id] = items[id]!.copyWith(
         pinned_globally: pin != 0,
-        modified_header: timestamp,
-        trashed: items[i].trashed);
-    return items[i];
+        trashed: items[id]!.trashed,
+        modified_header: timestamp);
+    return items[id]!;
   }
 
   @override
@@ -229,30 +248,37 @@ class ItemRepo implements ItemRepository {
     if (!response.isSuccessStatusCode()) throw 'Error updating item positions';
     int timestamp = int.parse(response.body);
     for (int i = 0; i < ipd.itemIds.length; i++) {
-      int idx = items.indexWhere((item) => item.id == ipd.itemIds[i]);
-      items[idx] = items[idx].copyWith(
+      final id = ipd.itemIds[i];
+      items[id] = items[id]!.copyWith(
           position: ipd.itemPositions[i],
           modified_header: timestamp,
-          trashed: items[i].trashed);
+          trashed: items[id]!.trashed);
     }
-    return items.where((i) => ipd.itemIds.any((id) => id == i.id)).toList();
+    return items.values
+        .where((i) => ipd.itemIds.any((id) => id == i.id))
+        .toList();
   }
 
   @override
   Future<bool> delete(String id) async {
     Response? response = await netClient.delete('/api/item/$id');
     if (!response.isSuccessStatusCode()) throw 'Error deleteing item';
-    items.removeWhere((element) => element.id == id);
+    items.removeWhere((key, value) => key == id);
     return true;
   }
 
   @override
   Future<bool> deleteItems(List<String> ids) async {
     Response? response = await netClient.delete('/api/items', jsonEncode(ids));
-    if (!response.isSuccessStatusCode()) {
-      throw 'Error deleteing items';
-    }
-    items.removeWhere((element) => ids.any((id) => element.id == id));
+    if (!response.isSuccessStatusCode()) throw 'Error deleteing items';
+    items.removeWhere((key, value) => ids.any((i) => key == i));
     return true;
+  }
+
+  @override
+  List<Item> getItemAndChildren(String id) {
+    Item root = items[id]!;
+    Iterable<Item> children = items.values.where((i) => i.parent_id == id);
+    return [root, ...children];
   }
 }

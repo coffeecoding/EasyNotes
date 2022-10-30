@@ -17,6 +17,13 @@ enum ItemVMStatus { persisted, newDraft, draft, busy, error }
 
 enum ItemLevel { root, childOfRoot, grandChild }
 
+abstract class TreeNode {
+  abstract ItemVM item;
+  abstract ItemVM parent;
+  abstract List<ItemVM> children;
+  abstract ItemLevel get;
+}
+
 class ItemVM {
   ItemVM(
       {required this.item,
@@ -45,7 +52,7 @@ class ItemVM {
   ItemVM? parent;
 
   String get id => item.id;
-  String get color => item.color;
+  String get color => itemRepo.getColorOfRoot(item);
   String get symbol => item.symbol;
   String get title => item.title;
   String get content => item.content;
@@ -138,12 +145,14 @@ class ItemVM {
   Future<void> restoreFromTrash(ItemVM? newParent,
       [bool updateParent = false]) async {
     try {
+      List<String> ids =
+          getDescendantsRecursive(true).map((i) => i.id).toList();
       if (updateParent) {
-        item = await itemRepo.updateItemParent(id, newParent?.id, true);
+        item = await itemRepo.updateItemParent(ids, newParent?.id, true);
         await restoreDescendantsFromTrash();
         parent = newParent;
       }
-      item = await itemRepo.updateItemTrashed(id, null);
+      item = await itemRepo.updateItemTrashed(ids, null);
     } catch (e) {
       print("error restoring item from trash: $e");
       error = 'failed to restore item from item: $e';
@@ -154,8 +163,10 @@ class ItemVM {
     if (status == ItemVMStatus.newDraft) return;
     try {
       int time = DateTime.now().toUtc().millisecondsSinceEpoch;
-      Item updated = await itemRepo.updateItemTrashed(id, time);
-      item = updated;
+      List<String> ids =
+          getDescendantsRecursive(true).map((i) => i.id).toList();
+      await itemRepo.updateItemTrashed(ids, time);
+      reloadFromRepo();
       parent?.removeChild(this);
     } catch (e) {
       print("error trashing item: $e");
@@ -180,13 +191,23 @@ class ItemVM {
     }
   }
 
-  void getDescendants(List<ItemVM> acc) {
+  List<ItemVM> getDescendantsRecursive([bool includeRoot = false]) {
     if (isTopic) {
-      acc.addAll(children);
-      for (var c in children) {
-        c.getDescendants(acc);
-      }
+      final descendants = children
+          .map((e) => e.getDescendantsRecursive(true))
+          .expand((i) => i)
+          .toList();
+      return includeRoot ? [this, ...descendants] : descendants;
+    } else {
+      return [this];
     }
+  }
+
+  void reloadFromRepo() {
+    List<Item> items = itemRepo.getItemAndChildren(id);
+    item = items[0];
+    items.removeAt(0);
+    children = ItemVM.createChildrenCubitsForParent(this, items);
   }
 
   List<ItemVM> search(String term, [List<ItemVM> acc = const []]) {
@@ -275,7 +296,7 @@ class ItemVM {
 
       Item updated =
           item.copyWith(parent_id: newParent?.id, trashed: item.trashed);
-      await itemRepo.updateItemParent(updated.id, newParent?.id);
+      await itemRepo.updateItemParent([updated.id], newParent?.id);
 
       parent?.removeChild(this);
       newParent?.addChild(this);
@@ -348,6 +369,23 @@ class ItemVM {
       cursor = cursor.parent;
     }
     return result;
+  }
+
+  // Finds the parent of an item in a list of (sub)trees. Example:
+  // item (parent_id: '12')
+  // list [(id: '1', children('10', '12', '20')), ('id: '5', children: [])]
+  // -> returns subtree with root id 1's second child item
+  ItemVM? findItemParentInTrees(ItemVM item) {
+    if (id != null && id == item.parent?.id) {
+      return this;
+    }
+    List<ItemVM?> p =
+        children.map((c) => c.findItemParentInTrees(item)).toList();
+    if (p.any((element) => element != null)) {
+      return p.firstWhere((element) => element != null);
+    } else {
+      return null;
+    }
   }
 
   static List<ItemVM> createChildrenCubitsForParent(

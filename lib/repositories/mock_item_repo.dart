@@ -7,8 +7,28 @@ import 'package:uuid/uuid.dart';
 import 'item_repository.dart';
 
 class MockItemRepo implements ItemRepository {
-  List<Item> items = <Item>[];
-  List<Item> trashedItems = <Item>[];
+  Map<String, Item> items = {};
+
+  @override
+  String getColorOfRoot(Item item) {
+    String color = item.color;
+    Item? parent = items[item.parent_id];
+    while (parent != null) {
+      color = parent.color;
+      parent = items[parent.parent_id];
+    }
+    return color;
+  }
+
+  @override
+  List<Item> getItemAndChildren(String id) {
+    Item? root = items[id];
+    if (root == null) {
+      return [];
+    }
+    Iterable<Item> children = items.values.where((i) => i.parent_id == id);
+    return [root, ...children];
+  }
 
   @override
   Future<Item> createNewItem(
@@ -27,28 +47,28 @@ class MockItemRepo implements ItemRepository {
   @override
   Future<bool> delete(String id) async {
     await Future.delayed(const Duration(milliseconds: 500));
-    items.removeWhere((element) => element.id == id);
+    items.removeWhere((key, value) => key == id);
     return true;
   }
 
   @override
   Future<bool> deleteItems(List<String> ids) async {
     await Future.delayed(const Duration(milliseconds: 1500));
-    items.removeWhere((element) => ids.any((i) => element.id == i));
+    items.removeWhere((key, value) => ids.any((i) => key == i));
     return true;
   }
 
   @override
   Future<List<Item>> fetchItems() async {
     await Future.delayed(const Duration(seconds: 1));
-    items = SampleData.sampleItems;
-    return items;
+    SampleData.sampleItems.forEach((i) => items[i.id] = i);
+    return items.values.toList();
   }
 
   @override
   Future<List<Item>> fetchRootItems() async {
     await Future.delayed(const Duration(seconds: 1));
-    return items.where((element) => element.parent_id == null).toList();
+    return items.values.where((i) => i.parent_id == null).toList();
   }
 
   @override
@@ -65,37 +85,35 @@ class MockItemRepo implements ItemRepository {
 
   @override
   List<Item> getItems() {
-    return items;
-  }
-
-  @override
-  List<Item> getRootItems() {
-    return items.where((i) => i.parent_id == null).toList();
-  }
-
-  @override
-  List<Item> getTrashedItems() {
-    // TODO: implement getTrashedItems
-    throw UnimplementedError();
+    return items.values.toList();
   }
 
   @override
   Future<Item> insertOrUpdateItem(Item item, ItemUpdateAction action) async {
     await Future.delayed(const Duration(milliseconds: 500));
-    items.add(item);
+    items.update(item.id, (value) => item, ifAbsent: () => item);
     return item;
   }
 
   @override
   Future<List<Item>> insertOrUpdateItems(List<Item> items) async {
-    // TODO: implement insertOrUpdateItems
-    throw UnimplementedError();
+    for (var element in items) {
+      insertOrUpdateItem(element, ItemUpdateAction.insert);
+    }
+    return this
+        .items
+        .values
+        .where((i) => items.any((j) => j.id == i.id))
+        .toList();
   }
 
   @override
   Future<List<Item>> setItems(List<Item> items) async {
     await Future.delayed(const Duration(milliseconds: 500));
-    this.items = items;
+    this.items.clear();
+    for (var i in items) {
+      this.items[i.id] = i;
+    }
     return items;
   }
 
@@ -112,27 +130,32 @@ class MockItemRepo implements ItemRepository {
   }
 
   @override
-  Future<Item> updateItemParent(String id, String? parent_id,
-      [bool? untrash]) async {
+  Future<Item> updateItemParent(List<String> ids, String? parent_id,
+      [bool untrash = false]) async {
+    String id = ids[0];
     await Future.delayed(const Duration(milliseconds: 200));
-    int i = items.indexWhere((i) => i.id == id);
-    items[i].parent_id = parent_id;
+    int time = DateTime.now().toUtc().millisecondsSinceEpoch;
+    items[id] = items[id]!.copyWith(
+        parent_id: parent_id,
+        trashed: untrash ? null : items[id]!.trashed,
+        modified_header: time);
     if (untrash == true) {
-      items[i] = items[i].copyWith(trashed: null);
+      for (String idd in ids) {
+        items[idd] = items[idd]!.copyWith(trashed: null, modified_header: time);
+      }
     }
-    return items[i];
+    return items[id]!;
   }
 
   @override
   Future<Item> updateItemPinned(String id, int pin) async {
     await Future.delayed(const Duration(milliseconds: 500));
     int timestamp = DateTime.now().millisecondsSinceEpoch;
-    int i = items.indexWhere((i) => i.id == id);
-    items[i] = items[i].copyWith(
+    items[id] = items[id]!.copyWith(
         pinned: pin != 0,
-        modified_header: timestamp,
-        trashed: items[i].trashed);
-    return items[i];
+        trashed: items[id]!.trashed,
+        modified_header: timestamp);
+    return items[id]!;
   }
 
   @override
@@ -142,12 +165,14 @@ class MockItemRepo implements ItemRepository {
   }
 
   @override
-  Future<Item> updateItemTrashed(String id, int? trashed) async {
+  Future<Item> updateItemTrashed(List<String> ids, int? trashed) async {
+    String id = ids[0];
     await Future.delayed(const Duration(milliseconds: 500));
     int timestamp = DateTime.now().millisecondsSinceEpoch;
-    int i = items.indexWhere((i) => i.id == id);
-    items[i] = items[i]
-        .copyWith(trashed: trashed, modified_header: trashed ?? timestamp);
-    return items[i];
+    for (String i in ids) {
+      items[i] =
+          items[i]!.copyWith(trashed: trashed, modified_header: timestamp);
+    }
+    return items[id]!;
   }
 }

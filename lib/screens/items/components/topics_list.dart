@@ -124,16 +124,12 @@ class TrashContainer extends StatelessWidget {
           final tic = context.read<TrashedItemsCubit>();
           final snc = context.read<SelectedNoteCubit>();
           bool isSelectedNote = itemCubit == snc.note;
-          if (itemCubit.level == ItemLevel.root) {
-            ric.handleItemsChanging();
-          }
+          ric.handleItemsChanging();
           if (!ric.state.isTrashSelected || itemCubit == ric.selectedItem) {
-            cic.handleItemsChanging(silent: itemCubit.level == ItemLevel.root);
+            cic.handleItemsChanging(silent: true);
           }
           tic.handleItemsChanging(silent: true);
           await itemCubit.trash();
-          cic.removeItem(itemCubit);
-          tic.addItem(itemCubit);
           if (isSelectedNote) {
             snc.handleNoteChanged(null);
           } else if (itemCubit.level == ItemLevel.root) {
@@ -141,18 +137,17 @@ class TrashContainer extends StatelessWidget {
             if (itemCubit == ric.selectedItem) {
               ric.handleSelectionChanged(null);
             }
-            ric.handleItemsChanged();
           } else {
             itemCubit.parent!.removeChild(itemCubit);
             if (itemCubit.level == ItemLevel.childOfRoot) {
               cic.removeItem(itemCubit);
             }
-            if (!ric.state.isTrashSelected) {
-              cic.handleItemsChanged();
-            }
           }
-          tic.handleItemsChanged();
-          cic.handleItemsChanged();
+          tic.handleItemsChanged(reload: true);
+          if (!ric.state.isTrashSelected) {
+            cic.handleRootItemSelectionChanged(ric.selectedItem);
+          }
+          ric.handleItemsChanged();
         },
         builder: (context, __, ___) {
           RootItemsCubit ic = context.read<RootItemsCubit>();

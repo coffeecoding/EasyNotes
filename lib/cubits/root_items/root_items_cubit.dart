@@ -98,7 +98,7 @@ class RootItemsCubit extends Cubit<RootItemsState> with ListWithSelectionCubit {
       final allItems = ItemVM.createChildrenCubitsForParent(null, items);
       final allItemsCopy = [...allItems];
       for (var t in allItemsCopy) {
-        t.getDescendants(allItems);
+        allItems.addAll(t.getDescendantsRecursive());
       }
 
       // trashed items

@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:easynotes/cubits/item_vm/item_vm.dart';
 import 'package:easynotes/cubits/root_items/root_items_cubit.dart';
+import 'package:easynotes/models/item.dart';
 import 'package:easynotes/repositories/item_repository.dart';
 import 'package:equatable/equatable.dart';
 
@@ -21,13 +22,21 @@ class TrashedItemsCubit extends Cubit<TrashedItemsState>
     items.sort((a, b) => a.item.trashed!.compareTo(b.item.trashed!));
   }
 
-  void initialize() {
-    final items = itemRepo.getTrashedItems();
-    final topLevelItems = items
-        .where((i) =>
-            i.parent_id == null || !items.any((p) => p.id == i.parent_id))
+  void reloadLocally() {
+    final trashRoot = ItemVM(
+        item: Item.empty(parent_id: null, type: 0, receiver_id: ''),
+        parent: null,
+        items: []);
+    final items = itemRepo.getItems();
+    // go through all leaves in trashed items (item w no children)
+    final roots = ItemVM.createChildrenCubitsForParent(null, items.toList());
+    trashRoot.children = roots;
+    roots.forEach((r) => r.parent = trashRoot);
+    final subtrees = trashRoot
+        .getDescendantsRecursive()
+        .where((i) => i.parent!.trashed == null && i.trashed != null)
         .toList();
-    items.removeWhere((i) => topLevelItems.contains(i));
+    emit(TrashedItemsState.ready(prev: state, items: subtrees));
   }
 
   Future<void> deleteAll() async {
@@ -41,7 +50,7 @@ class TrashedItemsCubit extends Cubit<TrashedItemsState>
 
   @override
   void addItem(ItemVM item) {
-    items.add(item);
+    insertItem(item, items.length);
     // todo: sort by preference (date trashed)
   }
 
@@ -58,13 +67,12 @@ class TrashedItemsCubit extends Cubit<TrashedItemsState>
   }
 
   @override
-  void handleItemsChanged({List<ItemVM>? items}) {
-    emit(TrashedItemsState.ready(prev: state, items: items));
-  }
-
-  void handleRootItemChanged({ItemVM? rootItem}) {
-    emit(TrashedItemsState.ready(
-        prev: state, items: rootItem == null ? [] : rootItem.children));
+  void handleItemsChanged({List<ItemVM>? items, bool reload = false}) {
+    if (reload) {
+      reloadLocally();
+    } else {
+      emit(TrashedItemsState.ready(prev: state, items: items));
+    }
   }
 
   @override
@@ -82,8 +90,11 @@ class TrashedItemsCubit extends Cubit<TrashedItemsState>
   }
 
   @override
-  void insertItem(ItemVM item) {
-    items.insert(0, item);
+  void insertItem(ItemVM item, [int idx = 0]) {
+    items.insert(idx, item);
+    // recreate tree structure, because a descendant might be added after one
+    // of its ancestors
+    item.reloadFromRepo();
     // todo: sort by preference (date trashed)
   }
 

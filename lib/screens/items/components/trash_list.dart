@@ -75,13 +75,9 @@ class TrashList extends StatelessWidget {
                           itemCount: itemCubits.length,
                           itemBuilder: (context, i) {
                             final item = itemCubits[i];
-                            final rootAncestor = item.getRootAncestor();
-                            final clr = rootAncestor == null
-                                ? Color(int.parse(item.color, radix: 16))
-                                : Color(
-                                    int.parse(rootAncestor.color, radix: 16));
                             return ExpandableItemContainer(
-                                color: clr, item: item);
+                                color: Color(int.parse(item.color, radix: 16)),
+                                item: item);
                           }),
                       state.status == TrashedItemsStatus.busy
                           ? Positioned.fill(
@@ -122,9 +118,6 @@ class _ExpandableItemContainerState extends State<ExpandableItemContainer> {
         if (widget.item.isTopic) {
           widget.item.expanded = !widget.item.expanded;
           setState(() {});
-        } else {
-          context.read<TrashedItemsCubit>().handleSelectionChanged(widget.item);
-          context.read<SelectedNoteCubit>().handleNoteChanged(widget.item);
         }
       },
     );
@@ -157,15 +150,6 @@ class _ExpandableItemContainerState extends State<ExpandableItemContainer> {
                                   widget.item.children[j].expanded =
                                       !widget.item.children[j].expanded;
                                   setState(() {});
-                                } else {
-                                  context
-                                      .read<TrashedItemsCubit>()
-                                      .handleSelectionChanged(
-                                          widget.item.children[j]);
-                                  context
-                                      .read<SelectedNoteCubit>()
-                                      .handleNoteChanged(
-                                          widget.item.children[j]);
                                 }
                               },
                               color: widget.color,
@@ -209,19 +193,7 @@ class DragDropContainer extends StatelessWidget {
               child: ItemRow(color: color, item: item),
             ),
           ),
-          child: item.isTopic &&
-                  (item.status == ItemVMStatus.draft ||
-                      item.status == ItemVMStatus.newDraft)
-              ? EditableItemContainer(
-                  color: color,
-                  item: item,
-                  onDiscard: () {
-                    final cic = context.read<TrashedItemsCubit>();
-                    cic.handleItemsChanging();
-                    item.parent!.discardSubtopicChanges(item);
-                    cic.handleItemsChanged();
-                  })
-              : ItemContainer(color: color, item: item, onTap: onTap)),
+          child: ItemContainer(color: color, item: item, onTap: onTap)),
     );
   }
 }
@@ -256,98 +228,6 @@ class ItemContainer extends StatelessWidget {
                 ),
                 child: ItemRow(item: item, color: color, onTap: onTap)));
       },
-    );
-  }
-}
-
-/// Used for newly created subtopics that are editable in line
-class EditableItemContainer extends StatelessWidget {
-  const EditableItemContainer({
-    super.key,
-    required this.item,
-    required this.color,
-    this.onDiscard,
-  });
-
-  final ItemVM item;
-  final Color color;
-  final Function()? onDiscard;
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<SelectedNoteCubit, SelectedNoteState>(
-      builder: (context, state) {
-        return Container(
-            padding: EdgeInsets.only(left: item.getTrashedAncestorCount() * 28),
-            decoration: BoxDecoration(
-              color: (state.selectedNote != null && item == state.selectedNote)
-                  ? Theme.of(context).cardColor
-                  : Colors.transparent,
-            ),
-            child: EditableItemRow(
-                item: item, color: color, onDiscard: onDiscard));
-      },
-    );
-  }
-}
-
-class EditableItemRow extends StatelessWidget {
-  EditableItemRow(
-      {super.key, required this.item, required this.color, this.onDiscard})
-      : titleCtr = TextEditingController(text: item.titleField);
-
-  final ItemVM item;
-  final Color color;
-  final Function()? onDiscard;
-  final TextEditingController titleCtr;
-
-  bool? isSaving;
-
-  @override
-  Widget build(BuildContext context) {
-    FocusNode titleFN = FocusNode();
-    titleFN.requestFocus();
-    return ListTile(
-      onTap: () {},
-      contentPadding: const EdgeInsets.only(left: 16, right: 4),
-      leading: Icon(
-          item.item_type == 0
-              ? FluentIcons.folder_20_filled
-              : FluentIcons.note_20_regular,
-          color: color),
-      horizontalTitleGap: 0,
-      title: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Expanded(
-            child: TextField(
-              decoration: null,
-              focusNode: titleFN,
-              onChanged: (v) => item.saveLocalState(titleField: v),
-              selectionHeightStyle: BoxHeightStyle.tight,
-              controller: titleCtr,
-              style: const TextStyle(fontWeight: FontWeight.w100),
-              maxLines: 1, // remove this to line-break instead
-            ),
-          ),
-          InlineButton(
-              iconData: FluentIcons.dismiss_12_regular, onPressed: onDiscard),
-          StatefulBuilder(builder: ((context, setState) {
-            return isSaving == true
-                ? const Center(child: InlineCircularProgressIndicator())
-                : InlineButton(
-                    iconData: FluentIcons.save_16_regular,
-                    onPressed: () async {
-                      setState(() => isSaving = true);
-                      final cic = context.read<TrashedItemsCubit>();
-                      cic.handleItemsChanging();
-                      await item.save(titleField: titleCtr.text);
-                      cic.handleItemsChanged();
-                      setState(() => isSaving = false);
-                    });
-          })),
-        ],
-      ),
     );
   }
 }
