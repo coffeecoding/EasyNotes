@@ -84,23 +84,38 @@ class NoteScreen extends StatelessWidget {
         backgroundColor: Colors.black12,
         title:
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          ToolbarButton(
-              iconData: FluentIcons.delete_20_regular,
-              title: 'Move to Trash',
-              enabledColor: Colors.red,
-              enabled: true,
-              onPressed: () {}),
-          /*ToolbarButton(
-              iconData: FluentIcons.pin_20_regular,
-              title: 'Pin Globally',
-              enabled: true,
-              onPressed: () {}),*/
+          TrashButton(key: UniqueKey()),
           Row(children: [
             DiscardButton(key: UniqueKey()),
             SaveButton(key: UniqueKey(), noteView: noteView!),
           ]),
         ]),
       );
+}
+
+class TrashButton extends StatelessWidget {
+  const TrashButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<SelectedNoteCubit, SelectedNoteState>(
+        buildWhen: (p, n) => p.status != n.status,
+        builder: (context, state) {
+          return ToolbarButton(
+              iconData: FluentIcons.delete_20_regular,
+              enabledColor: Colors.red,
+              onPressed: () async {
+                final snc = context.read<SelectedNoteCubit>();
+                final cic = context.read<ChildrenItemsCubit>();
+                cic.handleItemsChanging();
+                await snc.note!.trash();
+                snc.handleNoteChanged(null);
+                cic.handleItemsChanged();
+              },
+              enabled: state.status != ItemVMStatus.newDraft,
+              title: 'Move to Trash');
+        });
+  }
 }
 
 class DiscardButton extends StatelessWidget {

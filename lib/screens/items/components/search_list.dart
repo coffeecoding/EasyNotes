@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:easynotes/cubits/cubits.dart';
 import 'package:easynotes/cubits/item_vm/item_vm.dart';
-import 'package:easynotes/cubits/trashed_items/trashed_items_cubit.dart';
+import 'package:easynotes/extensions/color_ext.dart';
 import 'package:easynotes/screens/common/inline_button.dart';
 import 'package:easynotes/screens/common/progress_indicators.dart';
 import 'package:easynotes/screens/common/toolbar_button.dart';
@@ -11,17 +11,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class SearchList extends StatelessWidget {
-  SearchList({Key? key})
-      : isDeleteingAll = false,
-        super(key: key);
-
-  bool isDeleteingAll;
+  const SearchList({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<TrashedItemsCubit, TrashedItemsState>(
+    return BlocBuilder<ChildrenItemsCubit, ChildrenItemsState>(
         builder: (context, state) {
-      final itemCubits = state.items;
+      final selectedItem = context.read<RootItemsCubit>().selectedItem;
+      //if (state.status == ChildrenItemsStatus.unselected) {
+      if (selectedItem == null) {
+        return const Center(child: Text('No Topic selected'));
+      }
+      final childrenItemsCubit = context.read<ChildrenItemsCubit>();
+      final itemCubits = state.childrenCubits;
+      final clr = HexColor.fromHex(selectedItem.color);
       return Scaffold(
           appBar: AppBar(
               titleSpacing: 8,
@@ -31,68 +34,44 @@ class SearchList extends StatelessWidget {
               title: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  StatefulBuilder(builder: (context, setState) {
-                    return isDeleteingAll == true
-                        ? const SizedBox(
-                            width: 100,
-                            child: Center(
-                                child: InlineCircularProgressIndicator(
-                                    color: Colors.red)),
-                          )
-                        : ToolbarButton(
-                            iconData: FluentIcons.delete_20_regular,
-                            enabledColor: itemCubits.isEmpty
-                                ? Theme.of(context).disabledColor
-                                : Colors.red,
-                            title: 'Delete All',
-                            onPressed: itemCubits.isEmpty
-                                ? null
-                                : () async {
-                                    setState(() {
-                                      isDeleteingAll = true;
-                                    });
-                                    final tic =
-                                        context.read<TrashedItemsCubit>();
-                                    tic.handleItemsChanging();
-                                    await tic.deleteAll();
-                                    tic.handleItemsChanged(items: []);
-                                    setState(() {
-                                      isDeleteingAll = false;
-                                    });
-                                  });
-                  }),
+                  ToolbarButton(
+                      iconData: FluentIcons.folder_add_20_regular,
+                      title: 'Subtopic',
+                      onPressed: () =>
+                          childrenItemsCubit.createSubTopic(selectedItem)),
+                  ToolbarButton(
+                      iconData: FluentIcons.note_add_20_regular,
+                      title: 'Note',
+                      onPressed: () async {
+                        final snc = context.read<SelectedNoteCubit>();
+                        ItemVM i =
+                            await childrenItemsCubit.createNote(selectedItem);
+                        snc.handleNoteChanged(i);
+                      }),
                 ],
               )),
-          body: itemCubits.isEmpty
-              ? const Center(child: Text('Empty'))
-              : Container(
-                  alignment: Alignment.topLeft,
-                  child: Stack(
-                    children: [
-                      ListView.builder(
-                          shrinkWrap: true,
-                          physics: const ClampingScrollPhysics(),
-                          itemCount: itemCubits.length,
-                          itemBuilder: (context, i) {
-                            final item = itemCubits[i];
-                            final rootAncestor = item.getRootAncestor();
-                            final clr = rootAncestor == null
-                                ? Color(int.parse(item.color, radix: 16))
-                                : Color(
-                                    int.parse(rootAncestor.color, radix: 16));
-                            return ExpandableItemContainer(
-                                color: clr, item: item);
-                          }),
-                      state.status == TrashedItemsStatus.busy
-                          ? Positioned.fill(
-                              child: Container(
-                                  color: Colors.black26,
-                                  child: const Center(
-                                      child: CircularProgressIndicator())))
-                          : Container(),
-                    ],
-                  ),
-                ));
+          body: Container(
+            alignment: Alignment.topLeft,
+            child: Stack(
+              children: [
+                ListView.builder(
+                    shrinkWrap: true,
+                    physics: const ClampingScrollPhysics(),
+                    itemCount: itemCubits.length,
+                    itemBuilder: (context, i) {
+                      final item = itemCubits[i];
+                      return ExpandableItemContainer(color: clr, item: item);
+                    }),
+                state.status == ChildrenItemsStatus.busy
+                    ? Positioned.fill(
+                        child: Container(
+                            color: Colors.black26,
+                            child: const Center(
+                                child: CircularProgressIndicator())))
+                    : Container(),
+              ],
+            ),
+          ));
     });
   }
 }
@@ -123,7 +102,9 @@ class _ExpandableItemContainerState extends State<ExpandableItemContainer> {
           widget.item.expanded = !widget.item.expanded;
           setState(() {});
         } else {
-          context.read<TrashedItemsCubit>().handleSelectionChanged(widget.item);
+          context
+              .read<ChildrenItemsCubit>()
+              .handleSelectionChanged(widget.item);
           context.read<SelectedNoteCubit>().handleNoteChanged(widget.item);
         }
       },
@@ -134,7 +115,7 @@ class _ExpandableItemContainerState extends State<ExpandableItemContainer> {
             widget.item.children.isEmpty
                 ? Container(
                     padding: EdgeInsets.only(
-                        left: widget.item.getAncestorCount() * 28),
+                        left: (widget.item.getAncestorCount() - 1) * 28),
                     height: 20,
                     child: Center(
                         child: Text('This topic is empty',
@@ -159,7 +140,7 @@ class _ExpandableItemContainerState extends State<ExpandableItemContainer> {
                                   setState(() {});
                                 } else {
                                   context
-                                      .read<TrashedItemsCubit>()
+                                      .read<ChildrenItemsCubit>()
                                       .handleSelectionChanged(
                                           widget.item.children[j]);
                                   context
@@ -215,7 +196,7 @@ class DragDropContainer extends StatelessWidget {
                   color: color,
                   item: item,
                   onDiscard: () {
-                    final cic = context.read<TrashedItemsCubit>();
+                    final cic = context.read<ChildrenItemsCubit>();
                     cic.handleItemsChanging();
                     item.parent!.discardSubtopicChanges(item);
                     cic.handleItemsChanged();
@@ -243,9 +224,7 @@ class ItemContainer extends StatelessWidget {
       buildWhen: (p, n) => p != n,
       builder: (context, state) {
         return Container(
-            padding: item.parent?.trashed == null
-                ? EdgeInsets.zero
-                : EdgeInsets.only(left: item.getAncestorCount() * 28),
+            padding: EdgeInsets.only(left: (item.getAncestorCount() - 1) * 28),
             child: Container(
                 decoration: BoxDecoration(
                   color:
@@ -277,7 +256,7 @@ class EditableItemContainer extends StatelessWidget {
     return BlocBuilder<SelectedNoteCubit, SelectedNoteState>(
       builder: (context, state) {
         return Container(
-            padding: EdgeInsets.only(left: item.getAncestorCount() * 28),
+            padding: EdgeInsets.only(left: (item.getAncestorCount() - 1) * 28),
             decoration: BoxDecoration(
               color: (state.selectedNote != null && item == state.selectedNote)
                   ? Theme.of(context).cardColor
@@ -338,7 +317,7 @@ class EditableItemRow extends StatelessWidget {
                     iconData: FluentIcons.save_16_regular,
                     onPressed: () async {
                       setState(() => isSaving = true);
-                      final cic = context.read<TrashedItemsCubit>();
+                      final cic = context.read<ChildrenItemsCubit>();
                       cic.handleItemsChanging();
                       await item.save(titleField: titleCtr.text);
                       cic.handleItemsChanged();
@@ -365,7 +344,7 @@ class ItemRow extends StatefulWidget {
 
 class _ItemRowState extends State<ItemRow> {
   bool? hovering;
-  bool? isDeleteing;
+  bool? isSaving;
 
   @override
   Widget build(BuildContext context) {
@@ -407,35 +386,89 @@ class _ItemRowState extends State<ItemRow> {
                 maxLines: 1, // remove this to line-break instead
               ),
             ),
-            if (hovering == true || isDeleteing == true)
-              StatefulBuilder(builder: (context, setState) {
-                return isDeleteing == true
-                    ? const Center(
-                        child: InlineCircularProgressIndicator(
-                        color: Colors.red,
-                      ))
-                    : InlineButton(
-                        iconData: FluentIcons.dismiss_16_regular,
-                        onPressed: () async {
-                          setState(() {
-                            isDeleteing = true;
-                          });
-                          final snc = context.read<SelectedNoteCubit>();
-                          final tic = context.read<TrashedItemsCubit>();
-                          tic.handleItemsChanging();
-                          await widget.item.delete();
-                          if (snc.note == widget.item) {
-                            snc.handleNoteChanged(null);
-                          }
-                          widget.item.parent?.removeChild(widget.item);
-                          tic.removeItem(widget.item);
-                          tic.handleItemsChanged();
-                          setState(() {
-                            isDeleteing = false;
-                          });
-                        },
-                      );
-              }),
+            if (hovering == true && widget.item.isTopic)
+              SizedBox(
+                  width: 32,
+                  child: PopupMenuButton(
+                      splashRadius: 1,
+                      elevation: 1,
+                      padding: EdgeInsets.zero,
+                      icon: const Icon(FluentIcons.more_vertical_16_regular),
+                      itemBuilder: (context) {
+                        final cib =
+                            BlocProvider.of<ChildrenItemsCubit>(context);
+                        final snc = context.read<SelectedNoteCubit>();
+                        final cic = context.read<ChildrenItemsCubit>();
+                        return <PopupMenuItem<InlineButton>>[
+                          PopupMenuItem<InlineButton>(
+                              onTap: () {
+                                cic.handleItemsChanging();
+                                widget.item.saveLocalState(
+                                    newStatus: ItemVMStatus.draft);
+                                cic.handleItemsChanged();
+                              },
+                              padding: const EdgeInsets.only(left: 8),
+                              key: UniqueKey(),
+                              child: InlineButton(
+                                  title: 'Edit',
+                                  iconData: FluentIcons.edit_16_regular,
+                                  onPressed: () {})),
+                          PopupMenuItem<InlineButton>(
+                              onTap: () => cib.createSubTopic(widget.item),
+                              padding: const EdgeInsets.only(left: 8),
+                              key: UniqueKey(),
+                              child: InlineButton(
+                                  title: 'Add Subtopic',
+                                  iconData: FluentIcons.folder_add_20_regular,
+                                  onPressed: () {})),
+                          PopupMenuItem<InlineButton>(
+                              onTap: () async {
+                                ItemVM n = await cib.createNote(widget.item);
+                                snc.handleNoteChanged(n);
+                              },
+                              padding: const EdgeInsets.only(left: 8),
+                              key: UniqueKey(),
+                              child: InlineButton(
+                                  title: 'Add Note',
+                                  iconData: FluentIcons.note_add_20_regular,
+                                  onPressed: () {})),
+                        ];
+                      })),
+            if ((hovering == true &&
+                widget.item.status == ItemVMStatus.newDraft))
+              InlineButton(
+                iconData: FluentIcons.dismiss_16_regular,
+                onPressed: () {
+                  final snc = context.read<SelectedNoteCubit>();
+                  final cic = context.read<ChildrenItemsCubit>();
+                  cic.handleItemsChanging();
+                  if (snc.note == widget.item) {
+                    snc.handleNoteChanged(null);
+                  }
+                  widget.item.resetState();
+                  cic.removeItem(widget.item);
+                  cic.handleItemsChanged();
+                },
+              ),
+            if ((hovering == true || widget.item.pinned) &&
+                isSaving != true &&
+                widget.item.status != ItemVMStatus.newDraft)
+              InlineButton(
+                iconData: FluentIcons.pin_16_regular,
+                onPressed: () async {
+                  setState(() {
+                    isSaving = true;
+                  });
+                  final cic = context.read<ChildrenItemsCubit>();
+                  cic.handleItemsChanging(silent: true);
+                  await widget.item.togglePinned();
+                  cic.handleItemsChanged();
+                  setState(() {
+                    isSaving = false;
+                  });
+                },
+              ),
+            if (isSaving == true) const InlineCircularProgressIndicator(),
           ],
         ),
       ),
