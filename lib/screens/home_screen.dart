@@ -1,3 +1,4 @@
+import 'package:easynotes/cubits/cubits.dart';
 import 'package:easynotes/cubits/item_vm/item_vm.dart';
 import 'package:easynotes/extensions/color_ext.dart';
 import 'package:easynotes/models/item.dart';
@@ -10,6 +11,7 @@ import 'package:easynotes/screens/items/items_screen.dart';
 import 'package:easynotes/screens/note/note_screen.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class HomeScreen extends StatelessWidget {
   HomeScreen({Key? key}) : super(key: key);
@@ -79,7 +81,12 @@ class HomeScreen extends StatelessWidget {
                   FluentIcons.search_20_regular,
                   size: 16,
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  final ric = context.read<RootItemsCubit>();
+                  final cic = context.read<ChildrenItemsCubit>();
+                  ric.handleSelectionChanged(null);
+                  cic.handleRootItemSelectionChanged(null);
+                },
               ),
             ]),
           ),
