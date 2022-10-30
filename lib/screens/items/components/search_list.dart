@@ -26,11 +26,11 @@ class SearchList extends StatelessWidget {
                   title: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      ToolbarButton(
+                      /*ToolbarButton(
                           iconData: FluentIcons.delete_20_regular,
                           enabledColor: Colors.red,
                           title: 'Trash All',
-                          onPressed: () {}),
+                          onPressed: () {}),*/
                     ],
                   )),
               body: Container(

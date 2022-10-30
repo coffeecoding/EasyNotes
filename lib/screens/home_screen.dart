@@ -57,6 +57,15 @@ class HomeScreen extends StatelessWidget {
                   child: TextField(
                 onChanged: (text) =>
                     context.read<SearchCubit>().handleSearchTermChanged(text),
+                onSubmitted: (_) async {
+                  final ric = context.read<RootItemsCubit>();
+                  final cic = context.read<ChildrenItemsCubit>();
+                  final sl = context.read<SearchCubit>();
+                  await sl.search(rootItems: ric.topicCubits);
+                  ric.handleItemsChanging();
+                  ric.handleSelectionChanged(null, ChildListVisibility.search);
+                  cic.handleRootItemSelectionChanged(null);
+                },
                 decoration:
                     const InputDecoration.collapsed(hintText: 'Search for ...'),
                 controller: searchController,
