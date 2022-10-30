@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:easynotes/cubits/cubits.dart';
 import 'package:easynotes/cubits/item_vm/item_vm.dart';
 import 'package:easynotes/cubits/trashed_items/trashed_items_cubit.dart';
