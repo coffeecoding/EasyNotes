@@ -232,6 +232,8 @@ class RootItemContainer extends StatelessWidget {
             onWillAccept: (itemVM) => itemVM != null && itemVM.isTopic,
             onAccept: (incomingItem) async {
               final ric = context.read<RootItemsCubit>();
+              if (ric.topicCubits.indexOf(item) ==
+                  ric.topicCubits.indexOf(incomingItem)) return;
               ric.handleItemsChanging();
               ric.removeItem(incomingItem);
               ric.insertItem(incomingItem, ric.topicCubits.indexOf(item));
