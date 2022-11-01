@@ -39,6 +39,7 @@ class TopicsList extends StatelessWidget {
                         context: context, builder: (context) => dlg);
                     if (created != null && created == true) {
                       ic.insertItem(tc.topicCubit!);
+                      ic.handleItemsChanged();
                     }
                   }),
             ],
