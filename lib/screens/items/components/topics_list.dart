@@ -96,7 +96,13 @@ class TopicsList extends StatelessWidget {
                                   tic.handleItemsChanged();
                                 }
                               },
-                              builder: (context, __, ___) => Container()),
+                              builder: (context, itemList, ___) {
+                                bool highlighted = itemList.isNotEmpty;
+                                return Container(
+                                    color: highlighted
+                                        ? Colors.white30
+                                        : Colors.transparent);
+                              }),
                         ),
                       ],
                     ),
@@ -184,10 +190,10 @@ class TrashContainer extends StatelessWidget {
                 children: [
                   Column(children: const [
                     Icon(FluentIcons.delete_24_filled, color: Colors.white70),
-                    /*Text('Trash',
+                    Text('Trash',
                         style: TextStyle(
                             fontWeight: FontWeight.w400,
-                            color: Colors.white70)),*/
+                            color: Colors.white70)),
                   ]),
                 ],
               ),
@@ -211,45 +217,63 @@ class RootItemContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DragTarget<ItemVM>(
-      onWillAccept: (itemCubit) =>
-          itemCubit != null &&
-          !item.children.contains(itemCubit) &&
-          itemCubit != item,
-      onAccept: (incomingItem) async {
-        final cic = context.read<ChildrenItemsCubit>();
-        final ric = context.read<RootItemsCubit>();
-        if (incomingItem.trashed == null) {
-          await incomingItem.changeParent(newParent: item, ric: ric, cic: cic);
-          if (incomingItem == ric.selectedItem) {
-            ric.handleSelectionChanged(item);
-            cic.handleRootItemSelectionChanged(item);
-          }
-        } else {
-          final tic = context.read<TrashedItemsCubit>();
-          final oldParent = incomingItem.parent;
-          tic.handleItemsChanging();
-          await incomingItem.restoreFromTrash(item, true);
-          oldParent?.removeChild(incomingItem);
-          item.addChild(incomingItem);
-          tic.removeItem(incomingItem);
-          tic.handleItemsChanged();
-        }
-      },
-      builder: (context, __, ___) => Draggable(
-        data: item,
-        feedback: Material(
-          child: Container(
-            color: Colors.black26,
-            width: 100,
-            height: 50,
+    return Column(
+      children: [
+        DragTarget<ItemVM>(
+            onWillAccept: (itemVM) => itemVM != null && itemVM.isTopic,
+            onAccept: (itemVM) {
+              itemVM;
+            },
+            builder: (context, itemList, dynamicList) {
+              bool highlighted = itemList.isNotEmpty;
+              return Container(
+                  decoration: BoxDecoration(
+                      color: highlighted ? Colors.white : Colors.transparent,
+                      borderRadius: BorderRadius.circular(3)),
+                  height: 6);
+            }),
+        DragTarget<ItemVM>(
+          onWillAccept: (itemCubit) =>
+              itemCubit != null &&
+              !item.children.contains(itemCubit) &&
+              itemCubit != item,
+          onAccept: (incomingItem) async {
+            final cic = context.read<ChildrenItemsCubit>();
+            final ric = context.read<RootItemsCubit>();
+            if (incomingItem.trashed == null) {
+              await incomingItem.changeParent(
+                  newParent: item, ric: ric, cic: cic);
+              if (incomingItem == ric.selectedItem) {
+                ric.handleSelectionChanged(item);
+                cic.handleRootItemSelectionChanged(item);
+              }
+            } else {
+              final tic = context.read<TrashedItemsCubit>();
+              final oldParent = incomingItem.parent;
+              tic.handleItemsChanging();
+              await incomingItem.restoreFromTrash(item, true);
+              oldParent?.removeChild(incomingItem);
+              item.addChild(incomingItem);
+              tic.removeItem(incomingItem);
+              tic.handleItemsChanged();
+            }
+          },
+          builder: (context, __, ___) => Draggable(
+            data: item,
+            feedback: Material(
+              child: Container(
+                color: Colors.black26,
+                width: 100,
+                height: 50,
+                child: RootItemRow(
+                    selectedItem: selectedItem, item: item, color: color),
+              ),
+            ),
             child: RootItemRow(
                 selectedItem: selectedItem, item: item, color: color),
           ),
         ),
-        child:
-            RootItemRow(selectedItem: selectedItem, item: item, color: color),
-      ),
+      ],
     );
   }
 }

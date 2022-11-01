@@ -14,14 +14,14 @@ class ChildrenList extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<ChildrenItemsCubit, ChildrenItemsState>(
         builder: (context, state) {
-      final selectedItem = context.read<RootItemsCubit>().selectedItem;
+      final selectedRootItem = context.read<RootItemsCubit>().selectedItem;
       //if (state.status == ChildrenItemsStatus.unselected) {
-      if (selectedItem == null) {
+      if (selectedRootItem == null) {
         return const Center(child: Text('No Topic selected'));
       }
       final childrenItemsCubit = context.read<ChildrenItemsCubit>();
       final itemCubits = state.childrenCubits;
-      final clr = HexColor.fromHex(selectedItem.color);
+      final clr = HexColor.fromHex(selectedRootItem.color);
       return Scaffold(
           appBar: AppBar(
               titleSpacing: 8,
@@ -35,14 +35,14 @@ class ChildrenList extends StatelessWidget {
                       iconData: FluentIcons.folder_add_20_regular,
                       title: 'Subtopic',
                       onPressed: () =>
-                          childrenItemsCubit.createSubTopic(selectedItem)),
+                          childrenItemsCubit.createSubTopic(selectedRootItem)),
                   ToolbarButton(
                       iconData: FluentIcons.note_add_20_regular,
                       title: 'Note',
                       onPressed: () async {
                         final snc = context.read<SelectedNoteCubit>();
-                        ItemVM i =
-                            await childrenItemsCubit.createNote(selectedItem);
+                        ItemVM i = await childrenItemsCubit
+                            .createNote(selectedRootItem);
                         snc.handleNoteChanged(i);
                       }),
                 ],

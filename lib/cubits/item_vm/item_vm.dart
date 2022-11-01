@@ -52,7 +52,7 @@ class ItemVM {
   ItemVM? parent;
 
   String get id => item.id;
-  String get color => itemRepo.getColorOfRoot(item);
+  String get color => item.color;
   String get symbol => item.symbol;
   String get title => item.title;
   String get content => item.content;
@@ -66,6 +66,8 @@ class ItemVM {
       : parent != null && parent!.parent == null
           ? ItemLevel.childOfRoot
           : ItemLevel.grandChild;
+
+  bool get isPersisted => id.isNotEmpty;
 
   // Local UI state
   ItemVMStatus status;
@@ -305,7 +307,7 @@ class ItemVM {
       parent?.removeChild(this);
       newParent?.addChild(this);
 
-      if (level == ItemLevel.root) {
+      if (level == ItemLevel.root && newParent != null) {
         ric.removeItem(this);
         ric.handleItemsChanged();
       }
@@ -326,12 +328,7 @@ class ItemVM {
         }
         cic.handleItemsChanged();
       }
-      // special case (1st in the text doc)
-      if (level == ItemLevel.root &&
-          newParent != null &&
-          newParent.level == ItemLevel.root) {
-        ric.handleItemsChanged();
-      }
+      ric.handleItemsChanged();
       parent = newParent;
     } catch (e) {
       print("error changing item parent: $e");
@@ -348,7 +345,7 @@ class ItemVM {
   List<ItemVM> getAncestors() {
     final result = <ItemVM>[];
     ItemVM? cursor = parent;
-    while (cursor != null) {
+    while (cursor != null && cursor.isPersisted) {
       result.add(cursor);
       cursor = cursor.parent;
     }
@@ -358,7 +355,7 @@ class ItemVM {
   int getTrashedAncestorCount() {
     int result = 0;
     ItemVM? cursor = parent;
-    while (cursor != null && cursor.trashed != null) {
+    while (cursor != null && cursor.trashed != null && cursor.isPersisted) {
       result += 1;
       cursor = cursor.parent;
     }
