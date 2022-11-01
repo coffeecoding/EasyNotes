@@ -159,9 +159,16 @@ class MockItemRepo implements ItemRepository {
   }
 
   @override
-  Future<List<Item>> updateItemPositions(ItemPositionData ipd) async {
-    // TODO: implement updateItemPositions
-    throw UnimplementedError();
+  Future<List<Item>> updateItemPositions(List<String> itemIds) async {
+    int timestamp = DateTime.now().toUtc().millisecondsSinceEpoch;
+    for (int i = 0; i < itemIds.length; i++) {
+      final id = itemIds[i];
+      items[id] = items[id]!.copyWith(
+          position: i, modified_header: timestamp, trashed: items[id]!.trashed);
+    }
+    List<Item> result =
+        items.values.where((i) => itemIds.any((id) => id == i.id)).toList();
+    return result;
   }
 
   @override

@@ -80,8 +80,17 @@ class TopicsList extends StatelessWidget {
                                 final cic = context.read<ChildrenItemsCubit>();
                                 final ric = context.read<RootItemsCubit>();
                                 if (incomingItem.trashed == null) {
-                                  await incomingItem.changeParent(
-                                      newParent: null, ric: ric, cic: cic);
+                                  if (incomingItem.level == ItemLevel.root) {
+                                    // only change the order
+                                    ric.handleItemsChanging();
+                                    ric.removeItem(incomingItem);
+                                    ric.addItem(incomingItem);
+                                    await ric.updateRootItemPositions();
+                                    ric.handleItemsChanged();
+                                  } else {
+                                    await incomingItem.changeParent(
+                                        newParent: null, ric: ric, cic: cic);
+                                  }
                                 } else {
                                   final tic = context.read<TrashedItemsCubit>();
                                   final oldParent = incomingItem.parent;
@@ -221,8 +230,13 @@ class RootItemContainer extends StatelessWidget {
       children: [
         DragTarget<ItemVM>(
             onWillAccept: (itemVM) => itemVM != null && itemVM.isTopic,
-            onAccept: (itemVM) {
-              itemVM;
+            onAccept: (incomingItem) async {
+              final ric = context.read<RootItemsCubit>();
+              ric.handleItemsChanging();
+              ric.removeItem(incomingItem);
+              ric.insertItem(incomingItem, ric.topicCubits.indexOf(item));
+              await ric.updateRootItemPositions();
+              ric.handleItemsChanged();
             },
             builder: (context, itemList, dynamicList) {
               bool highlighted = itemList.isNotEmpty;

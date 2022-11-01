@@ -7,11 +7,8 @@ import 'package:easynotes/extensions/http_client_ext.dart';
 import 'package:easynotes/models/item.dart';
 import 'package:easynotes/services/crypto_service.dart';
 import 'package:http/http.dart';
-import 'package:easynotes/utils/list_extensions.dart';
-import 'package:uuid/uuid.dart';
 
 import '../models/item_header.dart';
-import '../models/item_position_data.dart';
 import '../services/network_provider.dart';
 import 'preference_repository.dart';
 
@@ -34,7 +31,7 @@ abstract class ItemRepository {
   Future<Item> updateItemTrashed(List<String> ids, int? trashed);
   Future<Item> updateItemPinned(String id, int pin);
   Future<Item> updateItemGloballyPinned(String id, int pin);
-  Future<List<Item>> updateItemPositions(ItemPositionData ipd);
+  Future<List<Item>> updateItemPositions(List<String> itemIds);
   Future<bool> delete(String id);
   Future<bool> deleteItems(List<String> ids);
 
@@ -242,21 +239,17 @@ class ItemRepo implements ItemRepository {
   }
 
   @override
-  Future<List<Item>> updateItemPositions(ItemPositionData ipd) async {
+  Future<List<Item>> updateItemPositions(List<String> itemIds) async {
     Response? response =
-        await netClient.put('/api/items/position', jsonEncode(ipd));
+        await netClient.put('/api/items/position', jsonEncode(itemIds));
     if (!response.isSuccessStatusCode()) throw 'Error updating item positions';
     int timestamp = int.parse(response.body);
-    for (int i = 0; i < ipd.itemIds.length; i++) {
-      final id = ipd.itemIds[i];
+    for (int i = 0; i < itemIds.length; i++) {
+      final id = itemIds[i];
       items[id] = items[id]!.copyWith(
-          position: ipd.itemPositions[i],
-          modified_header: timestamp,
-          trashed: items[id]!.trashed);
+          position: i, modified_header: timestamp, trashed: items[id]!.trashed);
     }
-    return items.values
-        .where((i) => ipd.itemIds.any((id) => id == i.id))
-        .toList();
+    return items.values.where((i) => itemIds.any((id) => id == i.id)).toList();
   }
 
   @override

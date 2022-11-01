@@ -57,8 +57,8 @@ class RootItemsCubit extends Cubit<RootItemsState> with ListWithSelectionCubit {
   }
 
   @override
-  void insertItem(ItemVM item) {
-    topicCubits.insert(0, item);
+  void insertItem(ItemVM item, [int index = 0]) {
+    topicCubits.insert(index, item);
   }
 
   Future<ItemVM> createRootItem(int type) async {
@@ -87,6 +87,19 @@ class RootItemsCubit extends Cubit<RootItemsState> with ListWithSelectionCubit {
   void handleError(Object e) {
     emit(RootItemsState.error(
         prev: state, errorMsg: 'Failed to retrieve data: $e'));
+  }
+
+  Future<void> updateRootItemPositions() async {
+    try {
+      List<String> itemIds = topicCubits.map((i) => i.id).toList();
+      List<Item> updatedRootItems = await itemRepo.updateItemPositions(itemIds);
+      updatedRootItems.sort(((a, b) => a.position.compareTo(b.position)));
+      for (int i = 0; i < updatedRootItems.length; i++) {
+        topicCubits[i].item = updatedRootItems[i];
+      }
+    } catch (e) {
+      // don't do anything, this is a not huge deal
+    }
   }
 
   @override

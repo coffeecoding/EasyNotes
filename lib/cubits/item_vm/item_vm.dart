@@ -17,21 +17,15 @@ enum ItemVMStatus { persisted, newDraft, draft, busy, error }
 
 enum ItemLevel { root, childOfRoot, grandChild }
 
-abstract class TreeNode {
-  abstract ItemVM item;
-  abstract ItemVM parent;
-  abstract List<ItemVM> children;
-  abstract ItemLevel get;
-}
-
 class ItemVM {
   ItemVM(
-      {required this.item,
+      {required Item item,
       this.status = ItemVMStatus.newDraft,
       required this.parent,
       required List<Item> items,
       this.expanded = false})
-      : itemRepo = locator.get<ItemRepository>(),
+      : _item = item,
+        itemRepo = locator.get<ItemRepository>(),
         titleField = item.title,
         contentField = item.content,
         colorSelection = item.color,
@@ -46,7 +40,15 @@ class ItemVM {
     }
   }
 
-  Item item;
+  Item _item;
+  Item get item => _item;
+  set item(Item i) {
+    _item = i;
+    titleField = i.title;
+    contentField = i.content;
+    colorSelection = i.color;
+  }
+
   final ItemRepository itemRepo;
   List<ItemVM> children;
   ItemVM? parent;
@@ -60,8 +62,9 @@ class ItemVM {
   bool get isTopic => item.isTopic;
   bool get pinned => item.pinned;
   int? get trashed => item.trashed;
+  int get position => item.position;
 
-  ItemLevel get level => parent == null
+  ItemLevel get level => parent == null || parent?.isPersisted == false
       ? ItemLevel.root
       : parent != null && parent!.parent == null
           ? ItemLevel.childOfRoot
