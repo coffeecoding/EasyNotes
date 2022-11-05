@@ -59,79 +59,75 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             Expanded(
               flex: 2,
-              child: Container(
-                color: HexColor.fromHex('ff222222'),
-                child: Row(children: [
-                  Expanded(
-                      flex: 1,
-                      child: Center(
-                          child: false
-                              ? Container()
-                              : InkWell(
-                                  onTap: () => Future.delayed(
-                                          const Duration(milliseconds: 0),
-                                          () => _pageController.previousPage(
-                                              duration: const Duration(
-                                                  milliseconds: 150),
-                                              curve: Curves.ease))
-                                      .then((_) => setState(() {})),
-                                  child: const Icon(
-                                    Icons.chevron_left,
-                                    size: 64,
-                                    color: Colors.white30,
-                                  ),
-                                ))),
-                  Expanded(
-                    flex: 4,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          flex: 4,
-                          child: PageView(
-                              onPageChanged: (p) {
-                                print(p);
-                                Future.delayed(
-                                    const Duration(milliseconds: 400),
-                                    () => setState(() {}));
-                              },
-                              controller: _pageController,
-                              scrollBehavior: AppScrollBehavior(),
-                              children: <Widget>[
-                                const Center(
-                                  child: Text(
-                                      textAlign: TextAlign.center,
-                                      maxLines: null,
-                                      'Made by YousufCodes\n\nThis app is free and ad-free.\nPlease consider supporting:\nhttps://easynotes.app/donate'),
+              child: Row(children: [
+                Expanded(
+                    flex: 1,
+                    child: Center(
+                        child: false
+                            ? Container()
+                            : InkWell(
+                                onTap: () => Future.delayed(
+                                        const Duration(milliseconds: 0),
+                                        () => _pageController.previousPage(
+                                            duration: const Duration(
+                                                milliseconds: 150),
+                                            curve: Curves.ease))
+                                    .then((_) => setState(() {})),
+                                child: const Icon(
+                                  Icons.chevron_left,
+                                  size: 64,
+                                  color: Colors.white30,
                                 ),
-                                LoginForm(pageController: _pageController),
-                                SignupForm(pageController: _pageController)
-                              ]),
-                        ),
-                      ],
-                    ),
+                              ))),
+                Expanded(
+                  flex: 4,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        flex: 4,
+                        child: PageView(
+                            onPageChanged: (p) {
+                              print(p);
+                              Future.delayed(const Duration(milliseconds: 400),
+                                  () => setState(() {}));
+                            },
+                            controller: _pageController,
+                            scrollBehavior: AppScrollBehavior(),
+                            children: <Widget>[
+                              const Center(
+                                child: Text(
+                                    textAlign: TextAlign.center,
+                                    maxLines: null,
+                                    'Made by Yousuf from yscodes.com\n\nThis app is free and ad-free.\nPlease consider supporting:\nhttps://easynotes.app/donate'),
+                              ),
+                              LoginForm(pageController: _pageController),
+                              SignupForm(pageController: _pageController)
+                            ]),
+                      ),
+                    ],
                   ),
-                  Expanded(
-                      flex: 1,
-                      child: Center(
-                          child: false
-                              ? Container()
-                              : InkWell(
-                                  onTap: () => Future.delayed(
-                                          const Duration(milliseconds: 0),
-                                          () => _pageController.nextPage(
-                                              duration: const Duration(
-                                                  milliseconds: 150),
-                                              curve: Curves.ease))
-                                      .then((_) => setState(() {})),
-                                  child: const Icon(
-                                    Icons.chevron_right,
-                                    size: 64,
-                                    color: Colors.white30,
-                                  ),
-                                ))),
-                ]),
-              ),
+                ),
+                Expanded(
+                    flex: 1,
+                    child: Center(
+                        child: false
+                            ? Container()
+                            : InkWell(
+                                onTap: () => Future.delayed(
+                                        const Duration(milliseconds: 0),
+                                        () => _pageController.nextPage(
+                                            duration: const Duration(
+                                                milliseconds: 150),
+                                            curve: Curves.ease))
+                                    .then((_) => setState(() {})),
+                                child: const Icon(
+                                  Icons.chevron_right,
+                                  size: 64,
+                                  color: Colors.white30,
+                                ),
+                              ))),
+              ]),
             ),
           ]),
         ),

@@ -1,4 +1,4 @@
-import 'package:easynotes/screens/common/uiconstants.dart';
+import 'package:easynotes/screens/common/responsive.dart';
 import 'package:flutter/material.dart';
 
 class SignupForm extends StatelessWidget {
@@ -11,7 +11,12 @@ class SignupForm extends StatelessWidget {
     return Center(
       child: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 92),
+          padding: EdgeInsets.symmetric(
+              horizontal: Responsive.isDesktop(context)
+                  ? 92
+                  : Responsive.isTablet(context)
+                      ? 64
+                      : 32),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
