@@ -48,13 +48,22 @@ class _TopicScreenState extends State<TopicScreen> {
             children: [
               Scaffold(
                 appBar: AppBar(
-                    elevation: 1,
+                    elevation: 0,
                     titleSpacing: 0,
-                    leading: ToolbarButton(
-                        iconData: FluentIcons.arrow_left_16_regular,
-                        title: '',
-                        enabledColor: Colors.white,
-                        onPressed: () => Navigator.of(context).pop(false)),
+                    backgroundColor: Colors.transparent,
+                    bottom: PreferredSize(
+                      preferredSize: const Size.fromHeight(1),
+                      child: Container(
+                          height: 1, color: Theme.of(context).dividerColor),
+                    ),
+                    leading: Padding(
+                      padding: const EdgeInsets.only(left: 8),
+                      child: ToolbarButton(
+                          iconData: FluentIcons.arrow_left_16_regular,
+                          title: '',
+                          enabledColor: Colors.white,
+                          onPressed: () => Navigator.of(context).pop(false)),
+                    ),
                     title: Text(titleText),
                     actions: [
                       if (topicCubit.status != ItemVMStatus.newDraft)
