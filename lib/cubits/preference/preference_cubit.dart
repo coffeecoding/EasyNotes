@@ -48,6 +48,7 @@ class PreferenceCubit extends Cubit<PreferenceState> {
 
   Future<void> updateUser({String? newPassword, String? newEmail}) async {
     try {
+      emit(PreferenceState.copyWith(prev: state));
       bool success = await authRepo.updateUser(
           newPassword: newPassword, newEmail: newEmail);
       if (success) {

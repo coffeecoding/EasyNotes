@@ -36,7 +36,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
           body: SingleChildScrollView(
             child:
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              if (state.message.isNotEmpty) Text(state.message),
+              if (state.message.isNotEmpty)
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Text(
+                    state.message,
+                    style: const TextStyle(color: Colors.amber),
+                  ),
+                ),
               const SectionHeader(text: 'Synchronization'),
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16),
@@ -110,6 +118,7 @@ class PasswordSection extends StatefulWidget {
 
 class _PasswordSectionState extends State<PasswordSection> {
   bool isEditing = false;
+  bool isSaving = false;
 
   @override
   Widget build(BuildContext context) {
@@ -131,6 +140,7 @@ class _PasswordSectionState extends State<PasswordSection> {
                           ? Builder(builder: (context) {
                               widget.pwCtr.text = snapshot.data as String;
                               return TextField(
+                                  textAlign: TextAlign.end,
                                   selectionHeightStyle: BoxHeightStyle.tight,
                                   controller: widget.pwCtr);
                             })
@@ -163,13 +173,47 @@ class _PasswordSectionState extends State<PasswordSection> {
                       }),
                   title: 'Cancel'),
             if (isEditing)
-              ToolbarButton(
-                  small: true,
-                  iconData: FluentIcons.save_20_regular,
-                  onPressed: () => setState(() {
-                        isEditing = false;
-                      }),
-                  title: 'Save'),
+              StatefulBuilder(builder: (context, setState) {
+                return isSaving
+                    ? const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: InlineCircularProgressIndicator(),
+                      )
+                    : ToolbarButton(
+                        small: true,
+                        iconData: FluentIcons.save_20_regular,
+                        onPressed: () async {
+                          if (widget.pwCtr.text.isEmpty) {
+                            AlertDialog dlg = AlertDialog(
+                                actionsPadding: const EdgeInsets.all(16),
+                                actionsAlignment: MainAxisAlignment.end,
+                                actions: [
+                                  Expanded(child: Container()),
+                                  ToolbarButton(
+                                      iconData: FluentIcons.dismiss_16_regular,
+                                      title: 'OK',
+                                      onPressed: () =>
+                                          Navigator.of(context).pop())
+                                ],
+                                contentPadding: const EdgeInsets.all(16),
+                                content:
+                                    const Text('Password cannot be empty'));
+                            await showDialog(
+                                context: context, builder: (_) => dlg);
+                            return;
+                          }
+                          setState(() {
+                            isSaving = true;
+                          });
+                          await widget.prefCubit
+                              .updateUser(newPassword: widget.pwCtr.text);
+                          setState(() {
+                            isEditing = false;
+                            isSaving = false;
+                          });
+                        },
+                        title: 'Save');
+              }),
             if (!isEditing)
               ToolbarButton(
                   small: true,
