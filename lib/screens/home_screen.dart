@@ -3,11 +3,13 @@ import 'package:easynotes/cubits/item_vm/item_vm.dart';
 import 'package:easynotes/cubits/search/search_cubit.dart';
 import 'package:easynotes/extensions/color_ext.dart';
 import 'package:easynotes/screens/common/responsive.dart';
+import 'package:easynotes/screens/common/settings_dialog.dart';
 import 'package:easynotes/screens/common/toolbar_button.dart';
 import 'package:easynotes/screens/common/topic_dialog.dart';
 import 'package:easynotes/screens/common/uiconstants.dart';
 import 'package:easynotes/screens/items/items_screen.dart';
 import 'package:easynotes/screens/note/note_screen.dart';
+import 'package:easynotes/screens/settings/settings_screen.dart';
 import 'package:easynotes/screens/topic/topic_screen.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
@@ -140,7 +142,10 @@ class HomeScreen extends StatelessWidget {
           ToolbarButton(
             iconData: FluentIcons.settings_20_regular,
             title: 'Settings',
-            onPressed: () {},
+            onPressed: () async {
+              Dialog dlg = const SettingsDialog(child: SettingsScreen());
+              await showDialog(context: context, builder: (context) => dlg);
+            },
           ),
         ]),
       ),

@@ -159,6 +159,7 @@ class TrashContainer extends StatelessWidget {
               contentPadding: EdgeInsets.zero,
               trailing: null,
               onTap: () {
+                context.read<TrashedItemsCubit>().reloadLocally();
                 context
                     .read<RootItemsCubit>()
                     .handleSelectionChanged(null, ChildListVisibility.trash);
