@@ -59,7 +59,7 @@ class HomeScreen extends StatelessWidget {
                           Dialog dlg = const TopicDialog(child: TopicScreen());
                           final created = await showDialog(
                               context: context, builder: (context) => dlg);
-                          if (created != null && created == true) {
+                          if (created == true) {
                             ic.insertItem(tc.topicCubit!);
                             ic.handleItemsChanged();
                           }

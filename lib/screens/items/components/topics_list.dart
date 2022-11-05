@@ -331,12 +331,19 @@ class _RootItemRowState extends State<RootItemRow> {
                             BlocProvider.of<ChildrenItemsCubit>(context);
                         TopicCubit tc = BlocProvider.of<TopicCubit>(context);
                         tc.select(widget.item);
+                        bool isTopicSelected = widget.item == ric.selectedItem;
                         Dialog dlg = const TopicDialog(child: TopicScreen());
                         final changes = await showDialog(
                             context: context, builder: (context) => dlg);
                         if (changes == true) {
                           cic.handleItemsChanging(silent: true);
                           cic.handleItemsChanged();
+                          ric.handleItemsChanged();
+                        } else if (changes == false) {
+                          ric.removeItem(widget.item);
+                          if (isTopicSelected) {
+                            cic.handleRootItemSelectionChanged(tc.topicCubit);
+                          }
                           ric.handleItemsChanged();
                         }
                       },

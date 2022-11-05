@@ -36,6 +36,19 @@ class TopicCubit extends Cubit<TopicState> {
     }
   }
 
+  Future<bool> trash() async {
+    try {
+      emit(TopicState.busy(topicCubit!));
+      await topicCubit!.trash();
+      emit(const TopicState.empty());
+      return true;
+    } catch (e) {
+      print('error trashing topic: $e');
+      emit(TopicState.error(topicCubit!));
+      return false;
+    }
+  }
+
   Future<bool> save({String? title, String? color}) async {
     try {
       emit(TopicState.busy(topicCubit!));

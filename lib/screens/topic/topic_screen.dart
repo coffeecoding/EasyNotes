@@ -24,7 +24,13 @@ class _TopicScreenState extends State<TopicScreen> {
     return BlocBuilder<TopicCubit, TopicState>(
       buildWhen: (p, n) => p.status != n.status,
       builder: (context, state) {
-        ItemVM topicCubit = state.topicCubit!;
+        ItemVM? topicCubit = state.topicCubit;
+        if (topicCubit == null) {
+          return const SizedBox(
+              height: 400,
+              width: 400,
+              child: Center(child: Text('No topic selected')));
+        }
         final titleText =
             state.status == ItemVMStatus.newDraft || state.status == null
                 ? 'Create Topic'
@@ -55,7 +61,14 @@ class _TopicScreenState extends State<TopicScreen> {
                         ToolbarButton(
                             iconData: FluentIcons.delete_20_regular,
                             title: 'Trash',
-                            onPressed: () {}),
+                            onPressed: () async {
+                              context
+                                  .read<RootItemsCubit>()
+                                  .handleItemsChanging(silent: true);
+                              final nv = Navigator.of(context);
+                              await context.read<TopicCubit>().trash();
+                              nv.pop(false);
+                            }),
                       ToolbarButton(
                           iconData: FluentIcons.save_20_regular,
                           title: 'Save',
