@@ -3,92 +3,42 @@ import 'package:easynotes/cubits/item_vm/item_vm.dart';
 import 'package:easynotes/cubits/trashed_items/trashed_items_cubit.dart';
 import 'package:easynotes/screens/common/inline_button.dart';
 import 'package:easynotes/screens/common/progress_indicators.dart';
-import 'package:easynotes/screens/common/toolbar_button.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class TrashList extends StatelessWidget {
-  TrashList({Key? key})
-      : isDeleteingAll = false,
-        super(key: key);
-
-  bool isDeleteingAll;
-
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<TrashedItemsCubit, TrashedItemsState>(
         builder: (context, state) {
       final itemCubits = state.items;
-      return Scaffold(
-          appBar: AppBar(
-              titleSpacing: 8,
-              toolbarHeight: 48,
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
+      return itemCubits.isEmpty
+          ? const Center(child: Text('Empty'))
+          : Container(
+              alignment: Alignment.topLeft,
+              child: Stack(
                 children: [
-                  StatefulBuilder(builder: (context, setState) {
-                    return isDeleteingAll == true
-                        ? const SizedBox(
-                            width: 100,
-                            child: Center(
-                                child: InlineCircularProgressIndicator(
-                                    color: Colors.red)),
-                          )
-                        : ToolbarButton(
-                            iconData: FluentIcons.delete_20_regular,
-                            enabledColor: itemCubits.isEmpty
-                                ? Theme.of(context).disabledColor
-                                : Colors.red,
-                            title: 'Delete All',
-                            onPressed: itemCubits.isEmpty
-                                ? null
-                                : () async {
-                                    setState(() {
-                                      isDeleteingAll = true;
-                                    });
-                                    final tic =
-                                        context.read<TrashedItemsCubit>();
-                                    tic.handleItemsChanging();
-                                    await tic.deleteAll();
-                                    tic.handleItemsChanged(items: []);
-                                    setState(() {
-                                      isDeleteingAll = false;
-                                    });
-                                  });
-                  }),
+                  ListView.builder(
+                      shrinkWrap: true,
+                      physics: const ClampingScrollPhysics(),
+                      itemCount: itemCubits.length,
+                      itemBuilder: (context, i) {
+                        final item = itemCubits[i];
+                        final clr = item.getRootAncestor()?.color ?? item.color;
+                        return ExpandableItemContainer(
+                            color: Color(int.parse(clr, radix: 16)),
+                            item: item);
+                      }),
+                  state.status == TrashedItemsStatus.busy
+                      ? Positioned.fill(
+                          child: Container(
+                              color: Colors.black26,
+                              child: const Center(
+                                  child: CircularProgressIndicator())))
+                      : Container(),
                 ],
-              )),
-          body: itemCubits.isEmpty
-              ? const Center(child: Text('Empty'))
-              : Container(
-                  alignment: Alignment.topLeft,
-                  child: Stack(
-                    children: [
-                      ListView.builder(
-                          shrinkWrap: true,
-                          physics: const ClampingScrollPhysics(),
-                          itemCount: itemCubits.length,
-                          itemBuilder: (context, i) {
-                            final item = itemCubits[i];
-                            final clr =
-                                item.getRootAncestor()?.color ?? item.color;
-                            return ExpandableItemContainer(
-                                color: Color(int.parse(clr, radix: 16)),
-                                item: item);
-                          }),
-                      state.status == TrashedItemsStatus.busy
-                          ? Positioned.fill(
-                              child: Container(
-                                  color: Colors.black26,
-                                  child: const Center(
-                                      child: CircularProgressIndicator())))
-                          : Container(),
-                    ],
-                  ),
-                ));
+              ));
     });
   }
 }

@@ -1,6 +1,7 @@
 import 'package:easynotes/cubits/cubits.dart';
 import 'package:easynotes/cubits/item_vm/item_vm.dart';
 import 'package:easynotes/cubits/search/search_cubit.dart';
+import 'package:easynotes/cubits/trashed_items/trashed_items_cubit.dart';
 import 'package:easynotes/extensions/color_ext.dart';
 import 'package:easynotes/screens/common/responsive.dart';
 import 'package:easynotes/screens/common/settings_dialog.dart';
@@ -67,78 +68,49 @@ class HomeScreen extends StatelessWidget {
                           }
                         }),
                   ),
-                  BlocBuilder<ChildrenItemsCubit, ChildrenItemsState>(
-                    builder: (context, state) {
-                      if (ic.selectedItem == null) {
-                        return Container();
-                      }
-                      final childrenItemsCubit =
-                          context.read<ChildrenItemsCubit>();
-                      return Row(
-                        children: [
-                          ToolbarButton(
-                              iconData: FluentIcons.folder_add_20_regular,
-                              title: 'Subtopic',
-                              onPressed: () => childrenItemsCubit
-                                  .createSubTopic(ic.selectedItem!)),
-                          ToolbarButton(
-                              iconData: FluentIcons.note_add_20_regular,
-                              title: 'Note',
-                              onPressed: () async {
-                                final snc = context.read<SelectedNoteCubit>();
-                                ItemVM i = await childrenItemsCubit
-                                    .createNote(ic.selectedItem!);
-                                snc.handleNoteChanged(i);
-                              }),
-                        ],
-                      );
-                    },
-                  )
+                  buildSecondaryToolbar(context),
                 ],
               );
             },
           ),
-          Container(
-            width: 256,
-            padding: const EdgeInsets.only(left: ConstSpacing.m),
-            decoration: BoxDecoration(
-                color: Colors.black26, borderRadius: BorderRadius.circular(4)),
-            child: Row(children: [
-              Expanded(
-                  child: TextField(
-                onChanged: (text) =>
-                    context.read<SearchCubit>().handleSearchTermChanged(text),
-                onSubmitted: (_) async {
-                  final ric = context.read<RootItemsCubit>();
-                  final cic = context.read<ChildrenItemsCubit>();
-                  final sl = context.read<SearchCubit>();
-                  await sl.search(rootItems: ric.topicCubits);
-                  ric.handleItemsChanging();
-                  ric.handleSelectionChanged(null, ChildListVisibility.search);
-                  cic.handleRootItemSelectionChanged(null);
-                },
-                decoration:
-                    const InputDecoration.collapsed(hintText: 'Search for ...'),
-                controller: searchController,
-              )),
-              IconButton(
-                icon: const Icon(
-                  FluentIcons.search_20_regular,
-                  size: 18,
+          Builder(builder: (context) {
+            onSearch() async {
+              final ric = context.read<RootItemsCubit>();
+              final cic = context.read<ChildrenItemsCubit>();
+              final sl = context.read<SearchCubit>();
+              await sl.search(rootItems: ric.topicCubits);
+              ric.handleItemsChanging();
+              ric.handleSelectionChanged(null, ChildListVisibility.search);
+              cic.handleRootItemSelectionChanged(null);
+            }
+
+            return Container(
+              width: 256,
+              padding: const EdgeInsets.only(left: ConstSpacing.m),
+              decoration: BoxDecoration(
+                  color: Colors.black26,
+                  borderRadius: BorderRadius.circular(4)),
+              child: Row(children: [
+                Expanded(
+                    child: TextField(
+                  onChanged: (text) =>
+                      context.read<SearchCubit>().handleSearchTermChanged(text),
+                  onSubmitted: (_) async => await onSearch(),
+                  decoration: const InputDecoration.collapsed(
+                      hintText: 'Search for ...'),
+                  controller: searchController,
+                )),
+                IconButton(
+                  icon: const Icon(
+                    FluentIcons.search_20_regular,
+                    size: 18,
+                  ),
+                  splashRadius: 1,
+                  onPressed: () async => await onSearch(),
                 ),
-                splashRadius: 1,
-                onPressed: () async {
-                  final ric = context.read<RootItemsCubit>();
-                  final cic = context.read<ChildrenItemsCubit>();
-                  final sl = context.read<SearchCubit>();
-                  await sl.search(rootItems: ric.topicCubits);
-                  ric.handleItemsChanging();
-                  ric.handleSelectionChanged(null, ChildListVisibility.search);
-                  cic.handleRootItemSelectionChanged(null);
-                },
-              ),
-            ]),
-          ),
+              ]),
+            );
+          }),
           ToolbarButton(
             iconData: FluentIcons.settings_20_regular,
             title: 'Settings',
@@ -156,5 +128,57 @@ class HomeScreen extends StatelessWidget {
           Expanded(flex: 2, child: NoteScreen()),
       ]),
     ));
+  }
+
+  Widget buildSecondaryToolbar(BuildContext context) {
+    final ric = context.read<RootItemsCubit>();
+    switch (ric.state.childListVisibility) {
+      case ChildListVisibility.children:
+        return BlocBuilder<ChildrenItemsCubit, ChildrenItemsState>(
+          builder: (context, state) {
+            final ric = context.read<RootItemsCubit>();
+            if (ric.selectedItem == null) {
+              return Container();
+            }
+            final childrenItemsCubit = context.read<ChildrenItemsCubit>();
+            return Row(
+              children: [
+                ToolbarButton(
+                    iconData: FluentIcons.folder_add_20_regular,
+                    title: 'Subtopic',
+                    onPressed: () =>
+                        childrenItemsCubit.createSubTopic(ric.selectedItem!)),
+                ToolbarButton(
+                    iconData: FluentIcons.note_add_20_regular,
+                    title: 'Note',
+                    onPressed: () async {
+                      final snc = context.read<SelectedNoteCubit>();
+                      ItemVM i = await childrenItemsCubit
+                          .createNote(ric.selectedItem!);
+                      snc.handleNoteChanged(i);
+                    }),
+              ],
+            );
+          },
+        );
+      case ChildListVisibility.trash:
+        final tic = context.read<TrashedItemsCubit>();
+        final itemCubits = tic.items;
+        return ToolbarButton(
+            iconData: FluentIcons.delete_20_regular,
+            enabledColor:
+                itemCubits.isEmpty ? Theme.of(context).disabledColor : null,
+            title: 'Clear Trash',
+            onPressed: itemCubits.isEmpty
+                ? null
+                : () async {
+                    final tic = context.read<TrashedItemsCubit>();
+                    tic.handleItemsChanging();
+                    await tic.deleteAll();
+                    tic.handleItemsChanged(items: []);
+                  });
+      default:
+        return Container();
+    }
   }
 }

@@ -17,49 +17,33 @@ class SearchList extends StatelessWidget {
         buildWhen: (p, n) => p.status != n.status,
         builder: (context, state) {
           final itemCubits = state.results;
-          return Scaffold(
-              appBar: AppBar(
-                  titleSpacing: 8,
-                  toolbarHeight: 40,
-                  backgroundColor: Colors.black12,
-                  elevation: 0,
-                  title: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      /*ToolbarButton(
-                          iconData: FluentIcons.delete_20_regular,
-                          enabledColor: Colors.red,
-                          title: 'Trash All',
-                          onPressed: () {}),*/
-                    ],
-                  )),
-              body: Container(
-                alignment: Alignment.topLeft,
-                child: Stack(
-                  children: [
-                    if (state.results.isNotEmpty)
-                      ListView.builder(
-                          shrinkWrap: true,
-                          physics: const ClampingScrollPhysics(),
-                          itemCount: itemCubits.length,
-                          itemBuilder: (context, i) {
-                            final item = itemCubits[i];
-                            return ExpandableItemContainer(
-                                color: Color(int.parse(item.color, radix: 16)),
-                                item: item);
-                          }),
-                    state.status == SearchStatus.busy
-                        ? Positioned.fill(
-                            child: Container(
-                                color: Colors.black26,
-                                child: const Center(
-                                    child: CircularProgressIndicator())))
-                        : state.results.isEmpty
-                            ? const Center(child: Text('No matching results'))
-                            : Container()
-                  ],
-                ),
-              ));
+          return Container(
+            alignment: Alignment.topLeft,
+            child: Stack(
+              children: [
+                if (state.results.isNotEmpty)
+                  ListView.builder(
+                      shrinkWrap: true,
+                      physics: const ClampingScrollPhysics(),
+                      itemCount: itemCubits.length,
+                      itemBuilder: (context, i) {
+                        final item = itemCubits[i];
+                        return ExpandableItemContainer(
+                            color: Color(int.parse(item.color, radix: 16)),
+                            item: item);
+                      }),
+                state.status == SearchStatus.busy
+                    ? Positioned.fill(
+                        child: Container(
+                            color: Colors.black26,
+                            child: const Center(
+                                child: CircularProgressIndicator())))
+                    : state.results.isEmpty
+                        ? const Center(child: Text('No matching results'))
+                        : Container()
+              ],
+            ),
+          );
         });
   }
 }
