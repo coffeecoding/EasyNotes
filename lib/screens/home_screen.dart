@@ -1,11 +1,6 @@
 import 'package:easynotes/cubits/cubits.dart';
-import 'package:easynotes/cubits/item_vm/item_vm.dart';
 import 'package:easynotes/cubits/search/search_cubit.dart';
-import 'package:easynotes/extensions/color_ext.dart';
-import 'package:easynotes/models/item.dart';
-import 'package:easynotes/config/sample_data.dart';
 import 'package:easynotes/screens/common/responsive.dart';
-import 'package:easynotes/screens/common/styles.dart';
 import 'package:easynotes/screens/common/toolbar_button.dart';
 import 'package:easynotes/screens/common/uiconstants.dart';
 import 'package:easynotes/screens/items/items_screen.dart';
