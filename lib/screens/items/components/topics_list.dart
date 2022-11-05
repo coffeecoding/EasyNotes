@@ -4,7 +4,6 @@ import 'package:easynotes/cubits/search/search_cubit.dart';
 import 'package:easynotes/cubits/trashed_items/trashed_items_cubit.dart';
 import 'package:easynotes/extensions/color_ext.dart';
 import 'package:easynotes/screens/common/inline_button.dart';
-import 'package:easynotes/screens/common/toolbar_button.dart';
 import 'package:easynotes/screens/common/topic_dialog.dart';
 import 'package:easynotes/screens/topic/topic_screen.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
@@ -16,112 +15,82 @@ class TopicsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-          toolbarHeight: 40,
-          backgroundColor: Colors.black12,
-          elevation: 0,
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+    return BlocBuilder<RootItemsCubit, RootItemsState>(
+        buildWhen: (prev, next) =>
+            prev.status != next.status ||
+            prev.selectedItem != next.selectedItem,
+        builder: (context, state) {
+          final topics = state.topicCubits;
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              ToolbarButton(
-                  iconData: FluentIcons.folder_add_20_filled,
-                  title: 'Topic',
-                  onPressed: () async {
-                    RootItemsCubit ic =
-                        BlocProvider.of<RootItemsCubit>(context);
-                    TopicCubit tc = BlocProvider.of<TopicCubit>(context);
-                    await ic
-                        .createRootItem(0)
-                        .then((cubit) => tc.select(cubit));
-                    Dialog dlg = const TopicDialog(child: TopicScreen());
-                    final created = await showDialog(
-                        context: context, builder: (context) => dlg);
-                    if (created != null && created == true) {
-                      ic.insertItem(tc.topicCubit!);
-                      ic.handleItemsChanged();
-                    }
-                  }),
-            ],
-          )),
-      body: BlocBuilder<RootItemsCubit, RootItemsState>(
-          buildWhen: (prev, next) =>
-              prev.status != next.status ||
-              prev.selectedItem != next.selectedItem,
-          builder: (context, state) {
-            final topics = state.topicCubits;
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        ListView.builder(
-                            shrinkWrap: true,
-                            itemCount: topics.length,
-                            itemBuilder: (context, idx) {
-                              final topic = topics[idx];
-                              final clr = HexColor.fromHex(topic.color);
-                              return RootItemContainer(
-                                  key: UniqueKey(),
-                                  item: topic,
-                                  selectedItem: state.selectedItem,
-                                  color: clr);
-                            }),
-                        Container(
-                          color: Colors.transparent,
-                          height: 128,
-                          child: DragTarget<ItemVM>(
-                              onWillAccept: (itemCubit) =>
-                                  itemCubit != null && itemCubit.isTopic,
-                              onAccept: (incomingItem) async {
-                                // ! This is root drag target (not root item) !
-                                final cic = context.read<ChildrenItemsCubit>();
-                                final ric = context.read<RootItemsCubit>();
-                                if (incomingItem.trashed == null) {
-                                  if (incomingItem.level == ItemLevel.root) {
-                                    // only change the order
-                                    ric.handleItemsChanging();
-                                    ric.removeItem(incomingItem);
-                                    ric.addItem(incomingItem);
-                                    await ric.updateRootItemPositions();
-                                    ric.handleItemsChanged();
-                                  } else {
-                                    await incomingItem.changeParent(
-                                        newParent: null, ric: ric, cic: cic);
-                                  }
-                                } else {
-                                  final tic = context.read<TrashedItemsCubit>();
-                                  final oldParent = incomingItem.parent;
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: topics.length,
+                          itemBuilder: (context, idx) {
+                            final topic = topics[idx];
+                            final clr = HexColor.fromHex(topic.color);
+                            return RootItemContainer(
+                                key: UniqueKey(),
+                                item: topic,
+                                selectedItem: state.selectedItem,
+                                color: clr);
+                          }),
+                      Container(
+                        color: Colors.transparent,
+                        height: 128,
+                        child: DragTarget<ItemVM>(
+                            onWillAccept: (itemCubit) =>
+                                itemCubit != null && itemCubit.isTopic,
+                            onAccept: (incomingItem) async {
+                              // ! This is root drag target (not root item) !
+                              final cic = context.read<ChildrenItemsCubit>();
+                              final ric = context.read<RootItemsCubit>();
+                              if (incomingItem.trashed == null) {
+                                if (incomingItem.level == ItemLevel.root) {
+                                  // only change the order
                                   ric.handleItemsChanging();
-                                  tic.handleItemsChanging();
-                                  await incomingItem.restoreFromTrash(
-                                      null, true);
-                                  oldParent?.removeChild(incomingItem);
+                                  ric.removeItem(incomingItem);
                                   ric.addItem(incomingItem);
-                                  tic.removeItem(incomingItem);
+                                  await ric.updateRootItemPositions();
                                   ric.handleItemsChanged();
-                                  tic.handleItemsChanged();
+                                } else {
+                                  await incomingItem.changeParent(
+                                      newParent: null, ric: ric, cic: cic);
                                 }
-                              },
-                              builder: (context, itemList, ___) {
-                                bool highlighted = itemList.isNotEmpty;
-                                return Container(
-                                    color: highlighted
-                                        ? Colors.white30
-                                        : Colors.transparent);
-                              }),
-                        ),
-                      ],
-                    ),
+                              } else {
+                                final tic = context.read<TrashedItemsCubit>();
+                                final oldParent = incomingItem.parent;
+                                ric.handleItemsChanging();
+                                tic.handleItemsChanging();
+                                await incomingItem.restoreFromTrash(null, true);
+                                oldParent?.removeChild(incomingItem);
+                                ric.addItem(incomingItem);
+                                tic.removeItem(incomingItem);
+                                ric.handleItemsChanged();
+                                tic.handleItemsChanged();
+                              }
+                            },
+                            builder: (context, itemList, ___) {
+                              bool highlighted = itemList.isNotEmpty;
+                              return Container(
+                                  color: highlighted
+                                      ? Colors.white30
+                                      : Colors.transparent);
+                            }),
+                      ),
+                    ],
                   ),
                 ),
-                TrashContainer(key: UniqueKey())
-              ],
-            );
-          }),
-    );
+              ),
+              TrashContainer(key: UniqueKey())
+            ],
+          );
+        });
   }
 }
 

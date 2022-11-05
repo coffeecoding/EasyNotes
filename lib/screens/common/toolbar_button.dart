@@ -9,7 +9,7 @@ class ToolbarButton extends StatelessWidget {
       this.title,
       this.enabled = true,
       Color? enabledColor})
-      : enabledColor = enabledColor ?? Colors.lightBlue.shade300;
+      : enabledColor = enabledColor ?? Colors.white.withOpacity(1);
 
   final Function()? onPressed;
   final bool enabled;
@@ -29,7 +29,8 @@ class ToolbarButton extends StatelessWidget {
           if (!Responsive.isMobile(context) && title != null)
             Text(title!,
                 style: TextStyle(
-                    fontWeight: FontWeight.w500,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
                     color: enabled
                         ? enabledColor
                         : Theme.of(context).disabledColor)),

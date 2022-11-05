@@ -45,14 +45,13 @@ class _ItemsScreenState extends State<ItemsScreen> {
         default:
           return Stack(children: [
             Row(children: [
-              const Expanded(flex: 1, child: TopicsList()),
+              const SizedBox(width: 112, child: TopicsList()),
               const VerticalDivider(
                 indent: 0,
                 endIndent: 0,
                 width: 1,
               ),
               Expanded(
-                flex: 2,
                 child: state.childListVisibility == ChildListVisibility.trash
                     ? TrashList()
                     : state.childListVisibility == ChildListVisibility.search

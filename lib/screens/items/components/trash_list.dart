@@ -23,8 +23,8 @@ class TrashList extends StatelessWidget {
       return Scaffold(
           appBar: AppBar(
               titleSpacing: 8,
-              toolbarHeight: 40,
-              backgroundColor: Colors.black12,
+              toolbarHeight: 48,
+              backgroundColor: Colors.transparent,
               elevation: 0,
               title: Row(
                 mainAxisAlignment: MainAxisAlignment.start,

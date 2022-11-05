@@ -1,10 +1,14 @@
 import 'package:easynotes/cubits/cubits.dart';
+import 'package:easynotes/cubits/item_vm/item_vm.dart';
 import 'package:easynotes/cubits/search/search_cubit.dart';
+import 'package:easynotes/extensions/color_ext.dart';
 import 'package:easynotes/screens/common/responsive.dart';
 import 'package:easynotes/screens/common/toolbar_button.dart';
+import 'package:easynotes/screens/common/topic_dialog.dart';
 import 'package:easynotes/screens/common/uiconstants.dart';
 import 'package:easynotes/screens/items/items_screen.dart';
 import 'package:easynotes/screens/note/note_screen.dart';
+import 'package:easynotes/screens/topic/topic_screen.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -28,19 +32,69 @@ class HomeScreen extends StatelessWidget {
         child: Scaffold(
       appBar: AppBar(
         toolbarHeight: 64,
-        elevation: 1,
+        elevation: 0,
         titleSpacing: 8,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(height: 1, color: Theme.of(context).dividerColor),
+        ),
+        backgroundColor: Colors.transparent,
         title:
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Row(
-            children: [
-              ToolbarButton(
-                iconData: FluentIcons.settings_20_regular,
-                title: 'Settings',
-                enabledColor: Colors.white70,
-                onPressed: () {},
-              ),
-            ],
+          BlocBuilder<RootItemsCubit, RootItemsState>(
+            builder: (context, state) {
+              RootItemsCubit ic = context.read<RootItemsCubit>();
+              return Row(
+                children: [
+                  SizedBox(
+                    width: 112,
+                    child: ToolbarButton(
+                        iconData: FluentIcons.add_16_regular,
+                        title: 'Topic',
+                        onPressed: () async {
+                          TopicCubit tc = BlocProvider.of<TopicCubit>(context);
+                          await ic
+                              .createRootItem(0)
+                              .then((cubit) => tc.select(cubit));
+                          Dialog dlg = const TopicDialog(child: TopicScreen());
+                          final created = await showDialog(
+                              context: context, builder: (context) => dlg);
+                          if (created != null && created == true) {
+                            ic.insertItem(tc.topicCubit!);
+                            ic.handleItemsChanged();
+                          }
+                        }),
+                  ),
+                  BlocBuilder<ChildrenItemsCubit, ChildrenItemsState>(
+                    builder: (context, state) {
+                      if (ic.selectedItem == null) {
+                        return Container();
+                      }
+                      final childrenItemsCubit =
+                          context.read<ChildrenItemsCubit>();
+                      return Row(
+                        children: [
+                          ToolbarButton(
+                              iconData: FluentIcons.folder_add_20_regular,
+                              title: 'Subtopic',
+                              onPressed: () => childrenItemsCubit
+                                  .createSubTopic(ic.selectedItem!)),
+                          ToolbarButton(
+                              iconData: FluentIcons.note_add_20_regular,
+                              title: 'Note',
+                              onPressed: () async {
+                                final snc = context.read<SelectedNoteCubit>();
+                                ItemVM i = await childrenItemsCubit
+                                    .createNote(ic.selectedItem!);
+                                snc.handleNoteChanged(i);
+                              }),
+                        ],
+                      );
+                    },
+                  )
+                ],
+              );
+            },
           ),
           Container(
             width: 256,
@@ -82,6 +136,11 @@ class HomeScreen extends StatelessWidget {
                 },
               ),
             ]),
+          ),
+          ToolbarButton(
+            iconData: FluentIcons.settings_20_regular,
+            title: 'Settings',
+            onPressed: () {},
           ),
         ]),
       ),

@@ -78,10 +78,10 @@ class NoteScreen extends StatelessWidget {
   }
 
   PreferredSizeWidget buildActionPanel(context) => AppBar(
-        toolbarHeight: 40,
+        toolbarHeight: 48,
         elevation: 0,
         titleSpacing: 8,
-        backgroundColor: Colors.black12,
+        backgroundColor: Colors.transparent,
         title:
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
           TrashButton(key: UniqueKey()),
