@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -7,6 +9,7 @@ import 'package:easynotes/models/models.dart';
 import 'package:easynotes/repositories/preference_repository.dart';
 import 'package:easynotes/utils/crypto/crypto.dart';
 import 'package:http/http.dart';
+import 'package:pointycastle/asymmetric/api.dart';
 
 import '../services/network_provider.dart';
 
@@ -17,6 +20,51 @@ class AuthRepository {
 
   late NetworkProvider netClient;
   late PreferenceRepository prefsRepo;
+
+  Future<bool> updateUser({String? newPassword, String? newEmail}) async {
+    try {
+      final user = await prefsRepo.loggedInUser;
+      String newPwHash = user!.pwhash;
+      String newPrivKeyCrypt = user.privkey_crypt;
+      if (newPwHash == user.pwhash && newEmail == user.email) {
+        // don't do anything, nothing changed
+        return true;
+      }
+      if (newPassword != null) {
+        newPwHash = await RFC2898Helper.computePasswordHash(
+            newPassword,
+            user!.pwsalt,
+            user.algorithm_identifier.iterations,
+            user.algorithm_identifier.hashLen);
+        final privkey = await prefsRepo.privkey;
+        RSAPrivateKey pk = RSAHelper.parseRSAPrivateKeyFromXml(privkey!);
+        List<int> privKeyBytes =
+            utf8.encode(RSAHelper.xmlEncodeRSAPrivateKey(pk));
+        newPrivKeyCrypt = await RFC2898Helper.encryptWithDerivedKey(
+            newPassword, user.pwsalt, privKeyBytes);
+      }
+      User updated = user.copyWith(
+          pwhash: newPwHash, privkey_crypt: newPrivKeyCrypt, email: newEmail);
+      String updatedUser = jsonEncode(updated);
+      Response response = await netClient.put('/api/user/update', updatedUser);
+      bool success = response.body.toUpperCase() == 'TRUE';
+      if (success) {
+        String pw = newPassword ?? (await prefsRepo.password)!;
+        String privKey = (await prefsRepo.privkey)!;
+        prefsRepo.setAuth(
+            user: user,
+            username: user.id,
+            password: pw,
+            pubkey: user.pubkey,
+            privkey: privKey,
+            signkey: '');
+      }
+      return success;
+    } catch (e) {
+      print('Error updating user $e');
+      return false;
+    }
+  }
 
   /// Empty string indicates success, non-empty String is error message.
   Future<MapEntry<String, List<Item>>> login(
@@ -55,15 +103,15 @@ class AuthRepository {
       // 5) save creds securely in secure storage
       String privKey = await RFC2898Helper.decryptWithDerivedKey(
           password, p.pwsalt, authData.user!.privkey_crypt);
-      String signKey = await RFC2898Helper.decryptWithDerivedKey(
-          password, p.pwsalt, authData.user!.signing_key_crypt);
+      /*String signKey = await RFC2898Helper.decryptWithDerivedKey(
+          password, p.pwsalt, authData.user!.signing_key_crypt);*/
       await prefsRepo.setAuth(
           user: authData.user!,
           username: username,
           password: password,
           privkey: privKey,
           pubkey: authData.user!.pubkey,
-          signkey: signKey);
+          signkey: '');
 
       // 6) pass the successfully retrieved item data to the caller
       return MapEntry('', authData.items);

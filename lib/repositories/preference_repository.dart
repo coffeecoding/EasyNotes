@@ -14,6 +14,11 @@ class PreferenceRepository {
   static const String _pubkeyKey = 'pubkey';
   static const String _signkeyKey = 'signkey';
 
+  static const String _syncKey = 'enableSync';
+  static const bool _defaultSyncValue = true;
+  static const String _darkModeKey = 'useDarkMode';
+  static const bool _defaultUseDarkModeValue = true;
+
   final FlutterSecureStorage _secureStorage;
   final Future<SharedPreferences> _prefs;
 
@@ -29,6 +34,24 @@ class PreferenceRepository {
         if (userJson == null) return null;
         return User.fromJson(userJson);
       });
+
+  Future<bool> get enableSync async =>
+      await _prefs.then((SharedPreferences prefs) =>
+          prefs.getBool(_syncKey) ?? _defaultSyncValue);
+
+  Future<void> setEnableSync(bool newValue) async {
+    final SharedPreferences prefs = await _prefs;
+    await prefs.setBool(_syncKey, newValue);
+  }
+
+  Future<bool> get useDarkMode async =>
+      await _prefs.then((SharedPreferences prefs) =>
+          prefs.getBool(_syncKey) ?? _defaultUseDarkModeValue);
+
+  Future<void> setUseDarkMode(bool newValue) async {
+    final SharedPreferences prefs = await _prefs;
+    await prefs.setBool(_darkModeKey, newValue);
+  }
 
   Future<void> setAuth({
     required User user,

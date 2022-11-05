@@ -1,9 +1,13 @@
+import 'package:easynotes/screens/common/inline_button.dart';
 import 'package:easynotes/screens/common/input_label.dart';
 import 'package:easynotes/screens/common/section_header.dart';
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
+
+import '../common/toolbar_button.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -15,58 +19,76 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 500,
-      width: 400,
-      child: Scaffold(
-        appBar: AppBar(
-            titleSpacing: 8,
-            elevation: 0,
-            backgroundColor: Colors.transparent,
-            bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(1),
-              child:
-                  Container(height: 1, color: Theme.of(context).dividerColor),
-            ),
-            title: const Text('Settings')),
-        body: SingleChildScrollView(
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const SectionHeader(text: 'Synchronization'),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: InputLabel(
-                  text:
-                      'If enabled, backs up your end-to-end-encrypted notes to the cloud so you can access them from anywhere.'),
-            ),
-            SwitchListTile(
-                title: const Text('Synchronize notes'),
-                value: false,
-                onChanged: (_) {}),
-            const SectionHeader(text: 'Appearance'),
-            SwitchListTile(
-                title: const Text('Dark mode'),
-                value: false,
-                onChanged: (_) {}),
-            /*_buildTitledButtons(context, <Widget>[
+    return Scaffold(
+      appBar: AppBar(
+          titleSpacing: 8,
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(1),
+            child: Container(height: 1, color: Theme.of(context).dividerColor),
+          ),
+          title: const Text('Settings')),
+      body: SingleChildScrollView(
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          const SectionHeader(text: 'Synchronization'),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: InputLabel(
+                text:
+                    'If enabled, backs up your end-to-end-encrypted notes to the cloud so you can access them from anywhere.'),
+          ),
+          SwitchListTile(
+              title: const Text('Synchronize notes'),
+              value: false,
+              onChanged: (_) {}),
+          const SectionHeader(text: 'Appearance'),
+          SwitchListTile(
+              title: const Text('Dark mode'), value: true, onChanged: (_) {}),
+          /*_buildTitledButtons(context, <Widget>[
               for (ThemeMode tm in ThemeMode.values) ThemeModeButton(tm)
             ])*/
-            const SectionHeader(text: 'Profile'),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: const [
-                  Expanded(
-                      child: Text(
-                    'Change password',
-                    style: TextStyle(fontSize: 16),
-                  )),
-                  Expanded(child: TextField()),
-                ],
-              ),
-            )
-          ]),
-        ),
+          const SectionHeader(text: 'Profile'),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              children: [
+                Row(
+                  children: const [
+                    Expanded(
+                        child: Text(
+                      'Password',
+                      style: TextStyle(fontSize: 16),
+                    )),
+                    Expanded(child: TextField()),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    InlineButton(
+                        iconData: FluentIcons.edit_20_regular,
+                        onPressed: () {},
+                        title: 'Change Password')
+                  ],
+                )
+              ],
+            ),
+          ),
+          const SectionHeader(text: 'About'),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const [
+                InputLabel(text: 'Made by YSCodes'),
+                InputLabel(text: 'Twitter @YSCodes'),
+                InputLabel(text: 'Github CoffeeCoding'),
+                InputLabel(text: 'This app is free and ad-free'),
+              ],
+            ),
+          )
+        ]),
       ),
     );
   }

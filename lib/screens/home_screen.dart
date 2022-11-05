@@ -115,7 +115,7 @@ class HomeScreen extends StatelessWidget {
             iconData: FluentIcons.settings_20_regular,
             title: 'Settings',
             onPressed: () async {
-              Dialog dlg = const SettingsDialog(child: SettingsScreen());
+              Dialog dlg = SettingsDialog(child: const SettingsScreen());
               await showDialog(context: context, builder: (context) => dlg);
             },
           ),
