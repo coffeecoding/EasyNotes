@@ -36,12 +36,14 @@ class PreferenceCubit extends Cubit<PreferenceState> {
           isEditingEmail: editingEmail,
           isEditingPassword: editingPassword));
 
-  void updateSync(bool newValue) {
-    //
+  Future<void> updateSync(bool newValue) async {
+    await prefsRepo.setEnableSync(newValue);
+    emit(PreferenceState.copyWith(prev: state, enableSync: newValue));
   }
 
-  void updateUseDarkMode(bool newValue) {
-    //
+  Future<void> updateUseDarkMode(bool newValue) async {
+    await prefsRepo.setUseDarkMode(newValue);
+    emit(PreferenceState.copyWith(prev: state, useDarkMode: newValue));
   }
 
   Future<void> updateUser({String? newPassword, String? newEmail}) async {
