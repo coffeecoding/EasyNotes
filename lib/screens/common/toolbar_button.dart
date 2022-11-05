@@ -8,6 +8,7 @@ class ToolbarButton extends StatelessWidget {
       required this.iconData,
       this.title,
       this.enabled = true,
+      this.small = false,
       Color? enabledColor})
       : enabledColor = enabledColor ?? Colors.white.withOpacity(1);
 
@@ -16,6 +17,7 @@ class ToolbarButton extends StatelessWidget {
   final Color? enabledColor;
   final IconData iconData;
   final String? title;
+  final bool small;
 
   @override
   Widget build(BuildContext context) {
@@ -24,12 +26,13 @@ class ToolbarButton extends StatelessWidget {
       child: Row(
         children: [
           Icon(iconData,
+              size: small ? 16 : 20,
               color: enabled ? enabledColor : Theme.of(context).disabledColor),
           const SizedBox(width: 4),
           if (!Responsive.isMobile(context) && title != null)
             Text(title!,
                 style: TextStyle(
-                    fontSize: 16,
+                    fontSize: small ? 14 : 16,
                     fontWeight: FontWeight.w400,
                     color: enabled
                         ? enabledColor

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class InlineButton extends StatelessWidget {
-  InlineButton(
+  const InlineButton(
       {super.key,
       this.onPressed,
       required this.iconData,
