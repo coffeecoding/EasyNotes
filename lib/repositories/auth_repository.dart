@@ -45,7 +45,7 @@ class AuthRepository {
       }
       User updated = user.copyWith(
           pwhash: newPwHash, privkey_crypt: newPrivKeyCrypt, email: newEmail);
-      String updatedUser = jsonEncode(updated);
+      String updatedUser = updated.toJson();
       Response response = await netClient.put('/api/user/update', updatedUser);
       bool success = response.body.toUpperCase() == 'TRUE';
       if (success) {

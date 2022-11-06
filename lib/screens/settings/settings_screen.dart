@@ -1,11 +1,15 @@
 import 'dart:ui';
 
+import 'package:easynotes/blocs/auth/auth_bloc.dart';
+import 'package:easynotes/config/locator.dart';
 import 'package:easynotes/cubits/cubits.dart';
+import 'package:easynotes/repositories/preference_repository.dart';
 import 'package:easynotes/screens/common/inline_button.dart';
 import 'package:easynotes/screens/common/input_label.dart';
 import 'package:easynotes/screens/common/progress_indicators.dart';
 import 'package:easynotes/screens/common/section_header.dart';
 import 'package:easynotes/screens/common/toolbar_button.dart';
+import 'package:easynotes/utils/email_util.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -69,12 +73,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   for (ThemeMode tm in ThemeMode.values) ThemeModeButton(tm)
                 ])*/
               const SectionHeader(text: 'Profile'),
+              const SizedBox(height: 10),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Builder(builder: (context) {
-                  final prefsCubit = context.read<PreferenceCubit>();
-                  return PasswordSection(prefCubit: prefsCubit);
-                }),
+                child: Column(
+                  children: [
+                    PasswordSection(),
+                    const SizedBox(height: 10),
+                    EmailSection(),
+                    const SizedBox(height: 10),
+                    const LogoutSection(),
+                  ],
+                ),
               ),
               const SectionHeader(text: 'About'),
               Padding(
@@ -105,11 +115,43 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 }
 
-class PasswordSection extends StatefulWidget {
-  PasswordSection({required this.prefCubit, super.key})
-      : pwCtr = TextEditingController(text: '');
+class LogoutSection extends StatelessWidget {
+  const LogoutSection({super.key});
 
-  final PreferenceCubit prefCubit;
+  @override
+  Widget build(BuildContext context) {
+    final prefCubit = context.read<PreferenceCubit>();
+    final authBloc = context.read<AuthBloc>();
+    final prefRepo = locator.get<PreferenceRepository>();
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            FutureBuilder(
+                future: prefRepo.username,
+                builder: (context, snapshot) {
+                  return snapshot.hasData
+                      ? Text(
+                          'Signed in as ${snapshot.data}',
+                          style: const TextStyle(fontSize: 16),
+                        )
+                      : const Text(
+                          'Signed in as ...',
+                          style: TextStyle(fontSize: 16),
+                        );
+                }),
+            ElevatedButton(onPressed: () {}, child: const Text('Sign out'))
+          ],
+        )
+      ],
+    );
+  }
+}
+
+class PasswordSection extends StatefulWidget {
+  PasswordSection({super.key}) : pwCtr = TextEditingController(text: '');
+
   final TextEditingController pwCtr;
 
   @override
@@ -122,6 +164,7 @@ class _PasswordSectionState extends State<PasswordSection> {
 
   @override
   Widget build(BuildContext context) {
+    final prefCubit = context.read<PreferenceCubit>();
     return Column(
       children: [
         Row(
@@ -135,30 +178,33 @@ class _PasswordSectionState extends State<PasswordSection> {
             if (isEditing)
               Expanded(
                   child: FutureBuilder(
-                      future: widget.prefCubit.password,
+                      future: prefCubit.password,
                       builder: ((context, snapshot) => snapshot.hasData
                           ? Builder(builder: (context) {
                               widget.pwCtr.text = snapshot.data as String;
+                              FocusNode pwFN = FocusNode();
+                              pwFN.requestFocus();
                               return TextField(
-                                  textAlign: TextAlign.end,
+                                  focusNode: pwFN,
+                                  textAlign: TextAlign.right,
+                                  decoration: null,
                                   selectionHeightStyle: BoxHeightStyle.tight,
                                   controller: widget.pwCtr);
                             })
                           : Container()))),
             if (!isEditing)
               Expanded(
-                  child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
                 child: TextField(
                   textAlign: TextAlign.right,
-                  decoration: null,
+                  selectionHeightStyle: BoxHeightStyle.tight,
                   controller: TextEditingController(text: 'blablabla'),
+                  decoration: null,
                   enabled: false,
                   obscureText: true,
                   style:
                       TextStyle(decoration: null, color: Colors.grey.shade600),
                 ),
-              ))
+              )
           ],
         ),
         Row(
@@ -173,47 +219,46 @@ class _PasswordSectionState extends State<PasswordSection> {
                       }),
                   title: 'Cancel'),
             if (isEditing)
-              StatefulBuilder(builder: (context, setState) {
-                return isSaving
-                    ? const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16),
-                        child: InlineCircularProgressIndicator(),
-                      )
-                    : ToolbarButton(
-                        small: true,
-                        iconData: FluentIcons.save_20_regular,
-                        onPressed: () async {
-                          if (widget.pwCtr.text.isEmpty) {
-                            AlertDialog dlg = AlertDialog(
-                                actionsPadding: const EdgeInsets.all(16),
-                                actionsAlignment: MainAxisAlignment.end,
-                                actions: [
-                                  Expanded(child: Container()),
-                                  ToolbarButton(
-                                      iconData: FluentIcons.dismiss_16_regular,
-                                      title: 'OK',
-                                      onPressed: () =>
-                                          Navigator.of(context).pop())
-                                ],
-                                contentPadding: const EdgeInsets.all(16),
-                                content:
-                                    const Text('Password cannot be empty'));
-                            await showDialog(
-                                context: context, builder: (_) => dlg);
-                            return;
-                          }
-                          setState(() {
-                            isSaving = true;
-                          });
-                          await widget.prefCubit
-                              .updateUser(newPassword: widget.pwCtr.text);
-                          setState(() {
+              isSaving
+                  ? const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      child: InlineCircularProgressIndicator(),
+                    )
+                  : ToolbarButton(
+                      small: true,
+                      iconData: FluentIcons.save_20_regular,
+                      onPressed: () async {
+                        if (widget.pwCtr.text.isEmpty) {
+                          AlertDialog dlg = AlertDialog(
+                              actionsPadding: const EdgeInsets.all(16),
+                              actionsAlignment: MainAxisAlignment.end,
+                              actions: [
+                                Expanded(child: Container()),
+                                ToolbarButton(
+                                    iconData: FluentIcons.dismiss_16_regular,
+                                    title: 'OK',
+                                    onPressed: () =>
+                                        Navigator.of(context).pop())
+                              ],
+                              contentPadding: const EdgeInsets.all(16),
+                              content: const Text('Password cannot be empty'));
+                          await showDialog(
+                              context: context, builder: (_) => dlg);
+                          return;
+                        }
+                        setState(() {
+                          isSaving = true;
+                        });
+                        bool success = await prefCubit.updateUser(
+                            newPassword: widget.pwCtr.text);
+                        setState(() {
+                          if (success) {
                             isEditing = false;
-                            isSaving = false;
-                          });
-                        },
-                        title: 'Save');
-              }),
+                          }
+                          isSaving = false;
+                        });
+                      },
+                      title: 'Save'),
             if (!isEditing)
               ToolbarButton(
                   small: true,
@@ -222,6 +267,122 @@ class _PasswordSectionState extends State<PasswordSection> {
                         isEditing = true;
                       }),
                   title: 'Change password')
+          ],
+        )
+      ],
+    );
+  }
+}
+
+class EmailSection extends StatefulWidget {
+  EmailSection({super.key}) : pwCtr = TextEditingController(text: '');
+
+  final TextEditingController pwCtr;
+
+  @override
+  State<EmailSection> createState() => _EmailSectionState();
+}
+
+class _EmailSectionState extends State<EmailSection> {
+  bool isEditing = false;
+  bool isSaving = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final prefCubit = context.read<PreferenceCubit>();
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Expanded(
+                child: Text(
+              'Email Address',
+              style: TextStyle(fontSize: 16),
+            )),
+            Expanded(
+                child: FutureBuilder(
+                    future: prefCubit.email,
+                    builder: ((context, snapshot) => snapshot.hasData
+                        ? Builder(builder: (context) {
+                            widget.pwCtr.text = snapshot.data as String;
+                            FocusNode emailFN = FocusNode();
+                            emailFN.requestFocus();
+                            return TextField(
+                                decoration: null,
+                                focusNode: emailFN,
+                                style: TextStyle(
+                                    color: isEditing
+                                        ? null
+                                        : Colors.grey.shade600),
+                                enabled: isEditing,
+                                textAlign: TextAlign.right,
+                                selectionHeightStyle: BoxHeightStyle.tight,
+                                controller: widget.pwCtr);
+                          })
+                        : Container()))),
+          ],
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            if (isEditing)
+              ToolbarButton(
+                  small: true,
+                  iconData: FluentIcons.dismiss_16_regular,
+                  onPressed: () => setState(() {
+                        isEditing = false;
+                      }),
+                  title: 'Cancel'),
+            if (isEditing)
+              isSaving
+                  ? const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      child: InlineCircularProgressIndicator(),
+                    )
+                  : ToolbarButton(
+                      small: true,
+                      iconData: FluentIcons.save_20_regular,
+                      onPressed: () async {
+                        if (!isValidEmail(widget.pwCtr.text)) {
+                          AlertDialog dlg = AlertDialog(
+                              actionsPadding: const EdgeInsets.all(16),
+                              actionsAlignment: MainAxisAlignment.end,
+                              actions: [
+                                Expanded(child: Container()),
+                                ToolbarButton(
+                                    iconData: FluentIcons.dismiss_16_regular,
+                                    title: 'OK',
+                                    onPressed: () =>
+                                        Navigator.of(context).pop())
+                              ],
+                              contentPadding: const EdgeInsets.all(16),
+                              content: const Text('Invalid email address.'));
+                          await showDialog(
+                              context: context, builder: (_) => dlg);
+                          return;
+                        }
+                        setState(() {
+                          isSaving = true;
+                        });
+                        bool success = await prefCubit.updateUser(
+                            newEmail: widget.pwCtr.text);
+                        setState(() {
+                          if (success) {
+                            isEditing = false;
+                          }
+                          isSaving = false;
+                        });
+                      },
+                      title: 'Save'),
+            if (!isEditing)
+              ToolbarButton(
+                  small: true,
+                  iconData: FluentIcons.edit_20_regular,
+                  onPressed: () => setState(() {
+                        isEditing = true;
+                      }),
+                  title: 'Change email')
           ],
         )
       ],

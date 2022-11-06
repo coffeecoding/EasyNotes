@@ -46,7 +46,7 @@ class PreferenceCubit extends Cubit<PreferenceState> {
     emit(PreferenceState.copyWith(prev: state, useDarkMode: newValue));
   }
 
-  Future<void> updateUser({String? newPassword, String? newEmail}) async {
+  Future<bool> updateUser({String? newPassword, String? newEmail}) async {
     try {
       emit(PreferenceState.copyWith(prev: state));
       bool success = await authRepo.updateUser(
@@ -61,10 +61,12 @@ class PreferenceCubit extends Cubit<PreferenceState> {
         emit(PreferenceState.copyWith(
             prev: state, message: 'Something went wrong ...'));
       }
+      return success;
     } catch (e) {
       print('Failed to update user: $e');
       emit(PreferenceState.copyWith(
           prev: state, message: 'Something went wrong ...'));
+      return false;
     }
   }
 }

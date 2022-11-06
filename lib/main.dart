@@ -76,8 +76,8 @@ class EasyNotesApp extends StatelessWidget {
           theme: ThemeData(
             visualDensity: VisualDensity.adaptivePlatformDensity,
             brightness: Brightness.dark,
-            primaryColor: Colors.lightBlue,
-            primarySwatch: Colors.lightBlue,
+            primaryColor: Colors.blue,
+            primarySwatch: Colors.blue,
           ),
           themeMode: ThemeMode.light,
           navigatorKey: navigatorKey,
