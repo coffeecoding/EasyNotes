@@ -49,8 +49,8 @@ class HomeScreen extends StatelessWidget {
               RootItemsCubit ic = context.read<RootItemsCubit>();
               return Row(
                 children: [
-                  SizedBox(
-                    width: 112,
+                  Container(
+                    padding: const EdgeInsets.only(left: 10, right: 24),
                     child: ToolbarButton(
                         iconData: FluentIcons.add_16_regular,
                         title: 'Topic',
