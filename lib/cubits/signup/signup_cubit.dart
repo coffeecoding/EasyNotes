@@ -3,6 +3,7 @@ import 'package:easynotes/models/user.dart';
 import 'package:easynotes/repositories/auth_repository.dart';
 import 'package:easynotes/utils/string_util.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 
 part 'signup_state.dart';
 
@@ -32,8 +33,8 @@ class SignupCubit extends Cubit<SignupState> {
       emit(state.copyWith(status: SignupStatus.busy));
       bool validated = validate();
       if (!validated) return;
-      User newUser =
-          await User.create(state.username, state.emailAddress, state.password);
+      User newUser = await compute(User.createIsolate,
+          [state.username, state.emailAddress, state.password]);
       authRepo.signup(newUser).then((success) {
         if (success) {
           emit(state.copyWith(

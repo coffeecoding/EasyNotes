@@ -189,4 +189,11 @@ class User extends Equatable with JsonData {
         signing_key_crypt: signingKeyCrypt,
         algorithm_identifier: AlgorithmIdentifier.standard);
   }
+
+  static Future<User> createIsolate(List<String> args) async {
+    String id = args[0];
+    String email = args[1];
+    String password = args[2];
+    return create(id, email, password);
+  }
 }
