@@ -12,46 +12,46 @@ class SignupCubit extends Cubit<SignupState> {
   final AuthRepository authRepo;
 
   void handleUsernameChanged(String username) {
-    emit(state.copyWith(username: username));
+    emit(state.copyWith(username: username, message: ''));
   }
 
   void handleEmailChanged(String email) {
-    emit(state.copyWith(emailAddress: email));
+    emit(state.copyWith(emailAddress: email, message: ''));
   }
 
   void handlePasswordChanged(String password) {
-    emit(state.copyWith(password: password));
+    emit(state.copyWith(password: password, message: ''));
   }
 
   void handleConfirmedPasswordChanged(String confirmedPassword) {
-    emit(state.copyWith(confirmedPassword: confirmedPassword));
+    emit(state.copyWith(confirmedPassword: confirmedPassword, message: ''));
   }
 
-  Future<bool> signup() async {
+  Future<void> signup() async {
     try {
       emit(state.copyWith(status: SignupStatus.busy));
+      bool validated = validate();
+      if (!validated) return;
       User newUser =
           await User.create(state.username, state.emailAddress, state.password);
-      bool success = await authRepo.signup(newUser);
-      if (!success) {
-        // Todo: Specify why no success (e.g. validation error from backend)
-        emit(state.copyWith(
-            status: SignupStatus.error,
-            message:
-                'An error occurred. Please verify your internet connection or try again later.'));
-        return false;
-      }
-      emit(state.copyWith(
-          status: SignupStatus.success,
-          message:
-              'Thanks for registering! :) Now log into your account and start noting down your brilliant ideas!'));
-      return true;
+      authRepo.signup(newUser).then((success) {
+        if (success) {
+          emit(state.copyWith(
+              status: SignupStatus.success,
+              message:
+                  'Thanks for registering! :) Now log into your account and start noting down your brilliant ideas!'));
+        } else {
+          emit(state.copyWith(
+              status: SignupStatus.error,
+              message:
+                  'An error occurred. Please verify your internet connection or try again later.'));
+        }
+      });
     } catch (e) {
       emit(state.copyWith(
           status: SignupStatus.error,
           message:
               'An error occurred. Please verify your internet connection or try again later.'));
-      return false;
     }
   }
 
