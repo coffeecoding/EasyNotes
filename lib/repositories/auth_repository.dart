@@ -121,9 +121,8 @@ class AuthRepository {
     }
   }
 
-  logout() {
-    // do logout logic
-    // consider catching exceptions outside instead of here
+  Future<void> logout() async {
+    await prefsRepo.clearAuth();
   }
 
   Future<Response> _getUserAuthParams(String username) async => username.isEmpty

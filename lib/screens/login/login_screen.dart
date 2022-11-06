@@ -1,8 +1,6 @@
 import 'package:easynotes/blocs/auth/auth_bloc.dart';
 import 'package:easynotes/config/constants.dart';
-import 'package:easynotes/extensions/color_ext.dart';
 import 'package:easynotes/main.dart';
-import 'package:easynotes/repositories/auth_repository.dart';
 import 'package:easynotes/screens/common/app_scroll_behaviour.dart';
 import 'package:easynotes/screens/login/views/views.dart';
 import 'package:easynotes/screens/screens.dart';

@@ -3,12 +3,14 @@ import 'dart:ui';
 import 'package:easynotes/blocs/auth/auth_bloc.dart';
 import 'package:easynotes/config/locator.dart';
 import 'package:easynotes/cubits/cubits.dart';
+import 'package:easynotes/main.dart';
 import 'package:easynotes/repositories/preference_repository.dart';
 import 'package:easynotes/screens/common/inline_button.dart';
 import 'package:easynotes/screens/common/input_label.dart';
 import 'package:easynotes/screens/common/progress_indicators.dart';
 import 'package:easynotes/screens/common/section_header.dart';
 import 'package:easynotes/screens/common/toolbar_button.dart';
+import 'package:easynotes/screens/login/login_screen.dart';
 import 'package:easynotes/utils/email_util.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
@@ -141,7 +143,13 @@ class LogoutSection extends StatelessWidget {
                           style: TextStyle(fontSize: 16),
                         );
                 }),
-            ElevatedButton(onPressed: () {}, child: const Text('Sign out'))
+            ElevatedButton(
+                onPressed: () async {
+                  authBloc.add(AuthLogoutRequested());
+                  EasyNotesApp.navigatorKey.currentState!.pushAndRemoveUntil(
+                      LoginScreen.route(), (route) => false);
+                },
+                child: const Text('Sign out'))
           ],
         )
       ],

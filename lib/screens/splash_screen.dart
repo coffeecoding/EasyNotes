@@ -1,5 +1,3 @@
-import 'package:easynotes/main.dart';
-import 'package:easynotes/repositories/auth_repository.dart';
 import 'package:easynotes/screens/screens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';

@@ -53,6 +53,10 @@ class PreferenceRepository {
     await prefs.setBool(_darkModeKey, newValue);
   }
 
+  Future<void> clearAuth() async {
+    await _secureStorage.deleteAll();
+  }
+
   Future<void> setAuth({
     required User user,
     required String username,
