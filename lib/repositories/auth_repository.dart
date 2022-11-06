@@ -33,7 +33,7 @@ class AuthRepository {
       if (newPassword != null) {
         newPwHash = await RFC2898Helper.computePasswordHash(
             newPassword,
-            user!.pwsalt,
+            user.pwsalt,
             user.algorithm_identifier.iterations,
             user.algorithm_identifier.hashLen);
         final privkey = await prefsRepo.privkey;
@@ -128,4 +128,19 @@ class AuthRepository {
   Future<Response> _getUserAuthParams(String username) async => username.isEmpty
       ? throw Exception('Username required')
       : await netClient.get('/api/user/$username/params');
+
+  Future<bool> signup(User user) async {
+    try {
+      String userJson = user.toJson();
+      Response re = await netClient.post('/api/user/register', userJson);
+      if (!re.isSuccessStatusCode()) {
+        print('Signup failed: ${re.reasonPhrase}');
+        return false;
+      }
+      return true;
+    } catch (e) {
+      print('Error signing up: $e');
+      return false;
+    }
+  }
 }
