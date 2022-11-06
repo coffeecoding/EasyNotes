@@ -8,6 +8,7 @@ import 'package:easynotes/extensions/http_client_ext.dart';
 import 'package:easynotes/models/models.dart';
 import 'package:easynotes/repositories/preference_repository.dart';
 import 'package:easynotes/utils/crypto/crypto.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
 import 'package:pointycastle/asymmetric/api.dart';
 
@@ -79,8 +80,12 @@ class AuthRepository {
       final p = UserCredParams.fromJson(authParams.body);
 
       // 2) Compute password hash
-      final pwhash = await RFC2898Helper.computePasswordHash(password, p.pwsalt,
-          p.algorithm_identifier.iterations, p.algorithm_identifier.hashLen);
+      final pwhash = await compute(RFC2898Helper.computePasswordHashIsolate, [
+        password,
+        p.pwsalt,
+        p.algorithm_identifier.iterations,
+        p.algorithm_identifier.hashLen
+      ]);
 
       // 3) Authenticate with api
       Map<String, dynamic> authSubmission = {
@@ -143,4 +148,11 @@ class AuthRepository {
       return false;
     }
   }
+}
+
+Future<MapEntry<String, List<Item>>> loginIsolate(List<Object> args) async {
+  AuthRepository authRepo = args[0] as AuthRepository;
+  String username = args[1] as String;
+  String password = args[2] as String;
+  return authRepo.login(username: username, password: password);
 }

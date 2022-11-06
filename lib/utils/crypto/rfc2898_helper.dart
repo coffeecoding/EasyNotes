@@ -30,11 +30,11 @@ class RFC2898Helper {
     return hashBase64;
   }
 
-  static Future<String> computePasswordHashIsolate(List<String> args) async {
-    String password = args[0];
-    String salt = args[1];
-    int iterations = int.parse(args[2]);
-    int hashLen = int.parse(args[3]);
+  static Future<String> computePasswordHashIsolate(List<Object> args) async {
+    String password = args[0] as String;
+    String salt = args[1] as String;
+    int iterations = args[2] as int;
+    int hashLen = args[3] as int;
     return await computePasswordHash(password, salt, iterations, hashLen);
   }
 

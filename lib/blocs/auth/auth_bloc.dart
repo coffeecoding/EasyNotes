@@ -8,6 +8,7 @@ import 'package:easynotes/repositories/auth_repository.dart';
 import 'package:easynotes/repositories/item_repository.dart';
 import 'package:easynotes/repositories/preference_repository.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
