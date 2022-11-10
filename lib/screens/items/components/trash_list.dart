@@ -28,7 +28,7 @@ class TrashList extends StatelessWidget {
                       itemCount: itemCubits.length,
                       itemBuilder: (context, i) {
                         final item = itemCubits[i];
-                        final clr = itemRepo.getColorOfRoot(item.item);
+                        final clr = itemRepo.getRootOf(item.item).color;
                         return ExpandableItemContainer(
                             color: Color(int.parse(clr, radix: 16)),
                             item: item);

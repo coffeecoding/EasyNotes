@@ -7,6 +7,8 @@ import 'package:easynotes/models/item.dart';
 import 'package:easynotes/repositories/item_repository.dart';
 import 'package:equatable/equatable.dart';
 
+import 'package:easynotes/utils/list_extensions.dart';
+
 part 'root_items_state.dart';
 
 abstract class ListWithSelectionCubit {
@@ -99,6 +101,62 @@ class RootItemsCubit extends Cubit<RootItemsState> with ListWithSelectionCubit {
       }
     } catch (e) {
       // todo: handle
+    }
+  }
+
+  void getItemsFromRepo() {
+    try {
+      emit(RootItemsState.busy(prev: state));
+      final items = itemRepo.getItems();
+      final nonTrashedItems = items.where((i) => i.trashed == null).toList();
+      final topicCubits =
+          ItemVM.createChildrenCubitsForParent(null, nonTrashedItems);
+      emit(RootItemsState.ready(prev: state, topicCubits: topicCubits));
+    } catch (e) {
+      print("error in items_cubit fetchTopics: $e");
+      emit(RootItemsState.error(
+          prev: state, errorMsg: 'Failed to retrieve data: $e'));
+    }
+  }
+
+  Future<void> refetchSelectedRootItemSubtree() async {
+    try {
+      if (selectedItem == null) return;
+      emit(RootItemsState.busy(prev: state));
+      List<Item> items =
+          await itemRepo.fetchItemsByRootParentId(selectedItem!.id);
+      Item root = items.removeAt(0);
+      emit(RootItemsState.ready(
+          prev: state,
+          selectedItem: ItemVM(item: root, items: items, parent: null)));
+    } catch (e) {
+      print("error fetching root item and children: $e");
+      emit(RootItemsState.error(
+          prev: state, errorMsg: 'Failed to retrieve rootitem & children: $e'));
+    }
+  }
+
+  Future<void> fetchRootItems() async {
+    try {
+      if (selectedItem == null) return;
+      emit(RootItemsState.busy(prev: state));
+      List<Item> roots = await itemRepo.fetchRootItems();
+      for (int i = 0; i < topicCubits.length; i++) {
+        // here, replace all root item VMs, but not their children
+        // this may be pretty tricky actually.
+        Item? existingRoot =
+            roots.singleOrNull((r) => r.id == topicCubits[i].id);
+        if (existingRoot != null) {
+          topicCubits[i].item = existingRoot;
+        } else {
+          addItem(ItemVM(item: roots[i], items: [], parent: null));
+        }
+      }
+      emit(RootItemsState.ready(prev: state, topicCubits: topicCubits));
+    } catch (e) {
+      print("error fetching root items: $e");
+      emit(RootItemsState.error(
+          prev: state, errorMsg: 'Failed to retrieve rootitems: $e'));
     }
   }
 

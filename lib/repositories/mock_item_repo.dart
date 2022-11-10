@@ -15,14 +15,14 @@ class MockItemRepo implements ItemRepository {
   Map<String, Item> items = {};
 
   @override
-  String getColorOfRoot(Item item) {
-    String color = item.color;
+  Item getRootOf(Item item) {
+    Item rootCandidate = item;
     Item? parent = items[item.parent_id];
     while (parent != null) {
-      color = parent.color;
+      rootCandidate = parent;
       parent = items[parent.parent_id];
     }
-    return color;
+    return rootCandidate;
   }
 
   @override
@@ -74,6 +74,12 @@ class MockItemRepo implements ItemRepository {
   Future<List<Item>> fetchRootItems() async {
     await Future.delayed(const Duration(seconds: 1));
     return items.values.where((i) => i.parent_id == null).toList();
+  }
+
+  @override
+  Future<List<Item>> fetchItemsByRootParentId(String? id) async {
+    await Future.delayed(const Duration(seconds: 1));
+    return items.values.where((i) => getRootOf(i).id == id).toList();
   }
 
   @override

@@ -15,7 +15,7 @@ import 'preference_repository.dart';
 enum ItemUpdateAction { none, insert, update, updateHeaderOnly }
 
 abstract class ItemRepository {
-  String getColorOfRoot(Item item);
+  Item getRootOf(Item item);
   Future<List<Item>> setItems(List<Item> items);
   List<Item> getItemAndChildren(String id);
   List<Item> getItems();
@@ -23,6 +23,7 @@ abstract class ItemRepository {
   Future<List<Item>> fetchUntrashedItems();
   Future<List<Item>> fetchTrashedItems();
   Future<List<Item>> fetchRootItems();
+  Future<List<Item>> fetchItemsByRootParentId(String? rootId);
   Future<Item> insertOrUpdateItem(Item item, ItemUpdateAction action);
   Future<List<Item>> insertOrUpdateItems(List<Item> items);
   Future<Item> updateItemHeader(ItemHeader header);
@@ -65,14 +66,14 @@ class ItemRepo implements ItemRepository {
   }
 
   @override
-  String getColorOfRoot(Item item) {
-    String color = item.color;
+  Item getRootOf(Item item) {
+    Item rootCandidate = item;
     Item? parent = items[item.parent_id];
     while (parent != null) {
-      color = parent.color;
+      rootCandidate = parent;
       parent = items[parent.parent_id];
     }
-    return color;
+    return rootCandidate;
   }
 
   // This function is used when initially getting the items from the auth_bloc
@@ -130,12 +131,28 @@ class ItemRepo implements ItemRepository {
 
   @override
   Future<List<Item>> fetchRootItems() async {
-    Response response = await netClient.post('/api/items', "");
+    Response response = await netClient.get('/api/items/roots');
     if (!response.isSuccessStatusCode()) throw 'Unable to fetch data';
     List<Item> encryptedItems = (jsonDecode(response.body) as List)
         .map((i) => Item.fromJson(i))
         .toList();
     items.removeWhere((key, value) => value.parent_id == null);
+    final rootItems = await cryptoService.decryptItems(encryptedItems);
+    for (var i in rootItems) {
+      items[i.id] = i;
+    }
+    return rootItems;
+  }
+
+  @override
+  Future<List<Item>> fetchItemsByRootParentId(String? id) async {
+    Response response = await netClient.post(
+        '/api/items${id == null ? '' : '?parent_id=$id'}', "");
+    if (!response.isSuccessStatusCode()) throw 'Unable to fetch data';
+    List<Item> encryptedItems = (jsonDecode(response.body) as List)
+        .map((i) => Item.fromJson(i))
+        .toList();
+    items.removeWhere((key, value) => getRootOf(value).id == id);
     final rootItems = await cryptoService.decryptItems(encryptedItems);
     for (var i in rootItems) {
       items[i.id] = i;
