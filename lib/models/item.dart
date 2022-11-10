@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:easynotes/models/item_header.dart';
 import 'package:equatable/equatable.dart';
+import 'package:uuid/uuid.dart';
 
 import 'json_data.dart';
 
@@ -195,7 +196,7 @@ class Item extends Equatable with JsonData {
       required String receiver_id,
       String color = 'ffA9B852'}) {
     return Item(
-        id: id ?? '',
+        id: id ?? const Uuid().v4(),
         title: '',
         parent_id: parent_id,
         receiver_id: receiver_id,

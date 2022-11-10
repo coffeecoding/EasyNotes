@@ -99,27 +99,29 @@ class AuthRepository {
       // so we have to do this silly cast dance ...
       final jsonMap = jsonDecode(authResult.body) as Map<String, dynamic>;
       var itemList = jsonMap['items'] as List;
-      jsonMap['items'] = itemList.cast<Item>().toList();
-      final authData = AuthResult.fromMap(jsonMap);
+      List<Item> items =
+          List<Item>.from((itemList.map((e) => Item.fromMap(e))));
+      String token = jsonMap['token'];
+      User user = User.fromMap(jsonMap['user']);
 
       // 4) save token in http client
-      netClient.setAuthHeader('Bearer ${authData.token}');
+      netClient.setAuthHeader('Bearer $token');
 
       // 5) save creds securely in secure storage
       String privKey = await RFC2898Helper.decryptWithDerivedKey(
-          password, p.pwsalt, authData.user!.privkey_crypt);
+          password, p.pwsalt, user.privkey_crypt);
       /*String signKey = await RFC2898Helper.decryptWithDerivedKey(
           password, p.pwsalt, authData.user!.signing_key_crypt);*/
       await prefsRepo.setAuth(
-          user: authData.user!,
+          user: user,
           username: username,
           password: password,
           privkey: privKey,
-          pubkey: authData.user!.pubkey,
+          pubkey: user.pubkey,
           signkey: '');
 
       // 6) pass the successfully retrieved item data to the caller
-      return MapEntry('', authData.items);
+      return MapEntry('', items);
     } catch (e) {
       print(e);
       return MapEntry('An unexpected error occurred: ${e}', []);

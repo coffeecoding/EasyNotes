@@ -183,7 +183,7 @@ class ItemRepo implements ItemRepository {
       [bool untrash = false]) async {
     String id = ids[0];
     Response? response = await netClient.put(
-        '/api/item/$id?parent_id=$parent_id${untrash == true ? '?untrash=$untrash' : ''}',
+        '/api/item/$id/parent?parent_id=$parent_id${untrash == true ? '&untrash=$untrash' : ''}',
         jsonEncode(ids));
     if (!response.isSuccessStatusCode()) throw 'Error updating item parent';
     int time = int.parse(response.body);
@@ -202,8 +202,8 @@ class ItemRepo implements ItemRepository {
   @override
   Future<Item> updateItemTrashed(List<String> ids, int? trashed) async {
     String id = ids[0];
-    Response? response =
-        await netClient.put('/api/item/$id?trashed=$trashed', jsonEncode(ids));
+    Response? response = await netClient.put(
+        '/api/item/$id/trashed?trashed=$trashed', jsonEncode(ids));
     if (!response.isSuccessStatusCode()) throw 'Error updating item trashed';
     int timestamp = int.parse(response.body);
     for (String i in ids) {
@@ -215,7 +215,8 @@ class ItemRepo implements ItemRepository {
 
   @override
   Future<Item> updateItemPinned(String id, int pin) async {
-    Response? response = await netClient.put('/api/item/$id?pin=$pin', "");
+    Response? response =
+        await netClient.put('/api/item/$id/pinned?pin=$pin', "");
     if (!response.isSuccessStatusCode()) throw 'Error updating item pinned';
     int timestamp = int.parse(response.body);
     items[id] = items[id]!.copyWith(
@@ -227,8 +228,8 @@ class ItemRepo implements ItemRepository {
 
   @override
   Future<Item> updateItemGloballyPinned(String id, int pin) async {
-    Response? response =
-        await netClient.put('/api/item/$id?pin_globally=$pin', "");
+    Response? response = await netClient.put(
+        '/api/item/$id/globallypinned?pin_globally=$pin', "");
     if (!response.isSuccessStatusCode()) throw 'Error updating item gl. pinned';
     int timestamp = int.parse(response.body);
     items[id] = items[id]!.copyWith(

@@ -4,6 +4,7 @@ import 'package:easynotes/config/locator.dart';
 import 'package:easynotes/cubits/cubits.dart';
 import 'package:easynotes/models/item.dart';
 import 'package:easynotes/repositories/item_repository.dart';
+import 'package:uuid/uuid.dart';
 
 enum FocussedElement { title, content }
 
@@ -83,7 +84,7 @@ class ItemVM {
 
   ItemUpdateAction getWriteAction(
       String titleField, String contentField, String colorSelection) {
-    if (status == ItemVMStatus.newDraft) {
+    if (id.isEmpty || id == '00000000-0000-0000-0000-000000000000') {
       return ItemUpdateAction.insert;
     } else if (titleField == title &&
         contentField == content &&

@@ -7,6 +7,11 @@ import 'package:easynotes/models/user.dart';
 
 import 'item.dart';
 
+// Obsolete class
+// The respective fields "token", "user" and "items" can be directly
+// json-decoded from the json-body of the http response.
+
+/*
 class AuthResult extends Equatable {
   final bool success;
   final String error;
@@ -78,3 +83,4 @@ class AuthResult extends Equatable {
     ];
   }
 }
+*/
