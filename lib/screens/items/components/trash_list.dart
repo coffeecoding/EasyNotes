@@ -15,6 +15,7 @@ class TrashList extends StatelessWidget {
     return BlocBuilder<TrashedItemsCubit, TrashedItemsState>(
         builder: (context, state) {
       final itemCubits = state.items;
+      final itemRepo = locator.get<ItemRepository>();
       return itemCubits.isEmpty
           ? const Center(child: Text('Empty'))
           : Container(
@@ -27,9 +28,7 @@ class TrashList extends StatelessWidget {
                       itemCount: itemCubits.length,
                       itemBuilder: (context, i) {
                         final item = itemCubits[i];
-                        final clr = locator
-                            .get<ItemRepository>()
-                            .getColorOfRoot(item.item);
+                        final clr = itemRepo.getColorOfRoot(item.item);
                         return ExpandableItemContainer(
                             color: Color(int.parse(clr, radix: 16)),
                             item: item);

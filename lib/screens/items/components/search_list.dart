@@ -1,7 +1,9 @@
+import 'package:easynotes/config/locator.dart';
 import 'package:easynotes/cubits/cubits.dart';
 import 'package:easynotes/cubits/item_vm/item_vm.dart';
 import 'package:easynotes/cubits/search/search_cubit.dart';
 import 'package:easynotes/cubits/trashed_items/trashed_items_cubit.dart';
+import 'package:easynotes/repositories/item_repository.dart';
 import 'package:easynotes/screens/common/inline_button.dart';
 import 'package:easynotes/screens/common/toolbar_button.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
@@ -17,6 +19,7 @@ class SearchList extends StatelessWidget {
         buildWhen: (p, n) => p.status != n.status,
         builder: (context, state) {
           final itemCubits = state.results;
+          final itemRepo = locator.get<ItemRepository>();
           return Container(
             alignment: Alignment.topLeft,
             child: Stack(
@@ -29,7 +32,9 @@ class SearchList extends StatelessWidget {
                       itemBuilder: (context, i) {
                         final item = itemCubits[i];
                         return ExpandableItemContainer(
-                            color: Color(int.parse(item.color, radix: 16)),
+                            color: Color(int.parse(
+                                itemRepo.getColorOfRoot(item.item),
+                                radix: 16)),
                             item: item);
                       }),
                 state.status == SearchStatus.busy
