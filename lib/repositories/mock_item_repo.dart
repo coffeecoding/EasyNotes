@@ -1,12 +1,17 @@
 // ignore_for_file: non_constant_identifier_names
 
+import 'package:easynotes/config/locator.dart';
 import 'package:easynotes/models/models.dart';
 import 'package:easynotes/config/sample_data.dart';
 import 'package:uuid/uuid.dart';
 
+import '../services/crypto_service.dart';
 import 'item_repository.dart';
 
 class MockItemRepo implements ItemRepository {
+  MockItemRepo() : cryptoService = locator.get<CryptoService>();
+  final CryptoService cryptoService;
+
   Map<String, Item> items = {};
 
   @override
@@ -109,6 +114,7 @@ class MockItemRepo implements ItemRepository {
 
   @override
   Future<List<Item>> setItems(List<Item> items) async {
+    items = await cryptoService.decryptItems(items);
     await Future.delayed(const Duration(milliseconds: 500));
     this.items.clear();
     for (var i in items) {

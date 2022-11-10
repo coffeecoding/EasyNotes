@@ -3,18 +3,22 @@ import 'package:easynotes/cubits/item_vm/item_vm.dart';
 import 'package:easynotes/models/item.dart';
 import 'package:easynotes/repositories/item_repository.dart';
 
+/*
 class ItemsStateManager {
   ItemsStateManager({required this.itemRepo})
       : root = ItemVM(
-            item: Item.empty(parent_id: null, type: 0, receiver_id: ''),
+            item:
+                Item.empty(id: null, parent_id: null, type: 0, receiver_id: ''),
             parent: null,
             items: []),
         searchRoot = ItemVM(
-            item: Item.empty(parent_id: null, type: 0, receiver_id: ''),
+            item:
+                Item.empty(id: null, parent_id: null, type: 0, receiver_id: ''),
             parent: null,
             items: []),
         trashRoot = ItemVM(
-            item: Item.empty(parent_id: null, type: 0, receiver_id: ''),
+            item:
+                Item.empty(id: null, parent_id: null, type: 0, receiver_id: ''),
             parent: null,
             items: []);
 
@@ -48,3 +52,4 @@ class ItemsStateManager {
     trashRoot.children = subtrees;
   }
 }
+*/

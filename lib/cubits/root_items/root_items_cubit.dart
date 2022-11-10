@@ -98,7 +98,7 @@ class RootItemsCubit extends Cubit<RootItemsState> with ListWithSelectionCubit {
         topicCubits[i].item = updatedRootItems[i];
       }
     } catch (e) {
-      // don't do anything, this is a not huge deal
+      // todo: handle
     }
   }
 
