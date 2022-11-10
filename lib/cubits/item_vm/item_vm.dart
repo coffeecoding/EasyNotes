@@ -341,6 +341,11 @@ class ItemVM {
     }
   }
 
+  ItemVM? getRootItem() {
+    final ancestors = getAncestors();
+    return ancestors.isEmpty ? null : ancestors.last;
+  }
+
   ItemVM? getRootAncestor() {
     final ancestors = getAncestors();
     return ancestors.isEmpty ? null : ancestors.last;

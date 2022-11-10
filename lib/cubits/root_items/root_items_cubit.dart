@@ -110,31 +110,6 @@ class RootItemsCubit extends Cubit<RootItemsState> with ListWithSelectionCubit {
       final nonTrashedItems = items.where((i) => i.trashed == null).toList();
       final topicCubits =
           ItemVM.createChildrenCubitsForParent(null, nonTrashedItems);
-
-      final allItems = ItemVM.createChildrenCubitsForParent(null, items);
-      final allItemsCopy = [...allItems];
-      for (var t in allItemsCopy) {
-        allItems.addAll(t.getDescendantsRecursive());
-      }
-
-      // trashed items
-      final trashedItems = items.where((i) => i.trashed != null).toList();
-      trashedItemsCubit.handleItemsChanging();
-      final topLevelTrashedItems = trashedItems
-          .where((i) =>
-              i.parent_id == null ||
-              !trashedItems.any((p) => p.id == i.parent_id))
-          .toList();
-      final trashedItemVMs = topLevelTrashedItems.map((i) {
-        final pIdx = allItemsCopy.indexWhere((j) => i.parent_id == j.id);
-        return ItemVM(
-            item: i,
-            items: trashedItems,
-            parent: pIdx == -1 ? null : allItemsCopy[pIdx],
-            status: ItemVMStatus.persisted);
-      }).toList();
-      trashedItemsCubit.handleItemsChanged(items: trashedItemVMs);
-
       emit(RootItemsState.ready(prev: state, topicCubits: topicCubits));
     } catch (e) {
       print("error in items_cubit fetchTopics: $e");
