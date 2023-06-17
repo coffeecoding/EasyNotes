@@ -1,7 +1,7 @@
-// manages the complete tree of items (both trashed and non trashed)
-import 'package:easynotes/cubits/item_vm/item_vm.dart';
-import 'package:easynotes/models/item.dart';
-import 'package:easynotes/repositories/item_repository.dart';
+// // manages the complete tree of items (both trashed and non trashed)
+// import 'package:easynotes/cubits/item_vm/item_vm.dart';
+// import 'package:easynotes/models/item.dart';
+// import 'package:easynotes/repositories/item_repository.dart';
 
 /*
 class ItemsStateManager {

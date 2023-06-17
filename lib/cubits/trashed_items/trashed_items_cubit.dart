@@ -31,7 +31,9 @@ class TrashedItemsCubit extends Cubit<TrashedItemsState>
     // go through all leaves in trashed items (item w no children)
     final roots = ItemVM.createChildrenCubitsForParent(null, items.toList());
     trashRoot.children = roots;
-    roots.forEach((r) => r.parent = trashRoot);
+    for (var r in roots) {
+      r.parent = trashRoot;
+    }
     final subtrees = trashRoot
         .getDescendantsRecursive()
         .where((i) => i.parent!.trashed == null && i.trashed != null)
@@ -56,7 +58,7 @@ class TrashedItemsCubit extends Cubit<TrashedItemsState>
 
   @override
   Future<void> fetchItems() {
-    // TODO: implement fetchItems
+    // Todo: implement fetchItems
     throw UnimplementedError();
   }
 

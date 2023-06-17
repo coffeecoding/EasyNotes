@@ -63,6 +63,7 @@ class PreferenceCubit extends Cubit<PreferenceState> {
       }
       return success;
     } catch (e) {
+      // ignore: avoid_print
       print('Failed to update user: $e');
       emit(PreferenceState.copyWith(
           prev: state, message: 'Something went wrong ...'));

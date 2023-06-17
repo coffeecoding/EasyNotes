@@ -4,7 +4,6 @@ import 'package:easynotes/config/locator.dart';
 import 'package:easynotes/cubits/cubits.dart';
 import 'package:easynotes/models/item.dart';
 import 'package:easynotes/repositories/item_repository.dart';
-import 'package:uuid/uuid.dart';
 
 enum FocussedElement { title, content }
 
@@ -386,7 +385,7 @@ class ItemVM {
   // list [(id: '1', children('10', '12', '20')), ('id: '5', children: [])]
   // -> returns subtree with root id 1's second child item
   ItemVM? findItemParentInTrees(ItemVM item) {
-    if (id != null && id == item.parent?.id) {
+    if (id == item.parent?.id) {
       return this;
     }
     List<ItemVM?> p =

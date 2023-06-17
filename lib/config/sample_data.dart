@@ -1,5 +1,4 @@
 import 'package:easynotes/models/models.dart';
-import 'package:easynotes/utils/crypto/algorithm_identifier.dart';
 
 class SampleData {
   static final sampleUser = User.fromJson(

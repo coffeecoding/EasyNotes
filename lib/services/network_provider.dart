@@ -17,8 +17,7 @@ class NetworkProvider {
           'Authorization': ''
         };
 
-  static const String baseUrl = 'localhost';
-  static const int port = 6000;
+  static const String baseUrl = 'localhost:6000';
 
   // The Dio instance for all of the application
   final http.Client _client;
@@ -29,7 +28,7 @@ class NetworkProvider {
   }
 
   Uri _createUri(String requestUri) {
-    return Uri(scheme: 'http', host: baseUrl, port: port, path: requestUri);
+    return Uri.parse('http://$baseUrl$requestUri');
   }
 
   Future<Response> get(String requestUri) async {

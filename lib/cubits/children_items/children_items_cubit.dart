@@ -73,7 +73,6 @@ class ChildrenItemsCubit extends Cubit<ChildrenItemsState>
     handleItemsChanging();
     ItemVM newNote = await _createItem(parent, 1);
     parent.expanded = true;
-    final blabla = this;
     parent.addChild(newNote);
     handleItemsChanged();
     return newNote;

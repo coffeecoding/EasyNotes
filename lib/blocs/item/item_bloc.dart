@@ -13,7 +13,7 @@ class ItemBloc extends Bloc<ItemEvent, ItemBlocState> {
       : super(ItemBlocState.initial(
             item: item, parent: parent, children: children)) {
     on<ItemEvent>((event, emit) {
-      // TODO: implement event handler
+      // Todo: implement event handler
     });
   }
 }
