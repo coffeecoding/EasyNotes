@@ -59,11 +59,12 @@ class LoginForm extends StatelessWidget {
                           height: 40, child: CircularProgressIndicator());
                     default:
                       return ElevatedButton(
-                          onPressed: () => context.read<AuthBloc>().add(
-                              AuthLoginRequested(
-                                  usernameController.text,
-                                  passwordController.text,
-                                  context.read<RootItemsCubit>())),
+                          onPressed: () {
+                            context.read<AuthBloc>().add(AuthLoginRequested(
+                                usernameController.text,
+                                passwordController.text,
+                                context.read<RootItemsCubit>()));
+                          },
                           child: Container(
                               width: double.infinity,
                               height: 40,
