@@ -50,46 +50,46 @@ class MockItemRepo implements ItemRepository {
   }
 
   @override
-  Future<bool> delete(String id) async {
+  Future<OPResult<bool>> delete(String id) async {
     await Future.delayed(const Duration(milliseconds: 500));
     items.removeWhere((key, value) => key == id);
-    return true;
+    return OPResult(true);
   }
 
   @override
-  Future<bool> deleteItems(List<String> ids) async {
+  Future<OPResult<bool>> deleteItems(List<String> ids) async {
     await Future.delayed(const Duration(milliseconds: 1500));
     items.removeWhere((key, value) => ids.any((i) => key == i));
-    return true;
+    return OPResult(true);
   }
 
   @override
-  Future<List<Item>> fetchItems() async {
+  Future<OPResult<List<Item>>> fetchItems() async {
     await Future.delayed(const Duration(seconds: 1));
     SampleData.sampleItems.forEach((i) => items[i.id] = i);
-    return items.values.toList();
+    return OPResult(items.values.toList());
   }
 
   @override
-  Future<List<Item>> fetchRootItems() async {
+  Future<OPResult<List<Item>>> fetchRootItems() async {
     await Future.delayed(const Duration(seconds: 1));
-    return items.values.where((i) => i.parent_id == null).toList();
+    return OPResult(items.values.where((i) => i.parent_id == null).toList());
   }
 
   @override
-  Future<List<Item>> fetchItemsByRootParentId(String? id) async {
+  Future<OPResult<List<Item>>> fetchItemsByRootParentId(String? id) async {
     await Future.delayed(const Duration(seconds: 1));
-    return items.values.where((i) => getRootOf(i).id == id).toList();
+    return OPResult(items.values.where((i) => getRootOf(i).id == id).toList());
   }
 
   @override
-  Future<List<Item>> fetchUntrashedItems() async {
+  Future<OPResult<List<Item>>> fetchUntrashedItems() async {
     // TODO: implement fetchTrashedItems
     throw UnimplementedError();
   }
 
   @override
-  Future<List<Item>> fetchTrashedItems() async {
+  Future<OPResult<List<Item>>> fetchTrashedItems() async {
     // TODO: implement fetchTrashedItems
     throw UnimplementedError();
   }
@@ -100,22 +100,23 @@ class MockItemRepo implements ItemRepository {
   }
 
   @override
-  Future<Item> insertOrUpdateItem(Item item, ItemUpdateAction action) async {
+  Future<OPResult<Item>> insertOrUpdateItem(
+      Item item, ItemUpdateAction action) async {
     await Future.delayed(const Duration(milliseconds: 500));
     items.update(item.id, (value) => item, ifAbsent: () => item);
-    return item;
+    return OPResult(item);
   }
 
   @override
-  Future<List<Item>> insertOrUpdateItems(List<Item> items) async {
+  Future<OPResult<List<Item>>> insertOrUpdateItems(List<Item> items) async {
     for (var element in items) {
       insertOrUpdateItem(element, ItemUpdateAction.insert);
     }
-    return this
+    return OPResult(this
         .items
         .values
         .where((i) => items.any((j) => j.id == i.id))
-        .toList();
+        .toList());
   }
 
   @override
@@ -130,19 +131,19 @@ class MockItemRepo implements ItemRepository {
   }
 
   @override
-  Future<Item> updateItemGloballyPinned(String id, int pin) async {
+  Future<OPResult<Item>> updateItemGloballyPinned(String id, int pin) async {
     // TODO: implement updateItemGloballyPinned
     throw UnimplementedError();
   }
 
   @override
-  Future<Item> updateItemHeader(ItemHeader header) async {
+  Future<OPResult<Item>> updateItemHeader(ItemHeader header) async {
     // TODO: implement updateItemHeader
     throw UnimplementedError();
   }
 
   @override
-  Future<Item> updateItemParent(List<String> ids, String? parent_id,
+  Future<OPResult<Item>> updateItemParent(List<String> ids, String? parent_id,
       [bool untrash = false]) async {
     String id = ids[0];
     await Future.delayed(const Duration(milliseconds: 200));
@@ -156,22 +157,22 @@ class MockItemRepo implements ItemRepository {
         items[idd] = items[idd]!.copyWith(trashed: null, modified_header: time);
       }
     }
-    return items[id]!;
+    return OPResult(items[id]!);
   }
 
   @override
-  Future<Item> updateItemPinned(String id, int pin) async {
+  Future<OPResult<Item>> updateItemPinned(String id, int pin) async {
     await Future.delayed(const Duration(milliseconds: 500));
     int timestamp = DateTime.now().millisecondsSinceEpoch;
     items[id] = items[id]!.copyWith(
         pinned: pin != 0,
         trashed: items[id]!.trashed,
         modified_header: timestamp);
-    return items[id]!;
+    return OPResult(items[id]!);
   }
 
   @override
-  Future<List<Item>> updateItemPositions(List<String> itemIds) async {
+  Future<OPResult<List<Item>>> updateItemPositions(List<String> itemIds) async {
     int timestamp = DateTime.now().toUtc().millisecondsSinceEpoch;
     for (int i = 0; i < itemIds.length; i++) {
       final id = itemIds[i];
@@ -180,11 +181,12 @@ class MockItemRepo implements ItemRepository {
     }
     List<Item> result =
         items.values.where((i) => itemIds.any((id) => id == i.id)).toList();
-    return result;
+    return OPResult(result);
   }
 
   @override
-  Future<Item> updateItemTrashed(List<String> ids, int? trashed) async {
+  Future<OPResult<Item>> updateItemTrashed(
+      List<String> ids, int? trashed) async {
     String id = ids[0];
     await Future.delayed(const Duration(milliseconds: 500));
     int timestamp = DateTime.now().millisecondsSinceEpoch;
@@ -192,6 +194,6 @@ class MockItemRepo implements ItemRepository {
       items[i] =
           items[i]!.copyWith(trashed: trashed, modified_header: timestamp);
     }
-    return items[id]!;
+    return OPResult(items[id]!);
   }
 }

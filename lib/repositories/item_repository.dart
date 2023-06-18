@@ -93,56 +93,89 @@ class ItemRepo implements ItemRepository {
   @override
   Future<OPResult<List<Item>>> fetchItems() async {
     Response response = await netClient.get('/api/items');
-    if (!response.isSuccessStatusCode()) throw 'Unable to fetch data';
-    List<Item> encryptedItems = (jsonDecode(response.body) as List)
-        .map((i) => Item.fromMap(i))
-        .toList();
-    final decrypted = await cryptoService.decryptItems(encryptedItems);
-    for (var i in decrypted) {
-      items[i.id] = i;
+    if (!response.isSuccessStatusCode()) {
+      return OPResult.err(buildErrorMsgs(
+          ErrorType.network, 'fetchItems', [], response.reasonPhrase));
     }
-    return OPResult(getItems());
+    try {
+      List<Item> encryptedItems = (jsonDecode(response.body) as List)
+          .map((i) => Item.fromMap(i))
+          .toList();
+      final decrypted = await cryptoService.decryptItems(encryptedItems);
+      for (var i in decrypted) {
+        items[i.id] = i;
+      }
+      return OPResult(getItems());
+    } catch (e) {
+      return OPResult.err(
+          buildErrorMsgs(ErrorType.client, 'fetchItems', [], e.toString()));
+    }
   }
 
   @override
   Future<OPResult<List<Item>>> fetchUntrashedItems() async {
     Response response = await netClient.get('/api/items?trashed=false');
-    if (!response.isSuccessStatusCode()) throw 'Unable to fetch data';
-    List<Item> encryptedItems = (jsonDecode(response.body) as List)
-        .map((i) => Item.fromMap(i))
-        .toList();
-    final untrashedItems = await cryptoService.decryptItems(encryptedItems);
-    //items.removeWhere((i) => i.trashed != null);
-    //items.addAll(trashedItems);
-    return OPResult(untrashedItems);
+    if (!response.isSuccessStatusCode()) {
+      return OPResult.err(buildErrorMsgs(
+          ErrorType.network, 'fetchUntrashedItems', [], response.reasonPhrase));
+    }
+    try {
+      List<Item> encryptedItems = (jsonDecode(response.body) as List)
+          .map((i) => Item.fromMap(i))
+          .toList();
+      final untrashedItems = await cryptoService.decryptItems(encryptedItems);
+      //items.removeWhere((i) => i.trashed != null);
+      //items.addAll(trashedItems);
+      return OPResult(untrashedItems);
+    } catch (e) {
+      return OPResult.err(buildErrorMsgs(
+          ErrorType.client, 'fetchUntrashedItems', [], e.toString()));
+    }
   }
 
   @override
   Future<OPResult<List<Item>>> fetchTrashedItems() async {
     Response response = await netClient.get('/api/items?trashed=asdf');
-    if (!response.isSuccessStatusCode()) throw 'Unable to fetch data';
-    List<Item> encryptedItems = (jsonDecode(response.body) as List)
-        .map((i) => Item.fromMap(i))
-        .toList();
-    final trashedItems = await cryptoService.decryptItems(encryptedItems);
-    //items.removeWhere((i) => i.trashed != null);
-    //items.addAll(trashedItems);
-    return OPResult(trashedItems);
+    if (!response.isSuccessStatusCode()) {
+      return OPResult.err(buildErrorMsgs(
+          ErrorType.network, 'fetchTrashedItems', [], response.reasonPhrase));
+    }
+    try {
+      List<Item> encryptedItems = (jsonDecode(response.body) as List)
+          .map((i) => Item.fromMap(i))
+          .toList();
+      final trashedItems = await cryptoService.decryptItems(encryptedItems);
+      //items.removeWhere((i) => i.trashed != null);
+      //items.addAll(trashedItems);
+      return OPResult(trashedItems);
+    } catch (e) {
+      return OPResult.err(buildErrorMsgs(
+          ErrorType.client, 'fetchTrashedItems', [], e.toString()));
+    }
   }
 
   @override
   Future<OPResult<List<Item>>> fetchRootItems() async {
     Response response = await netClient.get('/api/items/roots');
-    if (!response.isSuccessStatusCode()) throw 'Unable to fetch data';
-    List<Item> encryptedItems = (jsonDecode(response.body) as List)
-        .map((i) => Item.fromMap(i))
-        .toList();
-    items.removeWhere((key, value) => value.parent_id == null);
-    final rootItems = await cryptoService.decryptItems(encryptedItems);
-    for (var i in rootItems) {
-      items[i.id] = i;
+
+    if (!response.isSuccessStatusCode()) {
+      return OPResult.err(buildErrorMsgs(
+          ErrorType.network, 'fetchRootItems', [], response.reasonPhrase));
     }
-    return OPResult(rootItems);
+    try {
+      List<Item> encryptedItems = (jsonDecode(response.body) as List)
+          .map((i) => Item.fromMap(i))
+          .toList();
+      items.removeWhere((key, value) => value.parent_id == null);
+      final rootItems = await cryptoService.decryptItems(encryptedItems);
+      for (var i in rootItems) {
+        items[i.id] = i;
+      }
+      return OPResult(rootItems);
+    } catch (e) {
+      return OPResult.err(
+          buildErrorMsgs(ErrorType.client, 'fetchRootItems', [], e.toString()));
+    }
   }
 
   @override
