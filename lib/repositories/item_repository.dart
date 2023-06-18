@@ -3,8 +3,9 @@
 import 'dart:convert';
 
 import 'package:easynotes/config/locator.dart';
+import 'package:easynotes/config/messages.dart';
 import 'package:easynotes/extensions/http_client_ext.dart';
-import 'package:easynotes/models/item.dart';
+import 'package:easynotes/models/models.dart';
 import 'package:easynotes/services/crypto_service.dart';
 import 'package:http/http.dart';
 
@@ -19,20 +20,20 @@ abstract class ItemRepository {
   Future<List<Item>> setItems(List<Item> items);
   List<Item> getItemAndChildren(String id);
   List<Item> getItems();
-  Future<List<Item>> fetchItems();
-  Future<List<Item>> fetchUntrashedItems();
-  Future<List<Item>> fetchTrashedItems();
-  Future<List<Item>> fetchRootItems();
-  Future<List<Item>> fetchItemsByRootParentId(String? rootId);
-  Future<Item> insertOrUpdateItem(Item item, ItemUpdateAction action);
-  Future<List<Item>> insertOrUpdateItems(List<Item> items);
-  Future<Item> updateItemHeader(ItemHeader header);
-  Future<Item> updateItemParent(List<String> ids, String? parent_id,
+  Future<OPResult<List<Item>>> fetchItems();
+  Future<OPResult<List<Item>>> fetchUntrashedItems();
+  Future<OPResult<List<Item>>> fetchTrashedItems();
+  Future<OPResult<List<Item>>> fetchRootItems();
+  Future<OPResult<List<Item>>> fetchItemsByRootParentId(String? rootId);
+  Future<OPResult<Item>> insertOrUpdateItem(Item item, ItemUpdateAction action);
+  Future<OPResult<List<Item>>> insertOrUpdateItems(List<Item> items);
+  Future<OPResult<Item>> updateItemHeader(ItemHeader header);
+  Future<OPResult<Item>> updateItemParent(List<String> ids, String? parent_id,
       [bool untrash = false]);
-  Future<Item> updateItemTrashed(List<String> ids, int? trashed);
-  Future<Item> updateItemPinned(String id, int pin);
-  Future<Item> updateItemGloballyPinned(String id, int pin);
-  Future<List<Item>> updateItemPositions(List<String> itemIds);
+  Future<OPResult<Item>> updateItemTrashed(List<String> ids, int? trashed);
+  Future<OPResult<Item>> updateItemPinned(String id, int pin);
+  Future<OPResult<Item>> updateItemGloballyPinned(String id, int pin);
+  Future<OPResult<List<Item>>> updateItemPositions(List<String> itemIds);
   Future<bool> delete(String id);
   Future<bool> deleteItems(List<String> ids);
 
@@ -90,7 +91,7 @@ class ItemRepo implements ItemRepository {
   }
 
   @override
-  Future<List<Item>> fetchItems() async {
+  Future<OPResult<List<Item>>> fetchItems() async {
     Response response = await netClient.get('/api/items');
     if (!response.isSuccessStatusCode()) throw 'Unable to fetch data';
     List<Item> encryptedItems = (jsonDecode(response.body) as List)
@@ -100,11 +101,11 @@ class ItemRepo implements ItemRepository {
     for (var i in decrypted) {
       items[i.id] = i;
     }
-    return getItems();
+    return OPResult(getItems());
   }
 
   @override
-  Future<List<Item>> fetchUntrashedItems() async {
+  Future<OPResult<List<Item>>> fetchUntrashedItems() async {
     Response response = await netClient.get('/api/items?trashed=false');
     if (!response.isSuccessStatusCode()) throw 'Unable to fetch data';
     List<Item> encryptedItems = (jsonDecode(response.body) as List)
@@ -113,11 +114,11 @@ class ItemRepo implements ItemRepository {
     final untrashedItems = await cryptoService.decryptItems(encryptedItems);
     //items.removeWhere((i) => i.trashed != null);
     //items.addAll(trashedItems);
-    return untrashedItems;
+    return OPResult(untrashedItems);
   }
 
   @override
-  Future<List<Item>> fetchTrashedItems() async {
+  Future<OPResult<List<Item>>> fetchTrashedItems() async {
     Response response = await netClient.get('/api/items?trashed=asdf');
     if (!response.isSuccessStatusCode()) throw 'Unable to fetch data';
     List<Item> encryptedItems = (jsonDecode(response.body) as List)
@@ -126,11 +127,11 @@ class ItemRepo implements ItemRepository {
     final trashedItems = await cryptoService.decryptItems(encryptedItems);
     //items.removeWhere((i) => i.trashed != null);
     //items.addAll(trashedItems);
-    return trashedItems;
+    return OPResult(trashedItems);
   }
 
   @override
-  Future<List<Item>> fetchRootItems() async {
+  Future<OPResult<List<Item>>> fetchRootItems() async {
     Response response = await netClient.get('/api/items/roots');
     if (!response.isSuccessStatusCode()) throw 'Unable to fetch data';
     List<Item> encryptedItems = (jsonDecode(response.body) as List)
@@ -141,27 +142,36 @@ class ItemRepo implements ItemRepository {
     for (var i in rootItems) {
       items[i.id] = i;
     }
-    return rootItems;
+    return OPResult(rootItems);
   }
 
   @override
-  Future<List<Item>> fetchItemsByRootParentId(String? id) async {
+  Future<OPResult<List<Item>>> fetchItemsByRootParentId(String? id) async {
     Response response = await netClient.post(
         '/api/items${id == null ? '' : '?parent_id=$id'}', "");
-    if (!response.isSuccessStatusCode()) throw 'Unable to fetch data';
-    List<Item> encryptedItems = (jsonDecode(response.body) as List)
-        .map((i) => Item.fromMap(i))
-        .toList();
-    items.removeWhere((key, value) => getRootOf(value).id == id);
-    final rootItems = await cryptoService.decryptItems(encryptedItems);
-    for (var i in rootItems) {
-      items[i.id] = i;
+    if (!response.isSuccessStatusCode()) {
+      return OPResult.err(buildErrorMsgs(ErrorType.network,
+          'fetchItemsByRootParentId', [id], response.reasonPhrase));
     }
-    return rootItems;
+    try {
+      List<Item> encryptedItems = (jsonDecode(response.body) as List)
+          .map((i) => Item.fromMap(i))
+          .toList();
+      items.removeWhere((key, value) => getRootOf(value).id == id);
+      final rootItems = await cryptoService.decryptItems(encryptedItems);
+      for (var i in rootItems) {
+        items[i.id] = i;
+      }
+      return OPResult(rootItems);
+    } catch (e) {
+      return OPResult.err(buildErrorMsgs(
+          ErrorType.client, 'fetchItemsByRootParentId', [id], e.toString()));
+    }
   }
 
   @override
-  Future<Item> insertOrUpdateItem(Item item, ItemUpdateAction action) async {
+  Future<OPResult<Item>> insertOrUpdateItem(
+      Item item, ItemUpdateAction action) async {
     Item encrypted = await cryptoService.encryptItem(item);
     Response? response =
         await netClient.post('/api/item', jsonEncode(encrypted));
@@ -174,7 +184,7 @@ class ItemRepo implements ItemRepository {
   }
 
   @override
-  Future<List<Item>> insertOrUpdateItems(List<Item> items) async {
+  Future<OPResult<List<Item>>> insertOrUpdateItems(List<Item> items) async {
     List<Item> encryptedItems = await cryptoService.encryptItems(items);
     Response? response =
         await netClient.post('/api/items', jsonEncode(encryptedItems));
@@ -187,7 +197,7 @@ class ItemRepo implements ItemRepository {
   }
 
   @override
-  Future<Item> updateItemHeader(ItemHeader header) async {
+  Future<OPResult<Item>> updateItemHeader(ItemHeader header) async {
     Response? response =
         await netClient.put('/api/item/header', jsonEncode(header));
     if (!response.isSuccessStatusCode()) throw 'Error updating item header';
@@ -196,7 +206,7 @@ class ItemRepo implements ItemRepository {
   }
 
   @override
-  Future<Item> updateItemParent(List<String> ids, String? parent_id,
+  Future<OPResult<Item>> updateItemParent(List<String> ids, String? parent_id,
       [bool untrash = false]) async {
     String id = ids[0];
     Response? response = await netClient.put(
@@ -217,7 +227,8 @@ class ItemRepo implements ItemRepository {
   }
 
   @override
-  Future<Item> updateItemTrashed(List<String> ids, int? trashed) async {
+  Future<OPResult<Item>> updateItemTrashed(
+      List<String> ids, int? trashed) async {
     String id = ids[0];
     Response? response = await netClient.put(
         '/api/item/$id/trashed?trashed=$trashed', jsonEncode(ids));
@@ -231,7 +242,7 @@ class ItemRepo implements ItemRepository {
   }
 
   @override
-  Future<Item> updateItemPinned(String id, int pin) async {
+  Future<OPResult<Item>> updateItemPinned(String id, int pin) async {
     Response? response =
         await netClient.put('/api/item/$id/pinned?pin=$pin', "");
     if (!response.isSuccessStatusCode()) throw 'Error updating item pinned';
@@ -244,7 +255,7 @@ class ItemRepo implements ItemRepository {
   }
 
   @override
-  Future<Item> updateItemGloballyPinned(String id, int pin) async {
+  Future<OPResult<Item>> updateItemGloballyPinned(String id, int pin) async {
     Response? response = await netClient.put(
         '/api/item/$id/globallypinned?pin_globally=$pin', "");
     if (!response.isSuccessStatusCode()) throw 'Error updating item gl. pinned';
@@ -257,7 +268,7 @@ class ItemRepo implements ItemRepository {
   }
 
   @override
-  Future<List<Item>> updateItemPositions(List<String> itemIds) async {
+  Future<OPResult<List<Item>>> updateItemPositions(List<String> itemIds) async {
     Response? response =
         await netClient.put('/api/items/position', jsonEncode(itemIds));
     if (!response.isSuccessStatusCode()) throw 'Error updating item positions';
