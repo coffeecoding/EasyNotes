@@ -14,4 +14,7 @@ class OPResult<T> {
   OPResult.err(MsgWrapper msgs, {this.result})
       : msg = msgs.msg,
         friendlyMsg = msgs.friendlyMsg;
+
+  @override
+  String toString() => 'OPRESULT: $msg';
 }

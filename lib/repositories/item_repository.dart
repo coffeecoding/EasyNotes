@@ -34,8 +34,8 @@ abstract class ItemRepository {
   Future<OPResult<Item>> updateItemPinned(String id, int pin);
   Future<OPResult<Item>> updateItemGloballyPinned(String id, int pin);
   Future<OPResult<List<Item>>> updateItemPositions(List<String> itemIds);
-  Future<bool> delete(String id);
-  Future<bool> deleteItems(List<String> ids);
+  Future<OPResult<bool>> delete(String id);
+  Future<OPResult<bool>> deleteItems(List<String> ids);
 
   Future<Item> createNewItem(
       {required String? parent_id, required String color, required int type});
@@ -175,12 +175,20 @@ class ItemRepo implements ItemRepository {
     Item encrypted = await cryptoService.encryptItem(item);
     Response? response =
         await netClient.post('/api/item', jsonEncode(encrypted));
-    if (!response.isSuccessStatusCode()) throw 'Error saving item';
-    String newId = response.body;
-    items.removeWhere((key, value) => key == item.id);
-    Item updated = item.copyWith(id: newId, trashed: item.trashed);
-    items[newId] = updated;
-    return updated;
+    if (!response.isSuccessStatusCode()) {
+      return OPResult.err(buildErrorMsgs(ErrorType.network,
+          'insertOrUpdateItem', [item, action], response.reasonPhrase));
+    }
+    try {
+      String newId = response.body;
+      items.removeWhere((key, value) => key == item.id);
+      Item updated = item.copyWith(id: newId, trashed: item.trashed);
+      items[newId] = updated;
+      return OPResult(updated);
+    } catch (e) {
+      return OPResult.err(buildErrorMsgs(ErrorType.client, 'insertOrUpdateItem',
+          [item, action], e.toString()));
+    }
   }
 
   @override
@@ -188,21 +196,40 @@ class ItemRepo implements ItemRepository {
     List<Item> encryptedItems = await cryptoService.encryptItems(items);
     Response? response =
         await netClient.post('/api/items', jsonEncode(encryptedItems));
-    if (!response.isSuccessStatusCode()) throw 'Error saving item';
-    this.items.removeWhere((key, value) => items.any((j) => j.id == key));
-    for (var i in items) {
-      this.items[i.id] = i;
+    if (!response.isSuccessStatusCode()) {
+      return OPResult.err(buildErrorMsgs(
+          ErrorType.network,
+          'insertOrUpdateItems',
+          ['${items.length} items'],
+          response.reasonPhrase));
     }
-    return await fetchItems();
+    try {
+      this.items.removeWhere((key, value) => items.any((j) => j.id == key));
+      for (var i in items) {
+        this.items[i.id] = i;
+      }
+      return await fetchItems();
+    } catch (e) {
+      return OPResult.err(buildErrorMsgs(ErrorType.client,
+          'insertOrUpdateItems', ['${items.length} items'], e.toString()));
+    }
   }
 
   @override
   Future<OPResult<Item>> updateItemHeader(ItemHeader header) async {
     Response? response =
         await netClient.put('/api/item/header', jsonEncode(header));
-    if (!response.isSuccessStatusCode()) throw 'Error updating item header';
-    items[header.id] = items[header.id]!.copyWithHeader(header);
-    return items[header.id]!;
+    if (!response.isSuccessStatusCode()) {
+      return OPResult.err(buildErrorMsgs(ErrorType.network, 'updateItemHeader',
+          [header], response.reasonPhrase));
+    }
+    try {
+      items[header.id] = items[header.id]!.copyWithHeader(header);
+      return OPResult(items[header.id]!);
+    } catch (e) {
+      return OPResult.err(buildErrorMsgs(
+          ErrorType.client, 'updateItemHeader', [header], e.toString()));
+    }
   }
 
   @override
@@ -212,18 +239,27 @@ class ItemRepo implements ItemRepository {
     Response? response = await netClient.put(
         '/api/item/$id/parent?parent_id=$parent_id${untrash == true ? '&untrash=$untrash' : ''}',
         jsonEncode(ids));
-    if (!response.isSuccessStatusCode()) throw 'Error updating item parent';
-    int time = int.parse(response.body);
-    items[id] = items[id]!.copyWith(
-        parent_id: parent_id,
-        trashed: untrash ? null : items[id]!.trashed,
-        modified_header: time);
-    if (untrash == true) {
-      for (String idd in ids) {
-        items[idd] = items[idd]!.copyWith(trashed: null, modified_header: time);
-      }
+    if (!response.isSuccessStatusCode()) {
+      return OPResult.err(buildErrorMsgs(ErrorType.network, 'updateItemParent',
+          ['ids=$ids', parent_id, untrash], response.reasonPhrase));
     }
-    return items[id]!;
+    try {
+      int time = int.parse(response.body);
+      items[id] = items[id]!.copyWith(
+          parent_id: parent_id,
+          trashed: untrash ? null : items[id]!.trashed,
+          modified_header: time);
+      if (untrash == true) {
+        for (String idd in ids) {
+          items[idd] =
+              items[idd]!.copyWith(trashed: null, modified_header: time);
+        }
+      }
+      return OPResult(items[id]!);
+    } catch (e) {
+      return OPResult.err(buildErrorMsgs(ErrorType.client, 'updateItemParent',
+          ['ids=$ids', parent_id, untrash], e.toString()));
+    }
   }
 
   @override
@@ -232,69 +268,120 @@ class ItemRepo implements ItemRepository {
     String id = ids[0];
     Response? response = await netClient.put(
         '/api/item/$id/trashed?trashed=$trashed', jsonEncode(ids));
-    if (!response.isSuccessStatusCode()) throw 'Error updating item trashed';
-    int timestamp = int.parse(response.body);
-    for (String i in ids) {
-      items[i] =
-          items[i]!.copyWith(trashed: trashed, modified_header: timestamp);
+    if (!response.isSuccessStatusCode()) {
+      return OPResult.err(buildErrorMsgs(ErrorType.network, 'updateItemTrashed',
+          ['ids=$ids', trashed], response.reasonPhrase));
     }
-    return items[id]!;
+    try {
+      int timestamp = int.parse(response.body);
+      for (String i in ids) {
+        items[i] =
+            items[i]!.copyWith(trashed: trashed, modified_header: timestamp);
+      }
+      return OPResult(items[id]!);
+    } catch (e) {
+      return OPResult.err(buildErrorMsgs(ErrorType.client, 'updateItemTrashed',
+          ['ids=$ids', trashed], e.toString()));
+    }
   }
 
   @override
   Future<OPResult<Item>> updateItemPinned(String id, int pin) async {
     Response? response =
         await netClient.put('/api/item/$id/pinned?pin=$pin', "");
-    if (!response.isSuccessStatusCode()) throw 'Error updating item pinned';
-    int timestamp = int.parse(response.body);
-    items[id] = items[id]!.copyWith(
-        pinned: pin != 0,
-        trashed: items[id]!.trashed,
-        modified_header: timestamp);
-    return items[id]!;
+    if (!response.isSuccessStatusCode()) {
+      return OPResult.err(buildErrorMsgs(ErrorType.network, 'updateItemPinned',
+          [id, pin], response.reasonPhrase));
+    }
+    try {
+      int timestamp = int.parse(response.body);
+      items[id] = items[id]!.copyWith(
+          pinned: pin != 0,
+          trashed: items[id]!.trashed,
+          modified_header: timestamp);
+      return OPResult(items[id]!);
+    } catch (e) {
+      return OPResult.err(buildErrorMsgs(
+          ErrorType.client, 'updateItemPinned', [id, pin], e.toString()));
+    }
   }
 
   @override
   Future<OPResult<Item>> updateItemGloballyPinned(String id, int pin) async {
     Response? response = await netClient.put(
         '/api/item/$id/globallypinned?pin_globally=$pin', "");
-    if (!response.isSuccessStatusCode()) throw 'Error updating item gl. pinned';
-    int timestamp = int.parse(response.body);
-    items[id] = items[id]!.copyWith(
-        pinned_globally: pin != 0,
-        trashed: items[id]!.trashed,
-        modified_header: timestamp);
-    return items[id]!;
+    if (!response.isSuccessStatusCode()) {
+      return OPResult.err(buildErrorMsgs(ErrorType.network,
+          'updateItemGloballyPinned', [id, pin], response.reasonPhrase));
+    }
+    try {
+      int timestamp = int.parse(response.body);
+      items[id] = items[id]!.copyWith(
+          pinned_globally: pin != 0,
+          trashed: items[id]!.trashed,
+          modified_header: timestamp);
+      return OPResult(items[id]!);
+    } catch (e) {
+      return OPResult.err(buildErrorMsgs(ErrorType.client,
+          'updateItemGloballyPinned', [id, pin], e.toString()));
+    }
   }
 
   @override
   Future<OPResult<List<Item>>> updateItemPositions(List<String> itemIds) async {
     Response? response =
         await netClient.put('/api/items/position', jsonEncode(itemIds));
-    if (!response.isSuccessStatusCode()) throw 'Error updating item positions';
-    int timestamp = int.parse(response.body);
-    for (int i = 0; i < itemIds.length; i++) {
-      final id = itemIds[i];
-      items[id] = items[id]!.copyWith(
-          position: i, modified_header: timestamp, trashed: items[id]!.trashed);
+    if (!response.isSuccessStatusCode()) {
+      return OPResult.err(buildErrorMsgs(ErrorType.network,
+          'updateItemPositions', ['ids=$itemIds'], response.reasonPhrase));
     }
-    return items.values.where((i) => itemIds.any((id) => id == i.id)).toList();
+    try {
+      int timestamp = int.parse(response.body);
+      for (int i = 0; i < itemIds.length; i++) {
+        final id = itemIds[i];
+        items[id] = items[id]!.copyWith(
+            position: i,
+            modified_header: timestamp,
+            trashed: items[id]!.trashed);
+      }
+      return OPResult(
+          items.values.where((i) => itemIds.any((id) => id == i.id)).toList());
+    } catch (e) {
+      return OPResult.err(buildErrorMsgs(ErrorType.client,
+          'updateItemPositions', ['ids=$itemIds'], e.toString()));
+    }
   }
 
   @override
-  Future<bool> delete(String id) async {
+  Future<OPResult<bool>> delete(String id) async {
     Response? response = await netClient.delete('/api/item/$id');
-    if (!response.isSuccessStatusCode()) throw 'Error deleteing item';
-    items.removeWhere((key, value) => key == id);
-    return true;
+    if (!response.isSuccessStatusCode()) {
+      return OPResult.err(buildErrorMsgs(
+          ErrorType.network, 'delete', [id], response.reasonPhrase));
+    }
+    try {
+      items.removeWhere((key, value) => key == id);
+      return OPResult(true);
+    } catch (e) {
+      return OPResult.err(
+          buildErrorMsgs(ErrorType.client, 'delete', [id], e.toString()));
+    }
   }
 
   @override
-  Future<bool> deleteItems(List<String> ids) async {
+  Future<OPResult<bool>> deleteItems(List<String> ids) async {
     Response? response = await netClient.delete('/api/items', jsonEncode(ids));
-    if (!response.isSuccessStatusCode()) throw 'Error deleteing items';
-    items.removeWhere((key, value) => ids.any((i) => key == i));
-    return true;
+    if (!response.isSuccessStatusCode()) {
+      return OPResult.err(buildErrorMsgs(ErrorType.network, 'deleteItems',
+          ['ids=$ids'], response.reasonPhrase));
+    }
+    try {
+      items.removeWhere((key, value) => ids.any((i) => key == i));
+      return OPResult(true);
+    } catch (e) {
+      return OPResult.err(buildErrorMsgs(
+          ErrorType.client, 'deleteItems', ['ids=$ids'], e.toString()));
+    }
   }
 
   @override
