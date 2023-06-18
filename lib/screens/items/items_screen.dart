@@ -41,7 +41,17 @@ class _ItemsScreenState extends State<ItemsScreen> {
         builder: (context, state) {
       switch (state.status) {
         case RootItemsStatus.error:
-          return const Center(child: Text('Failed to retrieve notes ... :('));
+          return Center(
+              child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text('Failed to retrieve notes ... :('),
+              const SizedBox(height: 16.0),
+              ElevatedButton(
+                  onPressed: () => context.read<RootItemsCubit>().fetchItems(),
+                  child: const Text('Retry'))
+            ],
+          ));
         default:
           return Stack(children: [
             Row(children: [

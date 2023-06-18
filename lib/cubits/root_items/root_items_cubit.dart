@@ -142,8 +142,6 @@ class RootItemsCubit extends Cubit<RootItemsState> with ListWithSelectionCubit {
       emit(RootItemsState.busy(prev: state));
       List<Item> roots = await itemRepo.fetchRootItems();
       for (int i = 0; i < topicCubits.length; i++) {
-        // here, replace all root item VMs, but not their children
-        // this may be pretty tricky actually.
         Item? existingRoot =
             roots.singleOrNull((r) => r.id == topicCubits[i].id);
         if (existingRoot != null) {

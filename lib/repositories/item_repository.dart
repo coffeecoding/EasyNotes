@@ -93,8 +93,9 @@ class ItemRepo implements ItemRepository {
   Future<List<Item>> fetchItems() async {
     Response response = await netClient.get('/api/items');
     if (!response.isSuccessStatusCode()) throw 'Unable to fetch data';
+    final itemsraw = (jsonDecode(response.body) as List);
     List<Item> encryptedItems = (jsonDecode(response.body) as List)
-        .map((i) => Item.fromJson(i))
+        .map((i) => Item.fromMap(i))
         .toList();
     final decrypted = await cryptoService.decryptItems(encryptedItems);
     for (var i in decrypted) {

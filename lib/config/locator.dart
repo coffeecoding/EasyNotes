@@ -16,5 +16,5 @@ Future<void> setUpLocator() async {
     ..registerSingleton<NetworkProvider>(NetworkProvider())
     ..registerSingleton<AuthRepository>(AuthRepository())
     ..registerSingleton<CryptoService>(CryptoService())
-    ..registerSingleton<ItemRepository>(MockItemRepo());
+    ..registerSingleton<ItemRepository>(ItemRepo());
 }
