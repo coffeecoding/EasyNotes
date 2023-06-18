@@ -114,7 +114,7 @@ class ItemVM {
           modified_header: ts,
           trashed: item.trashed);
       final opresult = await itemRepo.insertOrUpdateItem(updated, iua);
-      if (opresult.hasResult) {
+      if (opresult.hasData) {
         status = ItemVMStatus.persisted;
         return true;
       } else {
@@ -136,8 +136,8 @@ class ItemVM {
     try {
       bool newValue = !pinned;
       final re = await itemRepo.updateItemPinned(id, newValue ? 1 : 0);
-      if (re.hasResult) {
-        item = re.result!;
+      if (re.hasData) {
+        item = re.data!;
         status = ItemVMStatus.persisted;
         parent!.sortChildren();
       } else {
@@ -167,7 +167,7 @@ class ItemVM {
           getDescendantsRecursive(true).map((i) => i.id).toList();
       if (updateParent) {
         final re = await itemRepo.updateItemParent(ids, newParent?.id, true);
-        if (re.hasResult) {
+        if (re.hasData) {
           await restoreDescendantsFromTrash();
           parent = newParent;
         } else {
@@ -177,8 +177,8 @@ class ItemVM {
         }
       }
       final re = await itemRepo.updateItemTrashed(ids, null);
-      if (re.hasResult) {
-        item = re.result!;
+      if (re.hasData) {
+        item = re.data!;
       } else {
         print('error updatingItemTrashed state: ${re.msg!}');
         error = re.friendlyMsg!;

@@ -95,8 +95,8 @@ class RootItemsCubit extends Cubit<RootItemsState> with ListWithSelectionCubit {
     try {
       List<String> itemIds = topicCubits.map((i) => i.id).toList();
       OPResult<List<Item>> result = await itemRepo.updateItemPositions(itemIds);
-      if (result.hasResult) {
-        final updatedRootItems = result.result!;
+      if (result.hasData) {
+        final updatedRootItems = result.data!;
         updatedRootItems.sort(((a, b) => a.position.compareTo(b.position)));
         for (int i = 0; i < updatedRootItems.length; i++) {
           topicCubits[i].item = updatedRootItems[i];
@@ -131,8 +131,8 @@ class RootItemsCubit extends Cubit<RootItemsState> with ListWithSelectionCubit {
       emit(RootItemsState.busy(prev: state));
       OPResult<List<Item>> re =
           await itemRepo.fetchItemsByRootParentId(selectedItem!.id);
-      if (re.hasResult) {
-        final items = re.result!;
+      if (re.hasData) {
+        final items = re.data!;
         Item root = items.removeAt(0);
         emit(RootItemsState.ready(
             prev: state,
@@ -153,8 +153,8 @@ class RootItemsCubit extends Cubit<RootItemsState> with ListWithSelectionCubit {
       if (selectedItem == null) return;
       emit(RootItemsState.busy(prev: state));
       OPResult<List<Item>> re = await itemRepo.fetchRootItems();
-      if (re.hasResult) {
-        final roots = re.result!;
+      if (re.hasData) {
+        final roots = re.data!;
         for (int i = 0; i < topicCubits.length; i++) {
           Item? existingRoot =
               roots.singleOrNull((r) => r.id == topicCubits[i].id);
@@ -181,9 +181,9 @@ class RootItemsCubit extends Cubit<RootItemsState> with ListWithSelectionCubit {
     try {
       emit(RootItemsState.busy(prev: state));
       final re = await itemRepo.fetchItems();
-      if (re.hasResult) {
+      if (re.hasData) {
         final nonTrashedItems =
-            re.result!.where((i) => i.trashed == null).toList();
+            re.data!.where((i) => i.trashed == null).toList();
         final topicCubits =
             ItemVM.createChildrenCubitsForParent(null, nonTrashedItems);
         emit(RootItemsState.ready(prev: state, topicCubits: topicCubits));
