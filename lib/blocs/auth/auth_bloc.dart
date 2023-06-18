@@ -75,5 +75,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       AuthLogoutRequested event, Emitter<AuthState> emit) async {
     // Todo: try, catch
     _authRepository.logout();
+    _itemRepo.reset();
   }
 }

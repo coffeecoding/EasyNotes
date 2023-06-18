@@ -9,7 +9,6 @@ import 'package:easynotes/models/models.dart';
 import 'package:easynotes/services/crypto_service.dart';
 import 'package:http/http.dart';
 
-import '../models/item_header.dart';
 import '../services/network_provider.dart';
 import 'preference_repository.dart';
 
@@ -39,6 +38,8 @@ abstract class ItemRepository {
 
   Future<Item> createNewItem(
       {required String? parent_id, required String color, required int type});
+
+  void reset();
 }
 
 class ItemRepo implements ItemRepository {
@@ -52,6 +53,14 @@ class ItemRepo implements ItemRepository {
   late PreferenceRepository prefsRepo;
 
   Map<String, Item> items = {};
+
+  @override
+  void reset() {
+    items.clear();
+    netClient = locator.get<NetworkProvider>();
+    cryptoService = locator.get<CryptoService>();
+    prefsRepo = locator.get<PreferenceRepository>();
+  }
 
   @override
   Future<Item> createNewItem(

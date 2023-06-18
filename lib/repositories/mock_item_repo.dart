@@ -10,9 +10,15 @@ import 'item_repository.dart';
 
 class MockItemRepo implements ItemRepository {
   MockItemRepo() : cryptoService = locator.get<CryptoService>();
-  final CryptoService cryptoService;
+  late CryptoService cryptoService;
 
   Map<String, Item> items = {};
+
+  @override
+  void reset() {
+    items.clear();
+    cryptoService = locator.get<CryptoService>();
+  }
 
   @override
   Item getRootOf(Item item) {
