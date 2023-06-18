@@ -95,7 +95,7 @@ class ItemRepo implements ItemRepository {
     Response response = await netClient.get('/api/items');
     if (!response.isSuccessStatusCode()) {
       return OPResult.err(buildErrorMsgs(
-          ErrorType.network, 'fetchItems', [], response.reasonPhrase));
+          ErrorType.network, 'fetchItems', [], response.fullText()));
     }
     try {
       List<Item> encryptedItems = (jsonDecode(response.body) as List)
@@ -117,7 +117,7 @@ class ItemRepo implements ItemRepository {
     Response response = await netClient.get('/api/items?trashed=false');
     if (!response.isSuccessStatusCode()) {
       return OPResult.err(buildErrorMsgs(
-          ErrorType.network, 'fetchUntrashedItems', [], response.reasonPhrase));
+          ErrorType.network, 'fetchUntrashedItems', [], response.fullText()));
     }
     try {
       List<Item> encryptedItems = (jsonDecode(response.body) as List)
@@ -138,7 +138,7 @@ class ItemRepo implements ItemRepository {
     Response response = await netClient.get('/api/items?trashed=asdf');
     if (!response.isSuccessStatusCode()) {
       return OPResult.err(buildErrorMsgs(
-          ErrorType.network, 'fetchTrashedItems', [], response.reasonPhrase));
+          ErrorType.network, 'fetchTrashedItems', [], response.fullText()));
     }
     try {
       List<Item> encryptedItems = (jsonDecode(response.body) as List)
@@ -160,7 +160,7 @@ class ItemRepo implements ItemRepository {
 
     if (!response.isSuccessStatusCode()) {
       return OPResult.err(buildErrorMsgs(
-          ErrorType.network, 'fetchRootItems', [], response.reasonPhrase));
+          ErrorType.network, 'fetchRootItems', [], response.fullText()));
     }
     try {
       List<Item> encryptedItems = (jsonDecode(response.body) as List)
@@ -184,7 +184,7 @@ class ItemRepo implements ItemRepository {
         '/api/items${id == null ? '' : '?parent_id=$id'}', "");
     if (!response.isSuccessStatusCode()) {
       return OPResult.err(buildErrorMsgs(ErrorType.network,
-          'fetchItemsByRootParentId', [id], response.reasonPhrase));
+          'fetchItemsByRootParentId', [id], response.fullText()));
     }
     try {
       List<Item> encryptedItems = (jsonDecode(response.body) as List)
@@ -206,11 +206,10 @@ class ItemRepo implements ItemRepository {
   Future<OPResult<Item>> insertOrUpdateItem(
       Item item, ItemUpdateAction action) async {
     Item encrypted = await cryptoService.encryptItem(item);
-    Response? response =
-        await netClient.post('/api/item', jsonEncode(encrypted));
+    Response? response = await netClient.post('/api/item', encrypted.toJson());
     if (!response.isSuccessStatusCode()) {
       return OPResult.err(buildErrorMsgs(ErrorType.network,
-          'insertOrUpdateItem', [item, action], response.reasonPhrase));
+          'insertOrUpdateItem', [item, action], response.fullText()));
     }
     try {
       String newId = response.body;
@@ -234,7 +233,7 @@ class ItemRepo implements ItemRepository {
           ErrorType.network,
           'insertOrUpdateItems',
           ['${items.length} items'],
-          response.reasonPhrase));
+          response.fullText()));
     }
     try {
       this.items.removeWhere((key, value) => items.any((j) => j.id == key));
@@ -251,10 +250,10 @@ class ItemRepo implements ItemRepository {
   @override
   Future<OPResult<Item>> updateItemHeader(ItemHeader header) async {
     Response? response =
-        await netClient.put('/api/item/header', jsonEncode(header));
+        await netClient.put('/api/item/header', header.toJson());
     if (!response.isSuccessStatusCode()) {
       return OPResult.err(buildErrorMsgs(ErrorType.network, 'updateItemHeader',
-          [header], response.reasonPhrase));
+          [header], response.fullText()));
     }
     try {
       items[header.id] = items[header.id]!.copyWithHeader(header);
@@ -274,7 +273,7 @@ class ItemRepo implements ItemRepository {
         jsonEncode(ids));
     if (!response.isSuccessStatusCode()) {
       return OPResult.err(buildErrorMsgs(ErrorType.network, 'updateItemParent',
-          ['ids=$ids', parent_id, untrash], response.reasonPhrase));
+          ['ids=$ids', parent_id, untrash], response.fullText()));
     }
     try {
       int time = int.parse(response.body);
@@ -303,7 +302,7 @@ class ItemRepo implements ItemRepository {
         '/api/item/$id/trashed?trashed=$trashed', jsonEncode(ids));
     if (!response.isSuccessStatusCode()) {
       return OPResult.err(buildErrorMsgs(ErrorType.network, 'updateItemTrashed',
-          ['ids=$ids', trashed], response.reasonPhrase));
+          ['ids=$ids', trashed], response.fullText()));
     }
     try {
       int timestamp = int.parse(response.body);
@@ -324,7 +323,7 @@ class ItemRepo implements ItemRepository {
         await netClient.put('/api/item/$id/pinned?pin=$pin', "");
     if (!response.isSuccessStatusCode()) {
       return OPResult.err(buildErrorMsgs(ErrorType.network, 'updateItemPinned',
-          [id, pin], response.reasonPhrase));
+          [id, pin], response.fullText()));
     }
     try {
       int timestamp = int.parse(response.body);
@@ -345,7 +344,7 @@ class ItemRepo implements ItemRepository {
         '/api/item/$id/globallypinned?pin_globally=$pin', "");
     if (!response.isSuccessStatusCode()) {
       return OPResult.err(buildErrorMsgs(ErrorType.network,
-          'updateItemGloballyPinned', [id, pin], response.reasonPhrase));
+          'updateItemGloballyPinned', [id, pin], response.fullText()));
     }
     try {
       int timestamp = int.parse(response.body);
@@ -366,7 +365,7 @@ class ItemRepo implements ItemRepository {
         await netClient.put('/api/items/position', jsonEncode(itemIds));
     if (!response.isSuccessStatusCode()) {
       return OPResult.err(buildErrorMsgs(ErrorType.network,
-          'updateItemPositions', ['ids=$itemIds'], response.reasonPhrase));
+          'updateItemPositions', ['ids=$itemIds'], response.fullText()));
     }
     try {
       int timestamp = int.parse(response.body);
@@ -390,7 +389,7 @@ class ItemRepo implements ItemRepository {
     Response? response = await netClient.delete('/api/item/$id');
     if (!response.isSuccessStatusCode()) {
       return OPResult.err(buildErrorMsgs(
-          ErrorType.network, 'delete', [id], response.reasonPhrase));
+          ErrorType.network, 'delete', [id], response.fullText()));
     }
     try {
       items.removeWhere((key, value) => key == id);
@@ -405,8 +404,8 @@ class ItemRepo implements ItemRepository {
   Future<OPResult<bool>> deleteItems(List<String> ids) async {
     Response? response = await netClient.delete('/api/items', jsonEncode(ids));
     if (!response.isSuccessStatusCode()) {
-      return OPResult.err(buildErrorMsgs(ErrorType.network, 'deleteItems',
-          ['ids=$ids'], response.reasonPhrase));
+      return OPResult.err(buildErrorMsgs(
+          ErrorType.network, 'deleteItems', ['ids=$ids'], response.fullText()));
     }
     try {
       items.removeWhere((key, value) => ids.any((i) => key == i));
