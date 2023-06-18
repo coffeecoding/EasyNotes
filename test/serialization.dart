@@ -1,44 +1,52 @@
-// import 'dart:convert';
+import 'dart:convert';
 
-// import 'package:easynotes/models/auth_result.dart';
-// import 'package:easynotes/models/item.dart';
-// import 'package:easynotes/config/sample_data.dart';
+import 'package:easynotes/models/auth_result.dart';
+import 'package:easynotes/models/item.dart';
+import 'package:easynotes/config/sample_data.dart';
 
-// /// How to deserialize json list in 2022 !!!
-// void main() {
-//   final items = SampleData.sampleItems;
+/// How to deserialize json list in 2022 !!!
+void main() {
+  final items = SampleData.sampleItems;
 
-//   dynamic serializedItems = jsonEncode(items);
+  print('\nSINGLE ITEM SERIALIZATION TEST');
+  final item = items[0];
+  print(item.toJson());
+  final copy = Item.fromJson(item.toJson());
+  print(copy.toJson());
+  print('END TEST \n');
+  return;
 
-//   //print(serializedItems);
+  dynamic serializedItems = jsonEncode(items);
 
-//   final deser = List.from(jsonDecode(serializedItems))
-//       .map((i) => Item.fromJson(i))
-//       .toList();
+  //print(serializedItems);
 
-//   print(deser.length);
-//   print(deser[2]);
+  final deser = List.from(jsonDecode(serializedItems))
+      .map((i) => Item.fromJson(i))
+      .toList();
 
-//   print("Apply the same to an empty list");
+  print(deser.length);
+  print(deser[2]);
 
-//   final empty = <Item>[];
-//   final emptySer = jsonEncode(empty);
-//   final de =
-//       List.from(jsonDecode(emptySer)).map((i) => Item.fromJson(i)).toList();
+  print("Apply the same to an empty list");
 
-//   print(de);
+  final empty = <Item>[];
+  final emptySer = jsonEncode(empty);
+  final de =
+      List.from(jsonDecode(emptySer)).map((i) => Item.fromJson(i)).toList();
 
-//   // Now with AuthResult
-//   // AuthResult ar =
-//   //     AuthResult(success: true, error: "", token: "asdftoken", items: items);
+  print(de);
 
-//   // final json = jsonEncode(ar);
+  // Now with AuthResult
+  // AuthResult ar =
+  //     AuthResult(success: true, error: "", token: "asdftoken", items: items);
 
-//   // print(json);
+  // final json = jsonEncode(ar);
 
-// //   print("\nDecoding json again\n");
+  // print(json);
 
-// //   final reAr = jsonDecode(json);
+//   print("\nDecoding json again\n");
 
-// //   print(reAr.toString());
-// // }
+//   final reAr = jsonDecode(json);
+
+//   print(reAr.toString());
+}
