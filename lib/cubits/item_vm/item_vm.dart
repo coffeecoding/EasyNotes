@@ -113,9 +113,16 @@ class ItemVM {
           modified: ts,
           modified_header: ts,
           trashed: item.trashed);
-      item = await itemRepo.insertOrUpdateItem(updated, iua);
-      status = ItemVMStatus.persisted;
-      return true;
+      final opresult = await itemRepo.insertOrUpdateItem(updated, iua);
+      if (opresult.hasResult) {
+        status = ItemVMStatus.persisted;
+        return true;
+      } else {
+        print(opresult.msg!);
+        status = ItemVMStatus.error;
+        error = opresult.friendlyMsg!;
+        return false;
+      }
     } catch (e) {
       print("error saving item: $e");
       error = 'failed to save item: $e';
@@ -128,10 +135,15 @@ class ItemVM {
     if (status == ItemVMStatus.newDraft) return;
     try {
       bool newValue = !pinned;
-      final updated = await itemRepo.updateItemPinned(id, newValue ? 1 : 0);
-      item = updated;
-      status = ItemVMStatus.persisted;
-      parent!.sortChildren();
+      final re = await itemRepo.updateItemPinned(id, newValue ? 1 : 0);
+      if (re.hasResult) {
+        item = re.result!;
+        status = ItemVMStatus.persisted;
+        parent!.sortChildren();
+      } else {
+        print(re.msg!);
+        error = re.friendlyMsg!;
+      }
     } catch (e) {
       print("error saving item: $e");
       error = 'failed to save item: $e';
@@ -154,11 +166,24 @@ class ItemVM {
       List<String> ids =
           getDescendantsRecursive(true).map((i) => i.id).toList();
       if (updateParent) {
-        item = await itemRepo.updateItemParent(ids, newParent?.id, true);
-        await restoreDescendantsFromTrash();
-        parent = newParent;
+        final re = await itemRepo.updateItemParent(ids, newParent?.id, true);
+        if (re.hasResult) {
+          await restoreDescendantsFromTrash();
+          parent = newParent;
+        } else {
+          print(re.msg!);
+          error = re.friendlyMsg!;
+          return;
+        }
       }
-      item = await itemRepo.updateItemTrashed(ids, null);
+      final re = await itemRepo.updateItemTrashed(ids, null);
+      if (re.hasResult) {
+        item = re.result!;
+      } else {
+        print('error updatingItemTrashed state: ${re.msg!}');
+        error = re.friendlyMsg!;
+        return;
+      }
     } catch (e) {
       print("error restoring item from trash: $e");
       error = 'failed to restore item from item: $e';

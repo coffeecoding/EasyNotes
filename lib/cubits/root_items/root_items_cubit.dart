@@ -3,7 +3,7 @@ import 'package:easynotes/config/constants.dart';
 import 'package:easynotes/cubits/children_items/children_items_cubit.dart';
 import 'package:easynotes/cubits/item_vm/item_vm.dart';
 import 'package:easynotes/cubits/trashed_items/trashed_items_cubit.dart';
-import 'package:easynotes/models/item.dart';
+import 'package:easynotes/models/models.dart';
 import 'package:easynotes/repositories/item_repository.dart';
 import 'package:equatable/equatable.dart';
 
@@ -94,13 +94,19 @@ class RootItemsCubit extends Cubit<RootItemsState> with ListWithSelectionCubit {
   Future<void> updateRootItemPositions() async {
     try {
       List<String> itemIds = topicCubits.map((i) => i.id).toList();
-      List<Item> updatedRootItems = await itemRepo.updateItemPositions(itemIds);
-      updatedRootItems.sort(((a, b) => a.position.compareTo(b.position)));
-      for (int i = 0; i < updatedRootItems.length; i++) {
-        topicCubits[i].item = updatedRootItems[i];
+      OPResult<List<Item>> result = await itemRepo.updateItemPositions(itemIds);
+      if (result.hasResult) {
+        final updatedRootItems = result.result!;
+        updatedRootItems.sort(((a, b) => a.position.compareTo(b.position)));
+        for (int i = 0; i < updatedRootItems.length; i++) {
+          topicCubits[i].item = updatedRootItems[i];
+        }
+      } else {
+        print(result.msg);
+        // todo: handle (not too critical, it's just sorting)
       }
     } catch (e) {
-      // todo: handle
+      // todo: handle (not too critical, it's just sorting)
     }
   }
 
@@ -123,12 +129,18 @@ class RootItemsCubit extends Cubit<RootItemsState> with ListWithSelectionCubit {
     try {
       if (selectedItem == null) return;
       emit(RootItemsState.busy(prev: state));
-      List<Item> items =
+      OPResult<List<Item>> re =
           await itemRepo.fetchItemsByRootParentId(selectedItem!.id);
-      Item root = items.removeAt(0);
-      emit(RootItemsState.ready(
-          prev: state,
-          selectedItem: ItemVM(item: root, items: items, parent: null)));
+      if (re.hasResult) {
+        final items = re.result!;
+        Item root = items.removeAt(0);
+        emit(RootItemsState.ready(
+            prev: state,
+            selectedItem: ItemVM(item: root, items: items, parent: null)));
+      } else {
+        print(re.msg);
+        emit(RootItemsState.error(prev: state, errorMsg: re.friendlyMsg!));
+      }
     } catch (e) {
       print("error fetching root item and children: $e");
       emit(RootItemsState.error(
@@ -140,17 +152,23 @@ class RootItemsCubit extends Cubit<RootItemsState> with ListWithSelectionCubit {
     try {
       if (selectedItem == null) return;
       emit(RootItemsState.busy(prev: state));
-      List<Item> roots = await itemRepo.fetchRootItems();
-      for (int i = 0; i < topicCubits.length; i++) {
-        Item? existingRoot =
-            roots.singleOrNull((r) => r.id == topicCubits[i].id);
-        if (existingRoot != null) {
-          topicCubits[i].item = existingRoot;
-        } else {
-          addItem(ItemVM(item: roots[i], items: [], parent: null));
+      OPResult<List<Item>> re = await itemRepo.fetchRootItems();
+      if (re.hasResult) {
+        final roots = re.result!;
+        for (int i = 0; i < topicCubits.length; i++) {
+          Item? existingRoot =
+              roots.singleOrNull((r) => r.id == topicCubits[i].id);
+          if (existingRoot != null) {
+            topicCubits[i].item = existingRoot;
+          } else {
+            addItem(ItemVM(item: roots[i], items: [], parent: null));
+          }
         }
+        emit(RootItemsState.ready(prev: state, topicCubits: topicCubits));
+      } else {
+        print(re.msg);
+        emit(RootItemsState.error(prev: state, errorMsg: re.friendlyMsg!));
       }
-      emit(RootItemsState.ready(prev: state, topicCubits: topicCubits));
     } catch (e) {
       print("error fetching root items: $e");
       emit(RootItemsState.error(
@@ -162,11 +180,17 @@ class RootItemsCubit extends Cubit<RootItemsState> with ListWithSelectionCubit {
   Future<void> fetchItems() async {
     try {
       emit(RootItemsState.busy(prev: state));
-      final items = await itemRepo.fetchItems();
-      final nonTrashedItems = items.where((i) => i.trashed == null).toList();
-      final topicCubits =
-          ItemVM.createChildrenCubitsForParent(null, nonTrashedItems);
-      emit(RootItemsState.ready(prev: state, topicCubits: topicCubits));
+      final re = await itemRepo.fetchItems();
+      if (re.hasResult) {
+        final nonTrashedItems =
+            re.result!.where((i) => i.trashed == null).toList();
+        final topicCubits =
+            ItemVM.createChildrenCubitsForParent(null, nonTrashedItems);
+        emit(RootItemsState.ready(prev: state, topicCubits: topicCubits));
+      } else {
+        print(re.msg!);
+        emit(RootItemsState.error(prev: state, errorMsg: re.friendlyMsg!));
+      }
     } catch (e) {
       print("error in items_cubit fetchTopics: $e");
       emit(RootItemsState.error(
