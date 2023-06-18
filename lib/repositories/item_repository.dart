@@ -93,7 +93,6 @@ class ItemRepo implements ItemRepository {
   Future<List<Item>> fetchItems() async {
     Response response = await netClient.get('/api/items');
     if (!response.isSuccessStatusCode()) throw 'Unable to fetch data';
-    final itemsraw = (jsonDecode(response.body) as List);
     List<Item> encryptedItems = (jsonDecode(response.body) as List)
         .map((i) => Item.fromMap(i))
         .toList();
@@ -109,7 +108,7 @@ class ItemRepo implements ItemRepository {
     Response response = await netClient.get('/api/items?trashed=false');
     if (!response.isSuccessStatusCode()) throw 'Unable to fetch data';
     List<Item> encryptedItems = (jsonDecode(response.body) as List)
-        .map((i) => Item.fromJson(i))
+        .map((i) => Item.fromMap(i))
         .toList();
     final untrashedItems = await cryptoService.decryptItems(encryptedItems);
     //items.removeWhere((i) => i.trashed != null);
@@ -122,7 +121,7 @@ class ItemRepo implements ItemRepository {
     Response response = await netClient.get('/api/items?trashed=asdf');
     if (!response.isSuccessStatusCode()) throw 'Unable to fetch data';
     List<Item> encryptedItems = (jsonDecode(response.body) as List)
-        .map((i) => Item.fromJson(i))
+        .map((i) => Item.fromMap(i))
         .toList();
     final trashedItems = await cryptoService.decryptItems(encryptedItems);
     //items.removeWhere((i) => i.trashed != null);
@@ -135,7 +134,7 @@ class ItemRepo implements ItemRepository {
     Response response = await netClient.get('/api/items/roots');
     if (!response.isSuccessStatusCode()) throw 'Unable to fetch data';
     List<Item> encryptedItems = (jsonDecode(response.body) as List)
-        .map((i) => Item.fromJson(i))
+        .map((i) => Item.fromMap(i))
         .toList();
     items.removeWhere((key, value) => value.parent_id == null);
     final rootItems = await cryptoService.decryptItems(encryptedItems);
@@ -151,7 +150,7 @@ class ItemRepo implements ItemRepository {
         '/api/items${id == null ? '' : '?parent_id=$id'}', "");
     if (!response.isSuccessStatusCode()) throw 'Unable to fetch data';
     List<Item> encryptedItems = (jsonDecode(response.body) as List)
-        .map((i) => Item.fromJson(i))
+        .map((i) => Item.fromMap(i))
         .toList();
     items.removeWhere((key, value) => getRootOf(value).id == id);
     final rootItems = await cryptoService.decryptItems(encryptedItems);
