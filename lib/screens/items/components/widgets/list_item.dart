@@ -222,7 +222,9 @@ class EditableItemRow extends StatelessWidget {
       contentPadding: const EdgeInsets.only(left: 16, right: 4),
       leading: Icon(
           item.item_type == 0
-              ? FluentIcons.folder_20_filled
+              ? item.expanded
+                  ? FluentIcons.folder_open_20_filled
+                  : FluentIcons.folder_20_filled
               : FluentIcons.note_20_regular,
           color: color),
       horizontalTitleGap: 0,
@@ -292,7 +294,9 @@ class _ItemRowState extends State<ItemRow> {
         onTap: widget.onTap,
         leading: Icon(
             widget.item.item_type == 0
-                ? FluentIcons.folder_20_filled
+                ? widget.item.expanded
+                    ? FluentIcons.folder_open_20_filled
+                    : FluentIcons.folder_20_filled
                 : FluentIcons.note_20_regular,
             color: widget.color),
         horizontalTitleGap: 0,

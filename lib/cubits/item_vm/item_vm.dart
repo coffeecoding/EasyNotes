@@ -116,6 +116,7 @@ class ItemVM {
       final opresult = await itemRepo.insertOrUpdateItem(updated, iua);
       if (opresult.hasData) {
         status = ItemVMStatus.persisted;
+        item = updated;
         return true;
       } else {
         print(opresult.msg!);

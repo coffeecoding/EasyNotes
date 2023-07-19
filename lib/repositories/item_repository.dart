@@ -222,7 +222,7 @@ class ItemRepo implements ItemRepository {
     }
     try {
       String newId = response.body;
-      items.removeWhere((key, value) => key == item.id);
+      // items.removeWhere((key, value) => key == item.id);
       Item updated = item.copyWith(id: newId, trashed: item.trashed);
       items[newId] = updated;
       return OPResult(updated);
