@@ -6,10 +6,10 @@ The Backend is in another (currently private) repo, and will be linked here shor
 
 ## Milestones
 
-    [x] UI: Login, Main Screen, Drag & Drop of Notes and Topics
-    [x] End-to-End Encryption
-    [ ] Keyboard Shortcuts
-    [ ] Self-hostable
+- [x] UI: Login, Main Screen, Drag & Drop of Notes and Topics
+- [x] End-to-End Encryption
+- [ ] Keyboard Shortcuts
+- [ ] Self-hostable
 
 ## Support this project
 
