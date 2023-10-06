@@ -6,8 +6,8 @@ import 'package:bloc/bloc.dart';
 import 'package:easynotes/cubits/cubits.dart';
 import 'package:easynotes/models/item.dart';
 import 'package:easynotes/models/user.dart';
+import 'package:easynotes/repositories/abstract_item_repository.dart';
 import 'package:easynotes/repositories/auth_repository.dart';
-import 'package:easynotes/repositories/item_repository.dart';
 import 'package:easynotes/repositories/preference_repository.dart';
 import 'package:equatable/equatable.dart';
 

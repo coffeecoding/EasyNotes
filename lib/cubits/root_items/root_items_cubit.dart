@@ -4,7 +4,7 @@ import 'package:easynotes/cubits/children_items/children_items_cubit.dart';
 import 'package:easynotes/cubits/item_vm/item_vm.dart';
 import 'package:easynotes/cubits/trashed_items/trashed_items_cubit.dart';
 import 'package:easynotes/models/models.dart';
-import 'package:easynotes/repositories/item_repository.dart';
+import 'package:easynotes/repositories/abstract_item_repository.dart';
 import 'package:equatable/equatable.dart';
 
 import 'package:easynotes/utils/list_extensions.dart';

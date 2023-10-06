@@ -3,7 +3,7 @@ import 'package:easynotes/cubits/cubits.dart';
 import 'package:easynotes/cubits/item_vm/item_vm.dart';
 import 'package:easynotes/cubits/search/search_cubit.dart';
 import 'package:easynotes/cubits/trashed_items/trashed_items_cubit.dart';
-import 'package:easynotes/repositories/item_repository.dart';
+import 'package:easynotes/repositories/abstract_item_repository.dart';
 import 'package:easynotes/screens/common/inline_button.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';

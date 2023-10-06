@@ -3,6 +3,7 @@
 import 'package:easynotes/config/locator.dart';
 import 'package:easynotes/cubits/cubits.dart';
 import 'package:easynotes/models/item.dart';
+import 'package:easynotes/repositories/abstract_item_repository.dart';
 import 'package:easynotes/repositories/item_repository.dart';
 
 enum FocussedElement { title, content }

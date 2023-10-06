@@ -6,7 +6,7 @@ import 'package:easynotes/config/sample_data.dart';
 import 'package:uuid/uuid.dart';
 
 import '../services/crypto_service.dart';
-import 'item_repository.dart';
+import 'abstract_item_repository.dart';
 
 class MockItemRepo implements ItemRepository {
   MockItemRepo() : cryptoService = locator.get<CryptoService>();

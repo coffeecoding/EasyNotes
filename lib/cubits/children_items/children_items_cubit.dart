@@ -3,7 +3,7 @@ import 'package:easynotes/config/constants.dart';
 import 'package:easynotes/cubits/item_vm/item_vm.dart';
 import 'package:easynotes/cubits/root_items/root_items_cubit.dart';
 import 'package:easynotes/models/item.dart';
-import 'package:easynotes/repositories/item_repository.dart';
+import 'package:easynotes/repositories/abstract_item_repository.dart';
 import 'package:equatable/equatable.dart';
 
 part 'children_items_state.dart';
