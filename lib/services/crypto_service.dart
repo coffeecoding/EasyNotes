@@ -41,11 +41,11 @@ class CryptoService {
   }
 
   Future<List<Item>> encryptItems(Iterable<Item> items) async {
-    String? privkey = await prefsRepo.privkey;
-    if (privkey == null) {
+    String? pubkey = await prefsRepo.pubkey;
+    if (pubkey == null) {
       throw 'CryptopServices.encryptItems: pub key not found';
     }
-    return Future.wait(items.map((i) => encryptItem(i, privkey)));
+    return Future.wait(items.map((i) => encryptItem(i, pubkey)));
   }
 
   Future<List<Item>> decryptItems(Iterable<Item> items) async {

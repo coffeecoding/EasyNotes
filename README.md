@@ -1,16 +1,21 @@
-# easynotes
+# EasyNotes
 
-A new Flutter project.
+Cross-platform Flutter client (iOS, Android, and Windows) for EasyNotes (name preliminary!), an End-to-End-Encrypted note taking app with (to me) just the right level of abstraction: Notes in Topics infinitely nestable Subtopics - kind of like files and folders in your filesystem.
 
-## Getting Started
+The Backend is in another (currently private) repo, and will be linked here shortly.
 
-This project is a starting point for a Flutter application.
+## Milestones
 
-A few resources to get you started if this is your first Flutter project:
+[x] UI: Login, Main Screen, Drag & Drop of Notes and Topics
+[x] End-to-End Encryption
+[ ] Keyboard Shortcuts
+[ ] Self-hostable
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## Support this project
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+You are more than welcome to open issues or even PRs, and/or otherwise leave feedback.
+However, I cannot promise to accept any PR. Kindly understand.
+
+## Contact
+
+Feel free to reach out to me on ~Twitter~ I mean [X](https://twitter.com/yscodes).
