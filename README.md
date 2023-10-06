@@ -1,6 +1,6 @@
 # EasyNotes
 
-Cross-platform Flutter client (iOS, Android, and Windows) for EasyNotes (name preliminary!), an End-to-End-Encrypted note taking app with (to me) just the right level of abstraction: Notes in Topics infinitely nestable Subtopics - kind of like files and folders in your filesystem.
+Cross-platform Flutter client (iOS, Android, and Windows) for EasyNotes (name pending!), an End-to-End-Encrypted note taking app with (to me) just the right level of abstraction: Notes in Topics infinitely nestable Subtopics - kind of like files and folders in your filesystem.
 
 The Backend is in another (currently private) repo, and will be linked here shortly.
 
@@ -18,4 +18,4 @@ However, I cannot promise to accept any PR. Kindly understand.
 
 ## Contact
 
-Feel free to reach out to me on ~Twitter~ I mean [X](https://twitter.com/yscodes).
+Feel free to reach out on ~Twitter~ I mean [X](https://twitter.com/yscodes).
